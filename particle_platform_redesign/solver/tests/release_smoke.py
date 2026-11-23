@@ -267,7 +267,7 @@ def _check_time_field(case: Any, result: Any) -> None:
         expected_v[:, 0] += acceleration_slope * frame.time_s**2 / 2.0
         np.testing.assert_allclose(frame.position_m, expected_x, rtol=0, atol=2e-14)
         np.testing.assert_allclose(frame.velocity_m_s, expected_v, rtol=0, atol=2e-14)
-    if result.manifest["time"]["field_snapshot_splits_s"] != [0.15]:
+    if result.manifest_document()["time"]["field_snapshot_splits_s"] != [0.15]:
         raise RuntimeError("time-field wheel smoke did not preserve the off-grid snapshot knot")
 
 

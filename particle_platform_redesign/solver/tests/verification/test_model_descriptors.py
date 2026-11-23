@@ -88,6 +88,9 @@ def test_advertised_selector_keys_resolve_and_describe_the_selected_model(
             expected.pop("parameter")
             expected["name"] = field_name
             assert asdict(actual_fields[field_name]) == expected
+        certificate_roles = descriptor.certificates
+        assert set(certificate_roles.local_applicability_fields) <= set(descriptor.field_parameters)
+        assert set(certificate_roles.local_additive_fields) <= set(descriptor.field_parameters)
 
 
 def test_model_descriptions_are_immutable_serializable_and_include_pair_constraints() -> None:
@@ -148,7 +151,9 @@ def test_model_field_roles_explain_si_temperature_diffusion_and_axis_conventions
     )
     assert electron_voltage.unit == "V"
     diffusion = next(item for item in descriptors if item.model == "prescribed_force_diffusion")
-    assert all(field.unit == "N^2*s" and field.positive for field in diffusion.fields)
+    assert all(
+        field.unit == "N^2*s" and field.value_constraint == "positive" for field in diffusion.fields
+    )
     lift = next(item for item in descriptors if item.model == "prescribed_rotational_lift")
     for coordinate in lift.coordinate_systems:
         rotation = next(
@@ -160,5 +165,25 @@ def test_model_field_roles_explain_si_temperature_diffusion_and_axis_conventions
         assert rotation.unit == "kg/s"
         assert rotation.components == ("value",)
         assert rotation.stored_basis == "scalar"
-        assert not rotation.positive
+        assert rotation.value_constraint == "finite"
         assert rotation.zero_on_rz_axis == (coordinate == "axisymmetric_rz")
+
+
+def test_model_fields_distinguish_zero_current_from_positive_density_and_signed_offset() -> None:
+    descriptors = describe_models()
+    three_current = next(
+        model for model in descriptors if model.revision.endswith("three_current_v1")
+    )
+    constraints = {field.parameter: field.value_constraint for field in three_current.fields}
+    assert constraints["negative_ion_number_density_field"] == "nonnegative"
+    assert constraints["positive_ion_number_density_field"] == "positive"
+    prescribed = next(
+        model for model in descriptors if model.model == "prescribed_exponential_linear"
+    )
+    constraints = {field.parameter: field.value_constraint for field in prescribed.fields}
+    assert constraints == {
+        "electron_exponent_offset_field": "finite",
+        "electron_charge_slope_field": "nonnegative",
+        "ion_rate_field": "nonnegative",
+        "ion_charge_slope_field": "nonnegative",
+    }

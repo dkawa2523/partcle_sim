@@ -1,6 +1,9 @@
 from __future__ import annotations
 
 import csv
+import json
+import subprocess
+import sys
 from dataclasses import replace
 from pathlib import Path
 
@@ -74,6 +77,7 @@ def test_saved_status_and_nonuniform_clock_preserve_unknown_disappearance(tmp_pa
     assert native["restricted_mean_active_lifetime_s"] == pytest.approx((0.05 + 0.2 + 0.4) / 3)
     assert native["capture_terminal_time_s"]["p50"] == 0.05
     assert report["qualified_solver_parity"] == "NOT_TESTED"
+
     assert "not equated" in report["interpretation"]["native_disappeared"]
 
 
@@ -203,6 +207,25 @@ def test_completed_public_population_and_analytic_terminal_capture(tmp_path: Pat
     assert report["candidate"]["saved_active_fraction_integral_s"] == 1.25
     assert report["candidate"]["restricted_mean_active_lifetime_s"] == 1.5
     assert report["qualified_solver_parity"] == "NOT_TESTED"
+
+    output = tmp_path / "comparison.json"
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "tools.vv.comsol.evaluate_saved_population",
+            "--reference",
+            str(path),
+            "--reference-terminal-times",
+            "--candidate",
+            str(result),
+            "--output",
+            str(output),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    assert json.loads(output.read_text(encoding="utf-8")) == report
 
 
 def test_candidate_must_cover_the_full_executed_window(tmp_path: Path) -> None:

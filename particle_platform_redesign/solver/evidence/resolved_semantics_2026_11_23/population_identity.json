@@ -1,0 +1,1499 @@
+{
+  "scope": "Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching",
+  "all80_scientific_payloads_equal": true,
+  "all80_failure_events_zero": true,
+  "source_sha256": {
+    "src/chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "src/chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "src/chamber_particles/api.py": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a",
+    "src/chamber_particles/boundaries.py": "bb1fa5283019a4f20ee790eb8d9e748f190778942bd6dbdb9e5a37aca85295c2",
+    "src/chamber_particles/case.py": "8c129705ae09e3a318f133663ac4e82165835d74a63cbcc843e448e7d1de09e4",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+    "src/chamber_particles/cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+    "src/chamber_particles/engine.py": "78a39e8aeb03e8535aa2dfb5c35366d96f5bdf94f24fa54af5d7cc172b38e2bc",
+    "src/chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+    "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "src/chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "src/chamber_particles/fields.py": "08f83de33fe45f7aef9426faf540631cc1b27eef80640baecc37382c1ae577f4",
+    "src/chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+    "src/chamber_particles/integrators.py": "d8c63f01cd427140128cdb52bc70ce6fae1fd3050ca40d19555b2b4baebf8954",
+    "src/chamber_particles/lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+    "src/chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+    "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+    "src/chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+    "src/chamber_particles/physics/catalog.py": "76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d",
+    "src/chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+    "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+    "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+    "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+    "src/chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+    "src/chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+    "src/chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+    "src/chamber_particles/time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+    "src/chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+    "src/chamber_particles/transport.py": "67cfd8083603921116a05eab45d639982415660a6d32092d4dee9d5b89d623f7",
+    "src/chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+    "src/chamber_particles_tools/__init__.py": "69538a6ffa93118465aa5395157c3b5b65102d794429a3f288a811ab7238db8a",
+    "src/chamber_particles_tools/analysis/__init__.py": "438026bc54ef9615a7db158ded6657e247c93ddf06f484ec61622205723c26fe",
+    "src/chamber_particles_tools/bundle_publication.py": "62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f",
+    "src/chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+    "src/chamber_particles_tools/csv_import/__init__.py": "6d2e5444af02a66c31a875d9b7f8a68c8363be34b0d512cc5d40a3b9af489b64",
+    "src/chamber_particles_tools/csv_import/workflow.py": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+    "src/chamber_particles_tools/electrostatic_builder/__init__.py": "4c1c899232d1b686d7b93da1ce993ded0bfd019488073e5ee85ea51ac5e5eb97",
+    "src/chamber_particles_tools/electrostatic_builder/numerics.py": "3be3ecc87661557d3ab66b4c8604c52e65739eb63929ffec887a56e8e7ec1846",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+    "src/chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+    "src/chamber_particles_tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+    "src/chamber_particles_tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+    "src/chamber_particles_tools/field_preprocessor/workflow.py": "5b1115ceb51b9024f2bd0ef42e348a8f02f6d0e8776b4e495eee0f7cac3c5dc1",
+    "src/chamber_particles_tools/inputs.py": "0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d",
+    "src/chamber_particles_tools/selection.py": "c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01",
+    "src/chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+    "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+    "src/chamber_particles_tools/visualization/__init__.py": "06975a1560d91c0770765dfedef8720438b35626b1223cbd726a5a72f42d86bc",
+    "uv.lock": "ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56"
+  },
+  "runs": [
+    {
+      "case": "A",
+      "seed": 21,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseA\\refined1_rk4_white_limit\\seed21\\case.yaml",
+        "sha256": "50401b0842840d94a7af33ed45ecabbaa4ac02264eb88797c24240624c55a105"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed21\\result\\run.json",
+        "sha256": "8cf1cf0501bb1ea4134696a92224602f9ab6dd1ac8bd3306682f17f3ed6ea992"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed21\\result\\run.json",
+        "sha256": "79ef3ac4566b1918239ce959491c27352b6a4ff6625dcb6967d3e2fcbe8cf58c"
+      },
+      "public_scientific_digest": "sha256:78706b383bd57df52c3f84652b69ed267389fab82dd4a1b289fbc3ca1adba78b",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 22,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseA\\refined1_rk4_white_limit\\seed22\\case.yaml",
+        "sha256": "5744511537ab99328eb0f60febf7bed0a658b34ca0bfa28601c9b5cfca11597f"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed22\\result\\run.json",
+        "sha256": "c1828cb628f397ae9ed0530eb2d78af1597440a1eccc100a6e9eed2ea79512c7"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed22\\result\\run.json",
+        "sha256": "266750a03cdd4dc50700e60b99b1c4cdef453b8b4b82ce5abb1e81cbc7d1c530"
+      },
+      "public_scientific_digest": "sha256:218f46696118e006038970b05e7279d420008c52d4ea931947d71d92ca921a95",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 23,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseA\\refined1_rk4_white_limit\\seed23\\case.yaml",
+        "sha256": "6a1b9a12ef84dd98115ea8415e9ec46545b7e793c69f908991377503de3e6f24"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed23\\result\\run.json",
+        "sha256": "afdd47fd4e7163b2fc5923fdb83514098a1aeffe1068b2f806522086b5035294"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed23\\result\\run.json",
+        "sha256": "c5ba3cfe8581acb4782888ac4f4c3645d17990680da9186fc6420c78292caf1f"
+      },
+      "public_scientific_digest": "sha256:d81b2741e0cdc4645d7b5767fd04f378ac599e5fa5fa662e293e11481370b74f",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 24,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseA\\refined1_rk4_white_limit\\seed24\\case.yaml",
+        "sha256": "87a7ddb403188576d28a077bbb6e58eaf1e3578e876dbe7ed750a2b0c08eda69"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed24\\result\\run.json",
+        "sha256": "672b41b6610787104d27ecd047b1331028fa3226682aa73972a8e95fabad107c"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed24\\result\\run.json",
+        "sha256": "333978d65ff023ec83e625b285af3d92d75b3094be9a0b3ecb9c38e2cf894694"
+      },
+      "public_scientific_digest": "sha256:2f1df51fb81c00860d985eb14f3d65ba2cae84c2b30faff2bef4884f707cd473",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 25,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed25\\case.yaml",
+        "sha256": "04d93f94ed250d51b6163ceb91116352bb840c799d5aba6a1c52648c8d216eee"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed25\\result\\run.json",
+        "sha256": "2afebb38c56647dfee4fe18c137b4b38d853accaf9d6206823307d948279cc7b"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed25\\result\\run.json",
+        "sha256": "5d41cef1882e137759a6ee8e4fb306c66a0e1528a2f7bb4353d27895b7020187"
+      },
+      "public_scientific_digest": "sha256:e194f7a607a36bbd664912b1c42cb7edf5fb4a21bc9cb02bc42b22e20e1f9de9",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 26,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed26\\case.yaml",
+        "sha256": "d71ed41d202527303fa63d170714cce47ef8f0ddffb230fcca668ffbeea19931"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed26\\result\\run.json",
+        "sha256": "7d9659f2f8b7ce0119cf2c01011ae015589ae7dad506c396cfbcabf25c8fe0be"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed26\\result\\run.json",
+        "sha256": "769aae25d28bd590537b802de3fe50bd162cbb5e4f655c45775aef49bd515ee9"
+      },
+      "public_scientific_digest": "sha256:c33d4dee8dd677fde53ebb44b6c70aa65436240c992081a6a87bf02a3ce47410",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 27,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed27\\case.yaml",
+        "sha256": "004dddeb26a9016e866d0bc459a65902ba3d49e2a01fb53596085c0d864cdd67"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed27\\result\\run.json",
+        "sha256": "d01bc4418245c582a9d4bdd1be34ed9af88e55531053e0f298a5abd97c38297e"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed27\\result\\run.json",
+        "sha256": "dbcc2fe31cbce11efb3bf1c499e6e5787e51428665ccc3317f44d43f51d24940"
+      },
+      "public_scientific_digest": "sha256:53c1b3d6fd1b187a667745d02bf25405b5290afacaf79b325a0b3e1990eb3547",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 28,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed28\\case.yaml",
+        "sha256": "21fa2ad7ce2df1debeb6473f0ed2649c6b3923af1499fe12ace8d0ff96d8bdb9"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed28\\result\\run.json",
+        "sha256": "d36a68548395541355f8d1c4d59d8007c0ea6d31fbe325bf183b9728adab96a4"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed28\\result\\run.json",
+        "sha256": "2fdc27818611073ffdbb7bc374a8f32c93f5436a9041f870e8156725c6d5baa5"
+      },
+      "public_scientific_digest": "sha256:29d233fb5bbe5e6d1c4437e42daebbc6228bb41afd494dd33042f868bc8eaacc",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 29,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed29\\case.yaml",
+        "sha256": "33fa0b11cfdcab4e1e9c9a19b5bfcd355f01d0a327e3abc5ae58f12c92e295ee"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed29\\result\\run.json",
+        "sha256": "660c40d2bf46f9bae4c0949bcbb656d9477c02b2d6a2e21fd5ea39fee5a7cc25"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed29\\result\\run.json",
+        "sha256": "3ed6abbbf0c48d2664cd6c6a704247f38be535e83ee0d9f881ee4dcd0195742a"
+      },
+      "public_scientific_digest": "sha256:8b0008e4ddebd99881125844dcbab8ed681f629a071ac50e82c92681c50ac767",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 30,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed30\\case.yaml",
+        "sha256": "239f396eec0488b45a27d61338734cd49c5c12b75c6400c8adbe97690dc8452e"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed30\\result\\run.json",
+        "sha256": "c71fae49c3245d7bc86e3957ab9e6e7a6cfc4a9fcb3468392bd7231b15bf7b82"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed30\\result\\run.json",
+        "sha256": "92294def46d9d6752b90fd521fdaa50a0d6dd01386f7c162f3de3a281cab7ef2"
+      },
+      "public_scientific_digest": "sha256:27dbc8414ab339df3b8f9adb7d71e8ba5ed7382cf08a9c297b2ac6de6e60e83e",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 31,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed31\\case.yaml",
+        "sha256": "fecb47914bccb54754a7cb827aec4c4de9a118971c9d0716ea1d8ea836bc4641"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed31\\result\\run.json",
+        "sha256": "942c60be3420a4e14b7a1f3941cb9603d605a0883e506d2de96145eb04cd0634"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed31\\result\\run.json",
+        "sha256": "c5808ae1d7f706f0c61421028c4c3d01503d511e11d86174f5897ea494125448"
+      },
+      "public_scientific_digest": "sha256:6c7298009338dfcf6d99f60aa9031fb5deff6af4312c7f93f326861466b6dab4",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 32,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed32\\case.yaml",
+        "sha256": "2f627b2c578e81d02310d188cc68a8ee89c070f8e7866450391870f85aca7521"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed32\\result\\run.json",
+        "sha256": "2d9a62e8fc9b70365ca18810bc52c0b3b02e2448215607f02040cb29e03d7f14"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed32\\result\\run.json",
+        "sha256": "f6c47c3b570df8b41e730320c5c02e41ac854d00481e9ccf3ab4b1dc99fad3ce"
+      },
+      "public_scientific_digest": "sha256:237c154d0f480b7f073ae168501ae9c562907b9e4495f80e85896ce84f546400",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 33,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed33\\case.yaml",
+        "sha256": "edda82d51cbdeb4d6c5798f9f9f7d1b7a0efabd70a71a342691a1cf267e5fd0d"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed33\\result\\run.json",
+        "sha256": "52d38412b85981716062ae716a52dedae039291bac315fb6c31e7b1206b59145"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed33\\result\\run.json",
+        "sha256": "722f9554135bca51d9c03936107fa4cc93e8c9ec31bcaebeb20800a783fbc111"
+      },
+      "public_scientific_digest": "sha256:6cfb65f4d35a4374c43f17142705b201eea0672f95a62fe7a0d1b9e99204fe10",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 34,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed34\\case.yaml",
+        "sha256": "5a3af9a43b18f8159f0008a5699d8b680bc2b58b3520ebf38c63d6467d35e16a"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed34\\result\\run.json",
+        "sha256": "8dd41b5ce28280b1e9c1d28b12b335739ff879f2fd4fb923015947b11e9ec2df"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed34\\result\\run.json",
+        "sha256": "44bb4e878eeb18615e556688ec5da9f66a4e0b89b8cba716004262db739f97ea"
+      },
+      "public_scientific_digest": "sha256:71cf751f512b2ac397d3452e34b761506b28c5f047bdf6b53ea628ba7b925daa",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 35,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed35\\case.yaml",
+        "sha256": "68e0d1437bc515197888e9f50375713c95841327b6ac6f140345cf05bb3acd8b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed35\\result\\run.json",
+        "sha256": "56d899fc14a6077ac0b5fa69b33bf3fdc5aa734356d9f10e1be05bb014d0d373"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed35\\result\\run.json",
+        "sha256": "46e4122b2bfe30ddea486beb4013e282b01e7891d62d8db563855bf47c2202b8"
+      },
+      "public_scientific_digest": "sha256:6d86ac248b2876058d9df6ddc49fa386c1b8e8cf5fe81a685756cbc8315d2169",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 36,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed36\\case.yaml",
+        "sha256": "a7456432654408f6d8431966b8ca42a2cb358ef1a56d79d9b11961374b633c1b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed36\\result\\run.json",
+        "sha256": "08d793839d55f933a76f68671e8a00fe4f8d6674f854cd9910f6f9cce7cecfd7"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed36\\result\\run.json",
+        "sha256": "9c6821cf5d20ff001ab17abe6df206e95ca9ec70b7ca5d4a2fdb84aa3afb2e00"
+      },
+      "public_scientific_digest": "sha256:3167226f91d59298eefe2a2d5d4dd42d83f0514c008377adaeb03a182faecc2c",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 37,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed37\\case.yaml",
+        "sha256": "32c681a20372be6e20176fed0015816d52707e792b8842d7246043e3d124c8a4"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed37\\result\\run.json",
+        "sha256": "f13466a585e71d9e5beb43e8fcaab394ba87f3ebcd0a7383fb5041e759cdbcbc"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed37\\result\\run.json",
+        "sha256": "addeb36ca5927d8add711fa25bcdfc113a1e8ff3b50842b1814ce0aeec55758b"
+      },
+      "public_scientific_digest": "sha256:18a97f5e94c31555294def767718f8b7665eb33bd215ea262c659d7a71db8e57",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 38,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed38\\case.yaml",
+        "sha256": "c5465197969fe9ab287c2bc9c8c76be935c1414ef09ed9a026bd096f9107e492"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed38\\result\\run.json",
+        "sha256": "70d10511dd93c30c70cdc0ed8628690b41f3142e47b0890ebbb90c4ec38e9e1a"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed38\\result\\run.json",
+        "sha256": "6cb7e34bc81634fda3128740f12c3804ebf094ce8cf81995339d61459a854cc6"
+      },
+      "public_scientific_digest": "sha256:ea2d8c0827db9d27b3cdd1fdb102efbbdfe1eeedb947fb39c2ff800adcd3d0ba",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 39,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed39\\case.yaml",
+        "sha256": "da7188c07556c7d84845eb59de8f9600f57a1725cd3bebc8e40a3c4f8101d7be"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed39\\result\\run.json",
+        "sha256": "152cb622fec00cbe7736e05368af70d436ea61a7919f29851a359af2c824714e"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed39\\result\\run.json",
+        "sha256": "dce01aab8232d4b5731aaecbf112242eac9077f479ec53d843547cbe7a26e927"
+      },
+      "public_scientific_digest": "sha256:3a5b9026ba1851b847874a18b5aa05a366cb05f31a15a2219124bc4f4a480ffe",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 40,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed40\\case.yaml",
+        "sha256": "4f93cafa3485dd6e1ae017aceeedb6e734ff5b1cad92f2a5a0ef69dc513f08ff"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed40\\result\\run.json",
+        "sha256": "6ee9dbca95422077ce476d5560e6b630ef14d28ec9ba1f6a115df9e58fbd2711"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed40\\result\\run.json",
+        "sha256": "4a14e4f94955118dacb2e1fe7781a0be09f9e805db8854d5e76e3f5decb3cf22"
+      },
+      "public_scientific_digest": "sha256:76995c5bf5f537a1234c77ef1b7c9566c04773f025497363b47d46d2fa6f650b",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 41,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed41\\case.yaml",
+        "sha256": "a29ff3e355c251c08ee14ae537c09ed79811823b3b1397e897ed82079e9bbd98"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed41\\result\\run.json",
+        "sha256": "02707754efde37a277ad97dc372170a717f45ef66c304714e8330a8c183e3468"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed41\\result\\run.json",
+        "sha256": "ef745736002b657dcde101e7224188ea46ecc67156110461a56dafd16eccfb7e"
+      },
+      "public_scientific_digest": "sha256:050e93a9dea45e6b4b80de10c58cd0f2ac7a2bc0a89c18efcbe3b4278a4dd4dd",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 42,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed42\\case.yaml",
+        "sha256": "8fe2bd1984fa1e580356abc3867eb4500f6e3400cbaa1479a12cced04f1cefc1"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed42\\result\\run.json",
+        "sha256": "8270aec3cfa4b1c974ef4cf8eae377a3e626ec4837a7331b84df8b20b935ebdb"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed42\\result\\run.json",
+        "sha256": "703ecf160f0f917d360e666ce8d8490b01b812364772e24b618ba09fff6aeaf7"
+      },
+      "public_scientific_digest": "sha256:e7d3afd64c9b048148b2e27ba75eb11bbe6a9fa5cb42c51a9199a0e359787443",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 43,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed43\\case.yaml",
+        "sha256": "03201c8be327327ad4ef6e3660a489526f1c0189bed4825b6404f564766e30cd"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed43\\result\\run.json",
+        "sha256": "82bc418d14514f451ad72fd93e568b3d3fb3dd0dd27686c7113b38c9de60d7fd"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed43\\result\\run.json",
+        "sha256": "a6d1d5b09a52d87700c78a943afa32937684aa09e11713ee6e49651927d3b948"
+      },
+      "public_scientific_digest": "sha256:d9a2249a4427baf8394ac0d89265e5c56f75d5f41381733f4412311ada3545a5",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 44,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed44\\case.yaml",
+        "sha256": "678d179151bcb4c45b7d51cee655b0533148890538b2ab20ecb0c2d8470c8484"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed44\\result\\run.json",
+        "sha256": "0a3d85775102896b3036cbd4638227bf883ff67d3a34aea42c7eb19d92a73339"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed44\\result\\run.json",
+        "sha256": "bafbb50ca4056c1130234860f110e5ce55ce61260ad4bda797a5a62c2aa694c5"
+      },
+      "public_scientific_digest": "sha256:e3c923da2d6e4438da92555c5a2301eeb1140f2b454bb2d648ee0369c13c3c98",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 45,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed45\\case.yaml",
+        "sha256": "abbdb0e4fcc6f36f535024166b99e44605a2d5d1bcfb760a410dc6e3aee8332b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed45\\result\\run.json",
+        "sha256": "09e0c0afeef6417d935bf34ff5193ca811181470d192a1f2d14dec1bec00d699"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed45\\result\\run.json",
+        "sha256": "23ddb80b732d028bc89214d4dd6c00b91abbc3e9f59a8c41f94b077ffb479c70"
+      },
+      "public_scientific_digest": "sha256:f88e91e69fc591128a3a0d7b72f5dace6ba254375dc6392a2246843a9b6683de",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 46,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed46\\case.yaml",
+        "sha256": "5b8b247be6456b626761163e933d5e0130e6e2d5ac1d380870c1a85f4c4bc411"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed46\\result\\run.json",
+        "sha256": "0aed3d7297a5469f51611183cf03ff9839cb9b273b22face41aee27045b6fc3a"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed46\\result\\run.json",
+        "sha256": "aa9bb0bdf5bb73a7f7feb741d3adc9751681c7d9539abe86592292cf52866adc"
+      },
+      "public_scientific_digest": "sha256:52319af0231e4fdb212b01b0299bc558c77cee925378704012900b0f8375cf49",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 47,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed47\\case.yaml",
+        "sha256": "6d7db1556140d3102347e77b55e3675ff17b64f1477bba4aeefc500a3bc36270"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed47\\result\\run.json",
+        "sha256": "f18f63a8b6ffd18a3eccdb27227f88c18072ebfd5ec208b0d41cc120d58eb87d"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed47\\result\\run.json",
+        "sha256": "aac68452a4733d2a604f9bf09035c3d976e21e9dbfa9d8edee5980c56bcbeb4c"
+      },
+      "public_scientific_digest": "sha256:b727944a101c1b95f53afce29e88b6ca20aca42f9900e82565829d2d8a976606",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 48,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed48\\case.yaml",
+        "sha256": "adbea6e195cee23b1ea148b838ac18b30831cf1f3427615ebb687937916c7303"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed48\\result\\run.json",
+        "sha256": "86b1bae0344cf8b6f0c359206c8c77fefb2612fb4ff7d6234476bcf12709560b"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed48\\result\\run.json",
+        "sha256": "f9b36f565f1149dda2eff67c7eae7bf576f3436ded6a309e4fd6400073df5a9c"
+      },
+      "public_scientific_digest": "sha256:7cedb818de8ccf82728a8e0beba138c236ef9e23295975990b7aa1ff39322132",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 49,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed49\\case.yaml",
+        "sha256": "c173e7fcccd9bb461619ff7f8e51c11f23ee6eaeec726644c60207242f2d82e8"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed49\\result\\run.json",
+        "sha256": "4eb85f3ff2a4611b5708165ee44ef7e8a4b299c5ea68a4f45c16243f57615b3d"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed49\\result\\run.json",
+        "sha256": "a465ee14871be27b21c2acc4fb2802bd0e43f8ed0dc72b7a577a174060faf8fe"
+      },
+      "public_scientific_digest": "sha256:d9055bf337bc3dc951e2e4c4527af0e21059a3fd8831455cb947c884334117cc",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 50,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed50\\case.yaml",
+        "sha256": "cad19eff462852a652fe573885b2134df946a65749530c1878d4df082a987e51"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed50\\result\\run.json",
+        "sha256": "955ddfe3ac145034156eff855c6e7fef11c653ab8bcf059533d0c9881e61ea49"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed50\\result\\run.json",
+        "sha256": "6045243cde567a797e28ea4aff5f525f138e9be58756b1285baef2d6f8e86d5c"
+      },
+      "public_scientific_digest": "sha256:7b99fbb70319006f0ec22ef58fc29537a5dfe1b4083c90f93f78bfc51b9a03f6",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 51,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed51\\case.yaml",
+        "sha256": "965ad803587063c42a1dafea48ca50ce36463cc869a6e862e5ecde91c4c7d01a"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed51\\result\\run.json",
+        "sha256": "c2852eee0524bbba69f5b02979e7431964fc7ae65a00bffc3a067e64e2b5652d"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed51\\result\\run.json",
+        "sha256": "7aada8d4c9314cb397184c09d9ebf8b0116bf85f1370fe56697f228856ad4362"
+      },
+      "public_scientific_digest": "sha256:2471798d6b0e103b8d2b6a81d838a856b75598b42bc5b8450b1576520f27c894",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 52,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed52\\case.yaml",
+        "sha256": "0d746cd2ceea91e6f263277e6077cf6e23eef75c40e1541d7475a16429137d97"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed52\\result\\run.json",
+        "sha256": "e8632309fddec47498d63785a812b0bb7d0d4e76b9338f2aa613ded89c8b9c96"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed52\\result\\run.json",
+        "sha256": "f9e63f7d6ef941aa7fcf887ee0f6c211b71b183d77d074a5c2e5346177131eb5"
+      },
+      "public_scientific_digest": "sha256:492a100d6c15cd27cd8dfb64ba002f81c5f5d076adf44bc0004e1b4aabd2ce32",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 53,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed53\\case.yaml",
+        "sha256": "5a69cea4849d3244b07938944ca3843dd79f3e3885bdb452edccbc92f5a8657a"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed53\\result\\run.json",
+        "sha256": "c94bb91fa177954943ab4c2fc41e890ef1a3de10feda3274635ffb21f556c1c5"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed53\\result\\run.json",
+        "sha256": "169ba123e34cbb876b8a64f90b9c47233f48af1abda5a44a7e55115be243847d"
+      },
+      "public_scientific_digest": "sha256:b1d393fed3f50d837a2baf8bc43e35c5f5f33c74df7e9b2508b76b08928c5a2b",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 54,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed54\\case.yaml",
+        "sha256": "27e455ecf7df1a89d02e86f4a889a69b3558dce4c5a7b561c6b4c938784ba8ad"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed54\\result\\run.json",
+        "sha256": "3255d9c8363a2c2f8f61c382e91c2b72d0d3569414736db33d5814c15d5c0521"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed54\\result\\run.json",
+        "sha256": "9bc0f4dd12db25a505949da286c0fe9db1a920894a2ec4d29920361849b694d7"
+      },
+      "public_scientific_digest": "sha256:aee378419aa621c101d4fc080f7fb1a91710078632973a4c9c00241c5dd8e839",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 55,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed55\\case.yaml",
+        "sha256": "eab4ebf6922612169f18ff05b5fdba177f1f2aca3a8a7264ef654a2138a6229a"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed55\\result\\run.json",
+        "sha256": "2440842e351351f1bbed51d3f6f6684c49db692582f5929964a346963f65fbe8"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed55\\result\\run.json",
+        "sha256": "0db7e566272c0e6bdb4d81c03124035efe82b440cca3590606521155fecadd85"
+      },
+      "public_scientific_digest": "sha256:261418a8f4b94bee872c7fc90fa3c89ed7b54ee40b1f537eb39ac05d1d265fd9",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 56,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed56\\case.yaml",
+        "sha256": "16a583f51639f398c11912e49a9978567083f9446e2b68e43e54538253ff7ea2"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed56\\result\\run.json",
+        "sha256": "e8d9d9da21546cc8a6c9ac9b98981144fdd190e1319e9b189e9d98e4a2c8b653"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed56\\result\\run.json",
+        "sha256": "e7a9147455fc1b119434baa92daeda81930148be0a0d7d1c9ba4bbb571c83d3c"
+      },
+      "public_scientific_digest": "sha256:ee42dcc4e66fa4284613ffc88c5adf7bf1d5d2e0db67e96dd5d166e968737081",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 57,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed57\\case.yaml",
+        "sha256": "5e3f16ee4cf63a47ab85fc92e79eabe9ac1dd29fc33fccfb99faefceb1a6ec21"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed57\\result\\run.json",
+        "sha256": "86b459e0d8b1f8b384a5e2f2e53119b9176335aaa902feded95f56c331e37fcd"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed57\\result\\run.json",
+        "sha256": "731e46d26ba4cd0fba7b6f634c7a0daadccddf3fda0218f6c0019a0b0dd59105"
+      },
+      "public_scientific_digest": "sha256:a1d005e1fd72f9200db115acfe0ee198d980633376fd7e21ac9e12f918458f5f",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 58,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed58\\case.yaml",
+        "sha256": "272bf5d739402e9642d5fe190602c8384c89dbcc179a83bdf0a73a0934c22cfd"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed58\\result\\run.json",
+        "sha256": "8bb8e92673cb92dd11e35d6e7cf771babc9fe60562ed6fe0256478bd8d7ccaab"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed58\\result\\run.json",
+        "sha256": "d9114911eba1ed7d04aa0e92069d0da750dc7e617197f416149b4653e8faedf5"
+      },
+      "public_scientific_digest": "sha256:6aad6ee8efbc99792d712b193a1044b98b5ee2284b9825076e78778ea797d2f0",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 59,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed59\\case.yaml",
+        "sha256": "aa46aaeb0dbfd2a3798a19e6a6558db80adf8df5cad0b099779a036a8ce7bef0"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed59\\result\\run.json",
+        "sha256": "25f097f00c26f8913dc8480fa74e1ceebed13357e11a53997cd6b9d30c09dc85"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed59\\result\\run.json",
+        "sha256": "5409fe231b504989bce2509dc2e396bb7a831ba6299c160acdddbec75aff37f3"
+      },
+      "public_scientific_digest": "sha256:b479e0c925e4bf22ab5762c0e63a6e02e1e8e9bb6601c0adb7572fc171a32f47",
+      "failure_events": 0
+    },
+    {
+      "case": "A",
+      "seed": 60,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseA\\seed60\\case.yaml",
+        "sha256": "1049ed4dff845e3f85588657d697b5595f68fa5e4fb0604e346f93f911fd6ed1"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseA\\seed60\\result\\run.json",
+        "sha256": "27fcfce68026ad483df14dc7edd805343874008f3f16327c89b0c0b6b29d3a8d"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseA\\seed60\\result\\run.json",
+        "sha256": "1f31b3188d2548e08c6052d073b80127f0e801b6e194f3310b25be26dc8f848d"
+      },
+      "public_scientific_digest": "sha256:81816c3703e6cacb417c1315f4376d6dcc4c5b937556fabc93ff6e269b40213b",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 21,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseP\\refined1_rk4_white_limit\\seed21\\case.yaml",
+        "sha256": "e631b70a8c5473ee18e3ef98d4938c6196dbb11822a4b24d50addf9280816aa9"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed21\\result\\run.json",
+        "sha256": "67c3a332a060b86aef8adfff265fe2e36d4fdcf6734e219967b2fe3845f07541"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed21\\result\\run.json",
+        "sha256": "a3e4bfac46bfabaa576d9efbeb002e43c618f9b900569980810b6deb774e411b"
+      },
+      "public_scientific_digest": "sha256:08568f962fbdc827695acf79dd15782b7487a40af23581939f3b082b48b4ed51",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 22,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseP\\refined1_rk4_white_limit\\seed22\\case.yaml",
+        "sha256": "26f5d0fe6e4b714dd0f81408ae30a0c25f0d4b9c3f418505b4be5a2ac88dd463"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed22\\result\\run.json",
+        "sha256": "a560a7cf5e5049dc24dd4b46d579b49cefff4fc31d10758ce65f4070ae6e11c0"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed22\\result\\run.json",
+        "sha256": "77935a8e9a2bc50ba769ac552ecf31e33a2ab43b8fcb76aa9cd9c7e2625c8880"
+      },
+      "public_scientific_digest": "sha256:6ddb90d4ca1c0b175bece29b15eec11536a43c4c8c6523ea9131dc9c3cabdbcf",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 23,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseP\\refined1_rk4_white_limit\\seed23\\case.yaml",
+        "sha256": "92ba15d6c38ec1d9ec36cb8c7ec80743e918c8a82cb6b15b45cd0ea70e99c11c"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed23\\result\\run.json",
+        "sha256": "200da9537d3085112a1ac71746122358fca5f3a861f64b981795d89ac9e45139"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed23\\result\\run.json",
+        "sha256": "cb7845a7d600b022fb9f640b8ef79d57bc90fd2537609d45cf2158ec97b8247f"
+      },
+      "public_scientific_digest": "sha256:aefc95feb03994a46ef2950a8c13c3d56396316661d0c8040c424aad45354919",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 24,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\case_ap_vigus_repair_20261122\\caseP\\refined1_rk4_white_limit\\seed24\\case.yaml",
+        "sha256": "13fcaba9fda3556444c008b35ec3ceec70e8359d6a7c9901f2dd2827fa62cb6c"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed24\\result\\run.json",
+        "sha256": "48d786323e0e02700ff837ff7b745638c83d047890f0c7ba60eb8b85f864863f"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed24\\result\\run.json",
+        "sha256": "d6660ac4c2f8439ff2645267bceb6f21bd42ae1a481666685e4b305c9ac99cbb"
+      },
+      "public_scientific_digest": "sha256:2e5a521df3d291cedcb8964fb940be6f3dcee86d1fc9f307678e1f74c6cd9d9e",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 25,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed25\\case.yaml",
+        "sha256": "eed2886340491d1f41f94fcdb9bd803cdf32bb1eadcc28d0c6558e99ff69f4de"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed25\\result\\run.json",
+        "sha256": "79fa5de0c9014327e561200307d656d7695836b1e748c9f542e8db1e3581d242"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed25\\result\\run.json",
+        "sha256": "19d09198fa46c676176608043b156387546f2634e1dac192fc910d56a8a4dd46"
+      },
+      "public_scientific_digest": "sha256:517cddd31872778f82bd51748a960b7c117a47662264c8def8b55292684e5c7d",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 26,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed26\\case.yaml",
+        "sha256": "7d5b2f44e94372a3cd01c8d89fe6d93de32b3355c9a93f6cf4203fe885ef213c"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed26\\result\\run.json",
+        "sha256": "08f2831f97b55ef3a6f07aeceb5ab34774b641b3555cb99921f35fec94efb6a6"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed26\\result\\run.json",
+        "sha256": "2328ed4391315e50ad4d33be6c49011835dd80957ddee9726ec4f8b28f9feb4b"
+      },
+      "public_scientific_digest": "sha256:3030e074c49eb099a501b1cdc692d73a83d2174534d1e42d8c2d1fce2f6d31dc",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 27,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed27\\case.yaml",
+        "sha256": "45b5d584fc85adbacf6f7c9b871524f6a465adc56bbc3e6bcf5e2e017e67d47c"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed27\\result\\run.json",
+        "sha256": "260ae6f746a4cca50fd77bec13de99f52a0047f8b1227983bf8012b30149a087"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed27\\result\\run.json",
+        "sha256": "04e92255b7159565bf671b02c900c1828972d9ff1858db4a3be25f1e32002aea"
+      },
+      "public_scientific_digest": "sha256:85fc02f79616b13b1faf5e99240ed2d72c4a22a79c8600626f956e09c500c021",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 28,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed28\\case.yaml",
+        "sha256": "fbeeaea40bf8ead8ee5f753db02037458a42c135b56f91ef56e8ccbcc5901e59"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed28\\result\\run.json",
+        "sha256": "bd9f6af7ca8caa66ab972144b76423e1cfd32acfc9b9e7da912e87b2382b60bf"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed28\\result\\run.json",
+        "sha256": "0c897de61cbecc7955d497f365098d1bd3d273dac8542e2624582514ff2491c9"
+      },
+      "public_scientific_digest": "sha256:2f40db3e030d81b8e5275ec0d1e25fee11643640311f0b2f64215913a0ef8f8e",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 29,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed29\\case.yaml",
+        "sha256": "72883ab7c553efda812e67f4ebcc37ae452cd1797866aa661ef77c9f33825fa7"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed29\\result\\run.json",
+        "sha256": "539fa82704b42d4a3b64a455149b55188b95d6cc71746a57e843902df4d53a51"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed29\\result\\run.json",
+        "sha256": "288d82de0e53486654e22c404f5b36c436538c15b857ad552571ae5eb4452f2e"
+      },
+      "public_scientific_digest": "sha256:fb81e22786eb3fec2a9f14817100bc9969e8f768ec090eeae96eec6dfa3e67d4",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 30,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed30\\case.yaml",
+        "sha256": "84d90c497d62b10837ed83722fbfd137a472ed3ee7bec44358dc2b1422f736f2"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed30\\result\\run.json",
+        "sha256": "1320ab0de83e675cede9cef646a0b70904c7ef94d7d690c28bfb97442dc737de"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed30\\result\\run.json",
+        "sha256": "83d177c3cf361657cf1771f66f41eecbd88930f50d65888847c47ce9a0e92eaf"
+      },
+      "public_scientific_digest": "sha256:0cfaafa5a77686c4d6f64b562491e4f33f53b1b3e130e5b4ce5738e4773e4846",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 31,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed31\\case.yaml",
+        "sha256": "eba23b63cb816c96ec07d31baecd19fc62732949dc5a330e2d239fa49682504b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed31\\result\\run.json",
+        "sha256": "908d2ac239e05240b1063b007d3c57248c22a515047caa2196c80708cbfbcf18"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed31\\result\\run.json",
+        "sha256": "8bab0f7f64f47fcb667c459528bfc5c07d0d5fd7daa4e2b05b1d2ae64badaf02"
+      },
+      "public_scientific_digest": "sha256:76f26bfc2c65fb96db6d8a451a494ce8a76199668bf528a45d5c52a4c1c6c37a",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 32,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed32\\case.yaml",
+        "sha256": "6dfc5b65e84844584839a5d44daf0970031e892d51ab3bbdd79cd376b615a5cb"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed32\\result\\run.json",
+        "sha256": "ee2c7a7f22db21e6fcab7d63df0f8218ddd7d52f55503c37acab3ce757bffaa6"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed32\\result\\run.json",
+        "sha256": "7db9c7423013946e4873936402bb33fdab54c2040b1905cd4d06e469f8e43587"
+      },
+      "public_scientific_digest": "sha256:2e5a7ef99413d034574e5897268a0f83844d4c418850ab11763d1b51ded042c9",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 33,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed33\\case.yaml",
+        "sha256": "67096c8cb85ab1471821cbafc6045f76d5056db97b92e222f26067dedc9cb8b5"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed33\\result\\run.json",
+        "sha256": "efa73f2e39d4e089ffa7b034506814548c5000ae5dd94339400bc4a5a07c111a"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed33\\result\\run.json",
+        "sha256": "707e959ff689207ccc32aed93000d1d0600d37dc3da6445224bb3540a668f01a"
+      },
+      "public_scientific_digest": "sha256:9421eee0fd36cc6aa7ed3729343a821d5b323f07f68a07ebcb7fd8dcd317e5d4",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 34,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed34\\case.yaml",
+        "sha256": "723b14dc5415dae132e5d8739e4a8841b08a07259282f56b11f2898ddffd26b7"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed34\\result\\run.json",
+        "sha256": "b180a66d39187e9a7ea3c313d049304f3244574989694f68a0ee79a2909ebc19"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed34\\result\\run.json",
+        "sha256": "97a11d2697ed0fa2a49aeb44c53ac35fb53459e23c7759c9a0c0ffd4226afead"
+      },
+      "public_scientific_digest": "sha256:92f61644dfb5899f76abd7ed2afda5d71c91b6af89557ed830ac68178402a5bf",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 35,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed35\\case.yaml",
+        "sha256": "459356d4090ee8759d86773b5ae8b22a0cdd6f84f8d9d7ca0087cb37ef8c88c4"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed35\\result\\run.json",
+        "sha256": "de708ee696ea3f1d0540f5e8c091a285913e18df7c430b2bd3ac6085bdec4763"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed35\\result\\run.json",
+        "sha256": "e1d609c98b05771a57a07f746b7f88fd52ba8b1bc3eebd29dae11fee4d070d82"
+      },
+      "public_scientific_digest": "sha256:586b0adec7a05c359e8860a3e5470ee82317d57dc416e55658097ec47be49c33",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 36,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed36\\case.yaml",
+        "sha256": "b43fbadcb33471d44876b1693d4a216d843f5759dde6903afc5024de59654b2b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed36\\result\\run.json",
+        "sha256": "a9f73025add23477c3e0b82f552318b123f672df286e671e8e8ed07ec9a36569"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed36\\result\\run.json",
+        "sha256": "c542713035079c454de39c69c6ccf3b9e3f3c6a2a4a75b8235ae2d48d5cbc966"
+      },
+      "public_scientific_digest": "sha256:9b829a682880762c4b36700056696c5188f6b50ab6386afcb9f275b5ee80e9d1",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 37,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed37\\case.yaml",
+        "sha256": "d5e165dddedd2d6cf7c87a680836d14ec102f8304c84bd100afda2d80f19ff57"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed37\\result\\run.json",
+        "sha256": "9e2758015fcc99d259b27b0a115a48f6709227be43df7b6fde33548af940495a"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed37\\result\\run.json",
+        "sha256": "2256d133c884d4db7e87c8235fcd34a55ad2c2d27a3fa758c0ef8f7511497499"
+      },
+      "public_scientific_digest": "sha256:af8ff9bf367e2699e0ee7edf2af772359d533df4f643fed724f6d1ecdd51ed09",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 38,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed38\\case.yaml",
+        "sha256": "c11c423fa0bf45d90b27d96430fe06047f2951db2885fdd47280c8357d1ac6e1"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed38\\result\\run.json",
+        "sha256": "981717ef4c17aa1259d1bb341bd33f4290ed7befc3e2eb64a091c86c719e566e"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed38\\result\\run.json",
+        "sha256": "33fc9c4cfe478d789332ff4951ee6dc8b6b64a4326a3c4870bd1e79db1390bcf"
+      },
+      "public_scientific_digest": "sha256:660b2215f75fa332c5445306f725e7b3c112feff140e689622833e08e78531e4",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 39,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed39\\case.yaml",
+        "sha256": "6c5249eb05ad86be67a10c3fb47df15b44bd27a19c9d4eeea082d9b8eaf51df3"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed39\\result\\run.json",
+        "sha256": "7e2176d35629edf8d2a44a0ee861d938989b6ec6ec7cf85a0ad69ab863230bf2"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed39\\result\\run.json",
+        "sha256": "0a3c4be492137b0ba9dd9375aa977ad66271413e484b4c6ba3c50eb8c3aef433"
+      },
+      "public_scientific_digest": "sha256:ee4c29afe3eba1e32d858b591a831312336b6028128ffb5f9a2ed5821bbb8025",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 40,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed40\\case.yaml",
+        "sha256": "b4937cbf1242b3a094077ef02818bc6a464cc8b22d62d1acacfd7897058c45c8"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed40\\result\\run.json",
+        "sha256": "9b08ae91da2be788e059ce5c98bcf870da519b88795bcdd662c726dcb42af627"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed40\\result\\run.json",
+        "sha256": "4abed6ff3941a1ab9840b3746c1aab3aa50f1d3c21bba2ea7801347b6c5509de"
+      },
+      "public_scientific_digest": "sha256:bd84197ae2270fb55fa26c8c7eb00485514c53b418a55cd8d926863d6919ec41",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 41,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed41\\case.yaml",
+        "sha256": "d403bddf1082d9514488e0f6e9a330c1a92f295179149dd65f49c888ebb54bdb"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed41\\result\\run.json",
+        "sha256": "0a7e41462b6d7c2e7464d568b617a38652b15eb4957beda2b2bed3b785258a06"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed41\\result\\run.json",
+        "sha256": "21d77eb4247cc15fe7a5e7a818f48272f210cb15ca73ef208ccba0f93ca05a12"
+      },
+      "public_scientific_digest": "sha256:e5520f8fa3bb8af3886001fd20718553574f39dca10fa806d4195d97acef8f9d",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 42,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed42\\case.yaml",
+        "sha256": "d0ff6ec2283f77fb0a0721748711dd67c2a4edbaed7c0fe4723cbcf0b2a2b3f5"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed42\\result\\run.json",
+        "sha256": "a2998b877bb621f84ad92c96829eb3a570589ce8cb83610a6edd979f8e55deed"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed42\\result\\run.json",
+        "sha256": "e00384d879c0f1f5d57bcad42c82f8f935cba5935b1970eec68efdcc66967b81"
+      },
+      "public_scientific_digest": "sha256:ea074288a9064a6d72ba258aa3786653fe9973f2cd0a66ef706ba6ce00282a29",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 43,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed43\\case.yaml",
+        "sha256": "e47cc67899791ef6ea32e70375d4ebcf6b2199b484270f2afeff0279a6d66808"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed43\\result\\run.json",
+        "sha256": "4c01cae1810e5cfdc3811c6f4c7a79aad8e06ac27b7f68cf30da3950e5e5d98c"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed43\\result\\run.json",
+        "sha256": "564a281571b675c31211adcd0fe12816a1687b38af6339208d7060a60e3b6f2d"
+      },
+      "public_scientific_digest": "sha256:af9a6639e203eecec402b81d16471a04ef7e30adb4036314d7ada7f83512d45e",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 44,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed44\\case.yaml",
+        "sha256": "9ce1902907edff673b78fbe8af0e62919918e8c6b25ea71aa70cc39665c7cd1f"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed44\\result\\run.json",
+        "sha256": "eb8c13e0a5442ba98298113a36a74199785492422e24406459dc1eb17e9f9e05"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed44\\result\\run.json",
+        "sha256": "f79b10b9d69f7388179880a157a34e0c1a09323803a3c99a2d0980cfe15e486f"
+      },
+      "public_scientific_digest": "sha256:6d6e81dbb861ccdfd56788e3b98fa446ce7cd8fdc3f8759652c98d51db1b94f2",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 45,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed45\\case.yaml",
+        "sha256": "73f00d8fd70bf953bd81d3487f4f43ffd8758a5e1f2fe37611d079d77d945ac2"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed45\\result\\run.json",
+        "sha256": "54e059ccb2a8e946235e2bef54009a9d23c5bb8fad3d23d9a56bc7e83cbdddc6"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed45\\result\\run.json",
+        "sha256": "a586a31cb5eecb99193a44f30dbf40570d17635cf3d85356f08e8699ddf4dcf7"
+      },
+      "public_scientific_digest": "sha256:80f4469d7b6f41c4aa79d1e9105b193936dc0d493fe36726e09fd88804be1919",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 46,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed46\\case.yaml",
+        "sha256": "34a0a15e3bb402698d24343f336f104fa07c07a0f1edebeb75910e5151aff54b"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed46\\result\\run.json",
+        "sha256": "0afaeae60ebd9342ebb2a47f6d5be876f822dc530b5d87cf354c1d0942abdb72"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed46\\result\\run.json",
+        "sha256": "2ec4fc1f732dd9bfc7b0094ee85c0dc605ddccc8ba2417baea66efa7dc94bcda"
+      },
+      "public_scientific_digest": "sha256:5221201081cc47eef6af21141754b76b83520d1d480166799ed790b3d288db05",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 47,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed47\\case.yaml",
+        "sha256": "74ca7f493c2e330a196dd69b9ac103b856742053e389e6b939df708ac671fc64"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed47\\result\\run.json",
+        "sha256": "4d0b977031c00b0fb1f7fc1dd221674fafb5bf129ec604c34eb33764c79addd4"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed47\\result\\run.json",
+        "sha256": "43c5eefbcd338b7689220718398aa35530f0cce27e6733524169cf71ca99e363"
+      },
+      "public_scientific_digest": "sha256:15950cbb9202c6ee38d52c9d9d79c6711ff1b434a44ec0e4d6bfed2392935bbd",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 48,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed48\\case.yaml",
+        "sha256": "29783c98f36fcc20ac753e327bdff81bfcf671f2c98cebe6cd9f96e79837e1b8"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed48\\result\\run.json",
+        "sha256": "e29b2300bbd9a5c4ae1dd50711fd74b6b61e2040f7bca2e07b01552ca61f989d"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed48\\result\\run.json",
+        "sha256": "69022451badc83873c19422044ed7932d8289ec657a5f06c0e48eb416095daf4"
+      },
+      "public_scientific_digest": "sha256:e248738938264e3fa50f45a9f24e7b87bbb5fb2dd164773df29bfcc86887a3c5",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 49,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed49\\case.yaml",
+        "sha256": "f4b43167e973d741a977c0568a103de37460f0660f225b8a86a9472f7f5741a4"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed49\\result\\run.json",
+        "sha256": "d700a83a1d0c902768fb1a5848b5c94f5e8135b907dd27abc44b4c419d162dd0"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed49\\result\\run.json",
+        "sha256": "d86de248f61c309dfb535c7ea47c13a5261bf8afd52de648c453dbd8b40656ea"
+      },
+      "public_scientific_digest": "sha256:20553892972b6df2c31d16ef6324b960c3cd9b182b5a6b39ab2bfec100cac025",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 50,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed50\\case.yaml",
+        "sha256": "d4f4a4e204d8869a8060d55831c4e9ad918a9ecef798e48f28c8e35d01252253"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed50\\result\\run.json",
+        "sha256": "4bfd481afb124106483be24cb41bee16f876b13b6053ae6303bed62422e732d3"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed50\\result\\run.json",
+        "sha256": "a7c8459475a387949db729db4e465002529800e7995cfebe1bfd180d4ed0a542"
+      },
+      "public_scientific_digest": "sha256:c3fbf6e99dfa239c784ee26d3e4e897175ff9a400289e0730be331c4f09e7bc1",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 51,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed51\\case.yaml",
+        "sha256": "eeb87fd891919dfec26dbaafa323ca91aae7912ad814171ca506c424e004e671"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed51\\result\\run.json",
+        "sha256": "50d6b97988615f855cdea9dc28ded8e06736c7f37a89519d11b0060dbb63cf5f"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed51\\result\\run.json",
+        "sha256": "b2c564741a984f17244e2d6e3b80ad67ce1172c4c16e8cf26cfc923609bdc411"
+      },
+      "public_scientific_digest": "sha256:181b64b990c72f5936f69b60e87f6f9991ac8f8f05dd4527816e5d4318f65241",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 52,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed52\\case.yaml",
+        "sha256": "3ca3b487bfcaa2cf73d810bba4f59893a9e3fd66668c08828515b848204a5c7f"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed52\\result\\run.json",
+        "sha256": "b0762a26b302b3bc07310d638440efcd66aac99489e11beed827c472f6edd686"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed52\\result\\run.json",
+        "sha256": "af87a3cb6e556bb0d9c2496c38f1bde692640bb3049fb2c77f8ca115d3a9e8bd"
+      },
+      "public_scientific_digest": "sha256:098e1872e07a19b3dfd1612121205b1d0e8033e24d10ede260d5589f2e8f6b97",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 53,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed53\\case.yaml",
+        "sha256": "01836574b15e55ff59f86983c63fcfc25ddf089eadfa34932a8b0472d0b5c172"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed53\\result\\run.json",
+        "sha256": "84592b9ce18c518c923ba34dd85cc424ad63b42b14d7ec915294124fd05d80e5"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed53\\result\\run.json",
+        "sha256": "f7fc60a53445f3a671edad89af5660cc20d2dc086cf813c493268a2d0b4b5aad"
+      },
+      "public_scientific_digest": "sha256:7db023da656d06a7bd61d2f0c154f3515719940e5ede041168ce0451b5b11c47",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 54,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed54\\case.yaml",
+        "sha256": "1adb9de5d24e58c0eb5ecf25956071c23bddc0644765d87e89817f6b9293fc4f"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed54\\result\\run.json",
+        "sha256": "628ff3de190923ef6b9dcff51c4415c8c346feee96fa65a4ecbc597d3529af1f"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed54\\result\\run.json",
+        "sha256": "c0551d8115a14045e814ac3a787a552b16af572769e5d80b04287961d1b79ebe"
+      },
+      "public_scientific_digest": "sha256:8574304f66e71c1f017da20b3b84a4d06b2aa42a4b284e349914c21f665c7fbc",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 55,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed55\\case.yaml",
+        "sha256": "66e760af2e903a2b4f1e98ecd2fdbf3a3052392b18beed22a7e3e3b97b96eac8"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed55\\result\\run.json",
+        "sha256": "ccc22381ffa9073879c148c91db8191a52308781b488ac91d3abc99ddcbf45f5"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed55\\result\\run.json",
+        "sha256": "8e3855c3d10f9a0f7b1a49cf884f1378c938ce4fba1ba2571a60ce39b8f6e782"
+      },
+      "public_scientific_digest": "sha256:dec3fd3cf799da0404f6976f066130b7cfe616d7286233c40729136de701e55e",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 56,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed56\\case.yaml",
+        "sha256": "b2cb87ced6c892d87664cab5d8daf2959e85a864c7bc24c312e2b6be5c96a094"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed56\\result\\run.json",
+        "sha256": "d1290a4eca09518ff8e03158d6e544eba655fc9ee6a007be7edacc29bcb24caf"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed56\\result\\run.json",
+        "sha256": "434a7f334c39edaaf234205f0da84c2cbc723fd9a1d75bda09463cc7f5dba87a"
+      },
+      "public_scientific_digest": "sha256:23b699e34ec5eecbeead3bd9538e79802def43e13f3351b9a74623ab88f31292",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 57,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed57\\case.yaml",
+        "sha256": "232498d2dff3ff87ffe821e8dd86e8eb43239fd7ebe4fd269daa8009a587d064"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed57\\result\\run.json",
+        "sha256": "86396979e28f00ae15caa6c091b1e6a57f58ad30129773ca3470da1dc5caec73"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed57\\result\\run.json",
+        "sha256": "974fffe914a46104013def38ab0f120c0ee654b9acd296cf79b9a3d79028ef54"
+      },
+      "public_scientific_digest": "sha256:c41c15d54e2385a3b576ec2aa9b2103a5f363e2778c49822055c757c598d53af",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 58,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed58\\case.yaml",
+        "sha256": "0fba855d3a1b31b0c5cc54c9cfa16767284c5bb77017ab6f0a6508780b0c77f6"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed58\\result\\run.json",
+        "sha256": "1f6107a335f6de3762fda74beda861a50f40a2ca58b72b4d7d985464c788f0a2"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed58\\result\\run.json",
+        "sha256": "275927339c7746e6990ed696053466bea5355b20f840b56b9179a2da144c480a"
+      },
+      "public_scientific_digest": "sha256:d5a0259718be594e3010037d3ff3553556b5bc0cf2f02574ab94d91109a82611",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 59,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed59\\case.yaml",
+        "sha256": "0c0c3ff45a2f4508c3a8d517fac3a38d209937438adfe1bd02ebd5be5710e515"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed59\\result\\run.json",
+        "sha256": "47e1b538aa352b9ca55071faac9fb3444b80b4a3d8238080bf31ea695ce3e7d0"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed59\\result\\run.json",
+        "sha256": "9e4c1d661871f7e7b6ce88ec94446a858750f3e8a3f3ecaef2bb0e0ff4ba1b9b"
+      },
+      "public_scientific_digest": "sha256:348ae88994c6cecf721262bee602e3ac884cfe9aa90367718e5f48e89b712996",
+      "failure_events": 0
+    },
+    {
+      "case": "P",
+      "seed": 60,
+      "case_identity": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\vigus_population_assessment_20261122\\ensemble\\caseP\\seed60\\case.yaml",
+        "sha256": "422657318cb36c114b745b5e8c406485cbd388dc51e9e2f5ab31c04b66c883fb"
+      },
+      "baseline_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\platform_restructure_20261123\\ensemble\\caseP\\seed60\\result\\run.json",
+        "sha256": "5673371fd180a4635abb9fca68330557c5f847ffbb113b0f4055db3300240c0c"
+      },
+      "current_result": {
+        "path": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_semantics_20261123\\population\\ensemble\\caseP\\seed60\\result\\run.json",
+        "sha256": "b4c859c3e03a06e000fb52bd20fe580b75ee928ecc12d321a37460182b0ead02"
+      },
+      "public_scientific_digest": "sha256:2d89294b9f1497f816b2cc8bc7516e6f62dbaf596434e3f601b295e6bbfae737",
+      "failure_events": 0
+    }
+  ]
+}

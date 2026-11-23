@@ -7,7 +7,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from dataclasses import field as dataclass_field
 from types import MappingProxyType
-from typing import NamedTuple
+from typing import Literal, NamedTuple
 
 import numpy as np
 from numba import njit
@@ -33,7 +33,7 @@ type Int64Array = NDArray[np.int64]
 FIELD_LOCATION_REVISION = "field_location_v5"
 FIELD_TIME_REVISION = "fixed_topology_linear_time_v2"
 FIELD_SPATIAL_GRADIENT_REVISION = "static_nodal_p1_regular_q1_gradient_v2"
-REQUIRED_FIELD_REVISION = "required_field_time_linear_v6"
+REQUIRED_FIELD_REVISION = "required_field_value_constraints_v7"
 FIELD_CELL_BVH_LEAF_SIZE = 8
 # Local path certificates deliberately keep a bounded cell arena.  A wider
 # query is not treated as outside the field; its range is left unavailable so
@@ -63,8 +63,12 @@ class RequiredFieldMetadata:
     unit: str
     components: tuple[str, ...]
     stored_basis: str
-    positive: bool
+    value_constraint: Literal["finite", "positive", "nonnegative"]
     zero_on_rz_axis: bool = False
+
+    def __post_init__(self) -> None:
+        if self.value_constraint not in {"finite", "positive", "nonnegative"}:
+            raise ValueError("required field value_constraint is invalid")
 
 
 @dataclass(frozen=True, slots=True)
@@ -1278,6 +1282,23 @@ def _raise_kernel_error(status: int, row: int, owner: str) -> None:
     raise FieldLocationError(f"{owner!r} failed at stage row {row}: {detail}")
 
 
+def _validate_required_field(field: FieldData, requirement: RequiredFieldMetadata) -> None:
+    """Check one primitive's declared metadata and nodal value constraint."""
+    name = field.name
+    if field.association != "node":
+        raise FieldLocationError(f"required field {name!r} must be node-associated")
+    actual = (field.unit, field.components, field.stored_basis)
+    expected = (requirement.unit, requirement.components, requirement.stored_basis)
+    if actual != expected:
+        raise FieldLocationError(
+            f"required field {name!r} metadata does not match unit/components/basis"
+        )
+    if requirement.value_constraint == "positive" and bool((field.values <= 0.0).any()):
+        raise FieldLocationError(f"required field {name!r} must be positive at every node")
+    if requirement.value_constraint == "nonnegative" and bool((field.values < 0.0).any()):
+        raise FieldLocationError(f"required field {name!r} must be nonnegative at every node")
+
+
 def prepare_required_fields(
     data: DataBundle,
     requirements: Mapping[str, RequiredFieldMetadata],
@@ -1302,16 +1323,7 @@ def prepare_required_fields(
         field = available_fields.get(name)
         if field is None:
             raise FieldLocationError(f"required field {name!r} is missing")
-        if field.association != "node":
-            raise FieldLocationError(f"required field {name!r} must be node-associated")
-        actual = (field.unit, field.components, field.stored_basis)
-        expected = (requirement.unit, requirement.components, requirement.stored_basis)
-        if actual != expected:
-            raise FieldLocationError(
-                f"required field {name!r} metadata does not match unit/components/basis"
-            )
-        if requirement.positive and bool((field.values <= 0.0).any()):
-            raise FieldLocationError(f"required field {name!r} must be positive at every node")
+        _validate_required_field(field, requirement)
         _certify_field_time_interval(field, time_interval_s)
         if layout_name is None:
             layout_name = field.layout

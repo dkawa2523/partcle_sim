@@ -34,12 +34,18 @@ AUTHORITY_PATHS = (
     "implementation_plan.md",
     "vv_methodology.md",
     "solver/pyproject.toml",
+    "solver/README.md",
     "solver/docs/case_format_v3.md",
     "solver/docs/result_format_v4.md",
     "solver/docs/physics_models.md",
     "solver/docs/numerics.md",
     "solver/src/chamber_particles/physics/catalog.py",
+    "solver/src/chamber_particles/time_grid.py",
+    "solver/src/chamber_particles/lifecycle.py",
+    "solver/src/chamber_particles/output.py",
     "solver/src/chamber_particles_tools/inputs.py",
+    "solver/src/chamber_particles_tools/bundle_publication.py",
+    "solver/src/chamber_particles_tools/selection.py",
 )
 COMPONENT_IDS = {
     "case_audit": ["dataset-role"],
@@ -64,7 +70,7 @@ COMPONENT_IDS = {
         "start-gate",
     ],
     "module_responsibilities": ["module-table"],
-    "numerical_contracts": ["numerics-table"],
+    "numerical_contracts": ["numerics-table", "complexity", "start-gate"],
     "result_layers": ["result-store", "result-table"],
     "implementation_work_packages": ["implementation-sequence", "work-package-table"],
     "quality_findings": ["dataset-role", "quality-table"],
@@ -147,8 +153,8 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         },
         {
             "area": "publication",
-            "decision": "One inputs.create_case publisher",
-            "reason": "Canonical hash and shared check before publication",
+            "decision": "inputs.create_case(bundle, settings, output_directory)",
+            "reason": "One bundle owns source tables; atomic case, editable inputs and producer receipts",
         },
         {
             "area": "native_boundary",
@@ -157,8 +163,13 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         },
         {
             "area": "result_reuse",
-            "decision": "Result schema 4 with immutable context.h5",
-            "reason": "Interpret results without original case or background fields",
+            "decision": "Result schema 4, nested immutable manifest and reusable ResultCohort",
+            "reason": "One source identity and exact selected population across analysis/export/view",
+        },
+        {
+            "area": "resolved_ownership",
+            "decision": "Catalog inputs/proof roles; parent clocks and worker numeric settings",
+            "reason": "Stage computability, path proof, global bounds and accuracy remain distinct",
         },
     ]
     physics = [
@@ -171,6 +182,8 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "integrators": list(item["integrators"]),
             "required_parameters": list(item["required_parameters"]),
             "field_parameters": list(item["field_parameters"]),
+            "required_fields": item["fields"],
+            "certificate_roles": item["certificates"],
         }
         for item in catalog
     ]
@@ -196,8 +209,13 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "must_not": "Endpoint-only passage, nudge or invented event",
         },
         {
+            "module": "chamber_particles.time_grid / lifecycle / cpu",
+            "owns": "Macro partition/window rules, lifecycle meaning and resident/persistent column declarations",
+            "must_not": "Accuracy verdicts, adhesion claims or duplicated state schemas",
+        },
+        {
             "module": "chamber_particles.engine / transport / execution",
-            "owns": "One engine, parent clocks and exclusive worker slabs",
+            "owns": "One engine; parent clocks/provenance and typed worker settings/exclusive slabs",
             "must_not": "Producer-specific engines or worker HDF5 writers",
         },
         {
@@ -212,16 +230,26 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         },
         {
             "module": "chamber_particles_tools.analysis / visualization",
-            "owns": "Public ResultView consumers",
+            "owns": "Reusable ResultView/cohort consumers and complete export/view publication",
             "must_not": "Private case access or implicit new simulation",
         },
         {
             "module": "tools/vv / native COMSOL",
-            "owns": "External observation, companions and qualified comparison",
+            "owns": "External native producers/receipts, observation, companions and qualified comparison",
             "must_not": "Normal wheel runtime dependency",
         },
     ]
     numerical = [
+        {
+            "topic": "macro/window",
+            "decision": "Shared MacroGrid merges field knots and exposes the actual selected-window partition",
+            "acceptance": "Known-window macro refinement and justified numerical-path refinement are separate prerequisites; nominal dt/global counts certify neither",
+        },
+        {
+            "topic": "primitive/proof",
+            "decision": "Catalog finite/positive/nonnegative inputs and selected model/proof roles",
+            "acceptance": "Separate global/local enclosure from actual-stage sampling and coupled path proof",
+        },
         {
             "topic": "check_case",
             "decision": "Same prepare as simulate; no worker/writer/update",
@@ -247,6 +275,11 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
             "decision": "Stable particle IDs, physical RNG streams and observation-independent production steps",
             "acceptance": "Worker/tile/output/resume scientific identity",
         },
+        {
+            "topic": "stability",
+            "decision": "Prepared stability upper bounds use requested dt and global bounds",
+            "acceptance": "Not an observed stage maximum or an accuracy estimate",
+        },
     ]
     result = [
         {
@@ -256,25 +289,25 @@ def _design_queries(catalog: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
         },
         {
             "layer": "ResultView",
-            "contents": "Final, streamed interactions, saved frames/probes and context",
-            "rule": "Public consumer interface; strict result schema 4",
+            "contents": "Final, interactions, saved frames/probes, context and immutable nested manifest",
+            "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 4",
         },
         {
             "layer": "analysis",
-            "contents": "Fates, first hit, terminal and repeated interactions",
-            "rule": "Exact cohort and computational count/weight meaning; no inferred adhesion/flux",
+            "contents": "ResultCohort, fates, first hit, terminal and repeated interactions",
+            "rule": "Reuse final/context and exact selection; computational count/weight, no inferred adhesion/flux",
         },
         {
             "layer": "visualization / report",
             "contents": "Geometry, bounded views and reviewed exported evidence",
-            "rule": "No simulation or invented missing states; presentation stays separate",
+            "rule": "Complete receipt-bound export/view before atomic publication; no invented missing states",
         },
     ]
     work = [
         {
             "package": "Installed input flow",
             "capability": "Own CSV mesh/field/source to runnable case",
-            "deliverable": "Mapping4 + source2 + recipe1",
+            "deliverable": "Mapping4 + source2 + recipe2 with explicit complete source-table set",
             "gate": "Load/check/run from installed wheel",
         },
         {
@@ -424,7 +457,7 @@ def build_snapshot(
         "authorities": authorities,
         "catalog_sha256": catalog_hash,
         "optional_inputs": inputs,
-        "optional_evidence_policy": "Missing is unavailable, never zero; source receipts do not imply rerunning scientific calculations",
+        "optional_evidence_policy": "Missing is unavailable, never zero; snapshot generation does not run scientific calculations, and imported receipts retain their declared execution scope",
     }
     return snapshot
 

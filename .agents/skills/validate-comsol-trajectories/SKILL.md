@@ -192,9 +192,21 @@ or bound normalized exports; preserve the comparison record and metric meaning.
 For this evaluator's qualified cross comparison, register independent
 `self_sensitivity_budgets` for candidate and reference as well as cross
 `physical_budgets`. Missing/exceeded self allowances or unproven actual
-refined macro partitions leave qualified parity `NOT_TESTED`; a small finest
-cross difference alone is insufficient. Its self-resolution gate consumes
-completed public result manifests. CSV-only native execution/partition
+refined macro partitions in the actual selected release/window leave qualified
+parity `NOT_TESTED`; a small finest cross difference alone is insufficient.
+Its self-resolution gate consumes completed public result manifests with a
+known `macro_grid_revision`, using the same pure clock owner as execution.
+Global counts do not prove a window refinement. Nonuniform actual macro grids
+retain raw changes without an order inferred from nominal dt ratios.
+A separate `fixed_root_execution` prerequisite binds a reviewed deterministic
+engine/path policy and all-zero run-wide refinement/depth, axis, residual,
+wall/boundary/topology and failure counters. This sufficient condition can
+link macro and particle intervals; positive global work cannot be attributed
+to the selected cohort/window. Both prerequisites govern self-resolution and
+order interpretation. Otherwise retain raw changes and empirical target
+verdicts with qualification `NOT_TESTED`, including for RK4 dense paths whose
+outer transport may reintegrate. This adds no accepted-path ledger or
+stochastic strong-convergence claim. CSV-only native execution/partition
 authenticity remains unqualified by this tool. Read the actual report limits,
 or use a source-bound native evaluation suited to the requested claim; do not
 label a native CSV as a public result to bypass the gate. Empirical self

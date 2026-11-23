@@ -12,7 +12,9 @@ uv run --locked python -m chamber_particles check input/case.yaml
 ```
 
 The same dispatcher is available as `chamber-particles` after wheel installation. No source checkout is needed.
-A format-1 case recipe contains `input_bundle`, `sources: [{csv, configuration}]`, and normal case `settings`.
+A format-2 case recipe contains `input_bundle`, the complete `sources` table set, and normal case `settings`.
+Each table is `{csv, configuration}` or `{existing_table: name}`. Unlisted input tables are removed;
+`settings.sources` separately selects actual releases. There is no implicit overlay.
 Paths are relative to the recipe. The shared [publisher](../inputs.py) fills data path/hash, writes through
 `case_format`, publicly loads the result and uses the same `check_case` prepare as execution before publication.
 A rejected case is not published. This readiness check does not execute particles or qualify accuracy.
@@ -21,7 +23,7 @@ Python services:
 
 - `chamber_particles_tools.source_builder.convert_velocity(...)` converts supplied row-wise velocity data.
 - `read_csv_source(path, bundle, configuration)` returns `RealizedTableSource` or `RealizedSurfaceSource` without writes.
-- `chamber_particles_tools.inputs.create_case(bundle, settings, sources, output_directory)` publishes the complete intended source tuple.
+- `chamber_particles_tools.inputs.create_case(bundle, settings, output_directory, *, supporting_files=None)` publishes the bundle and optional editable input files together. The bundle owns its source tables.
 - `create_from_configuration(recipe_path, output_directory)` is CLI `create`.
 
 ## Source configuration format 2

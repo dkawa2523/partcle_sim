@@ -1,0 +1,411 @@
+{
+  "benchmark": "p11_exponential_midpoint_fresh_warm_v2",
+  "captured_at_utc": "2026-11-23T03:45:24.526659+00:00",
+  "comparisons": {
+    "exponential": {
+      "public_end_to_end_fresh_over_warm_speedup": 381.0770038365092,
+      "simulate_fresh_minus_warm_s": 30.170675299945287,
+      "simulate_fresh_over_warm_speedup": 570.0132413283991
+    }
+  },
+  "conditions": {
+    "case_materialization_in_measured_scope": false,
+    "compiled_execution": "compiled_cpu_tile_v31 with NUMBA_DISABLE_JIT=0, fastmath=False, serial compiled kernels, NUMBA_NUM_THREADS=1",
+    "jit_isolation": "each observation uses a fresh process and a unique initially empty NUMBA_CACHE_DIR",
+    "macro_step_dt_s": 0.75,
+    "maximum_dt_over_tau": 3.0,
+    "particle_count": 256,
+    "repeats": 1,
+    "scenario": "expanded C03 constant linear relaxation and additive force",
+    "timed_scope": "load_case + simulate + open_result",
+    "warmup_runs_for_warm_mode": 1
+  },
+  "identity": {
+    "by_scenario": {
+      "exponential": {
+        "exact_match": true,
+        "observations_compared": 2,
+        "semantic_result_sha256": "sha256:fe64699482d5e9876b2d848c4f7526aea19a1a00810cce282b0f9d693315be8e"
+      }
+    },
+    "definition": "stable manifest semantics plus final/events/series/frames/probes; timing and RSS excluded"
+  },
+  "interpretation": {
+    "fresh_warm_speedup": "fresh/warm characterizes same-process JIT amortization; it is not a comparison against RK4 or another engine revision",
+    "rss": "OS process high-water RSS includes Python and native libraries and is separate from the solver-owned memory plan",
+    "scope": "P14 owns the product-scale field/event/output matrix",
+    "thresholds": "absolute seconds, RSS, and speedup have no pass/fail threshold"
+  },
+  "machine": {
+    "chamber_particles": "0.4.0",
+    "h5py": "3.16.0",
+    "logical_cpu_count": 20,
+    "machine": "AMD64",
+    "numba": "0.67.0",
+    "numpy": "2.5.3",
+    "peak_rss_source": "Windows GetProcessMemoryInfo",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+    "python": "3.12.13",
+    "uv_lock_sha256": "sha256:ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56"
+  },
+  "non_gating": true,
+  "observations": [
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "macro_grid_revision": "fixed_macro_grid_field_knots_v1",
+        "physics_catalog_revision": "declared_primitive_physics_catalog_v25",
+        "physics_runtime_revision": "record_bound_physics_runtime_v26",
+        "required_field_revision": "required_field_value_constraints_v7",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "boundary_event_count": 0,
+      "case_artifact_bytes": 68437,
+      "case_identity": {
+        "case_file_hash": "sha256:76655877ee8bf8b94a64efaaafb96e1d5fe7cc3a964dcf00d76f8aa930fb5b9f",
+        "data_content_hash": "sha256:8814634325a69a29d87b3e1fba1c58bba70fbf361e8a6ce22bfedcff24e7a902"
+      },
+      "compiled_execution": {
+        "numba_disable_jit": "0",
+        "numba_num_threads": "1",
+        "stage_advance_signature_count": 1
+      },
+      "macro_step_count": 1,
+      "memory": {
+        "additional_process_high_water_bytes": 424001536,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 510873600,
+        "peak_rss_before_measured_scope_bytes": 86872064,
+        "rss_after_measured_scope_bytes": 466403328,
+        "rss_before_measured_scope_bytes": 86872064,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 544,
+          "components": {
+            "active_index": 2048,
+            "canonical_data": 27945,
+            "field_runtime": 48,
+            "geometry_query_scratch": 16,
+            "output_buffer": 2304,
+            "particle_schedule": 32768,
+            "physics_runtime": 6165,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 25856,
+            "result_context_validation": 100,
+            "safety_margin": 499913,
+            "slab_certificate_work": 139264,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 13312,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 524288,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 79360,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 1073741824,
+          "phase_peaks": {
+            "load_case": 93481,
+            "prepare": 166350,
+            "run": 4499211
+          },
+          "planned_bytes": 4499211,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 256,
+          "stage_composition_work_bytes_per_particle": 310,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "fresh",
+      "particle_count": 256,
+      "repeat": 0,
+      "resolved_execution": {
+        "backend": "cpu",
+        "integrator": "exponential_midpoint",
+        "path_kind": "exponential_midpoint_reintegrated"
+      },
+      "result_artifact_bytes": 182038,
+      "scenario": "exponential",
+      "semantic_result_sha256": "sha256:fe64699482d5e9876b2d848c4f7526aea19a1a00810cce282b0f9d693315be8e",
+      "throughput": {
+        "events_per_simulate_s": 0.0,
+        "nominal_particle_macro_steps_per_simulate_s": 8.470174601179918,
+        "particles_per_simulate_s": 8.470174601179918
+      },
+      "timing_s": {
+        "load_case": 0.022950500017032027,
+        "open_result": 0.016427800059318542,
+        "public_end_to_end": 30.26307780004572,
+        "simulate": 30.22369809995871
+      }
+    },
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "macro_grid_revision": "fixed_macro_grid_field_knots_v1",
+        "physics_catalog_revision": "declared_primitive_physics_catalog_v25",
+        "physics_runtime_revision": "record_bound_physics_runtime_v26",
+        "required_field_revision": "required_field_value_constraints_v7",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "boundary_event_count": 0,
+      "case_artifact_bytes": 68437,
+      "case_identity": {
+        "case_file_hash": "sha256:76655877ee8bf8b94a64efaaafb96e1d5fe7cc3a964dcf00d76f8aa930fb5b9f",
+        "data_content_hash": "sha256:8814634325a69a29d87b3e1fba1c58bba70fbf361e8a6ce22bfedcff24e7a902"
+      },
+      "compiled_execution": {
+        "numba_disable_jit": "0",
+        "numba_num_threads": "1",
+        "stage_advance_signature_count": 1
+      },
+      "macro_step_count": 1,
+      "memory": {
+        "additional_process_high_water_bytes": 0,
+        "measurement_source": "Windows GetProcessMemoryInfo",
+        "peak_rss_after_measured_scope_bytes": 510857216,
+        "peak_rss_before_measured_scope_bytes": 510857216,
+        "rss_after_measured_scope_bytes": 469700608,
+        "rss_before_measured_scope_bytes": 469700608,
+        "solver_memory_plan": {
+          "certificate_work_bytes_per_particle": 544,
+          "components": {
+            "active_index": 2048,
+            "canonical_data": 27945,
+            "field_runtime": 48,
+            "geometry_query_scratch": 16,
+            "output_buffer": 2304,
+            "particle_schedule": 32768,
+            "physics_runtime": 6165,
+            "prepared_geometry": 96,
+            "probe_index": 0,
+            "replay_work": 0,
+            "resident_state": 25856,
+            "result_context_validation": 100,
+            "safety_margin": 499913,
+            "slab_certificate_work": 139264,
+            "slab_dense_path": 0,
+            "slab_event_staging": 0,
+            "slab_event_work": 0,
+            "slab_failure_staging": 13312,
+            "slab_proposal_replay_work": 0,
+            "slab_proposal_scratch": 524288,
+            "slab_release_work": 0,
+            "slab_stage_composition_work": 79360,
+            "slab_stochastic_tree_work": 0,
+            "writer_reserve": 3145728
+          },
+          "dense_path_bytes_per_particle": 0,
+          "event_candidate_capacity": 0,
+          "event_staging_bytes_per_row": 0,
+          "event_staging_capacity": 0,
+          "event_staging_fixed_bytes": 0,
+          "event_work_bytes_per_particle": 0,
+          "failure_staging_bytes_per_particle": 52,
+          "field_preparation_transient_bytes": 0,
+          "geometry_preparation_transient_bytes": 1024,
+          "limit_bytes": 1073741824,
+          "phase_peaks": {
+            "load_case": 93481,
+            "prepare": 166350,
+            "run": 4499211
+          },
+          "planned_bytes": 4499211,
+          "proposal_replay_work_bytes_per_particle": 0,
+          "release_work_bytes_per_particle": 0,
+          "replay_work_bytes": 0,
+          "revision": "solver_owned_memory_plan_v26",
+          "runtime_layout_revision": "resident_soa_process_slab_v14",
+          "scratch_bytes_per_particle": 2048,
+          "semantics": "predicted peak of solver-owned arrays; not process RSS",
+          "slab_particles": 256,
+          "stage_composition_work_bytes_per_particle": 310,
+          "stochastic_tree_work_bytes_per_particle": 0,
+          "worker_count": 1
+        }
+      },
+      "mode": "warm",
+      "particle_count": 256,
+      "repeat": 0,
+      "resolved_execution": {
+        "backend": "cpu",
+        "integrator": "exponential_midpoint",
+        "path_kind": "exponential_midpoint_reintegrated"
+      },
+      "result_artifact_bytes": 182038,
+      "scenario": "exponential",
+      "semantic_result_sha256": "sha256:fe64699482d5e9876b2d848c4f7526aea19a1a00810cce282b0f9d693315be8e",
+      "throughput": {
+        "events_per_simulate_s": 0.0,
+        "nominal_particle_macro_steps_per_simulate_s": 4828.111679036046,
+        "particles_per_simulate_s": 4828.111679036046
+      },
+      "timing_s": {
+        "load_case": 0.011030799942091107,
+        "open_result": 0.015359899960458279,
+        "public_end_to_end": 0.0794145999243483,
+        "simulate": 0.053022800013422966
+      }
+    }
+  ],
+  "summaries": [
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "macro_grid_revision": "fixed_macro_grid_field_knots_v1",
+        "physics_catalog_revision": "declared_primitive_physics_catalog_v25",
+        "physics_runtime_revision": "record_bound_physics_runtime_v26",
+        "required_field_revision": "required_field_value_constraints_v7",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "boundary_event_count": 0,
+      "macro_step_count": 1,
+      "maximum_peak_rss_bytes": 510873600,
+      "median_throughput": {
+        "events_per_simulate_s": 0.0,
+        "nominal_particle_macro_steps_per_simulate_s": 8.470174601179918,
+        "particles_per_simulate_s": 8.470174601179918
+      },
+      "median_timing_s": {
+        "load_case": 0.022950500017032027,
+        "open_result": 0.016427800059318542,
+        "public_end_to_end": 30.26307780004572,
+        "simulate": 30.22369809995871
+      },
+      "mode": "fresh",
+      "observations": 1,
+      "particle_count": 256,
+      "scenario": "exponential",
+      "semantic_result_sha256": "sha256:fe64699482d5e9876b2d848c4f7526aea19a1a00810cce282b0f9d693315be8e"
+    },
+    {
+      "algorithms": {
+        "boundary_algorithm_revision": null,
+        "brownian_charge_dense_revision": null,
+        "brownian_composition_revision": null,
+        "brownian_rng_revision": null,
+        "brownian_tree_policy_revision": null,
+        "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+        "engine_algorithm_revision": "particle_engine_v64",
+        "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+        "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "field_location_revision": "field_location_v5",
+        "field_time_revision": "fixed_topology_linear_time_v2",
+        "geometry_algorithm_revision": "line_boundary_capsule_contact_bvh_v8",
+        "joint_ou_revision": null,
+        "joint_ou_split_revision": null,
+        "macro_grid_revision": "fixed_macro_grid_field_knots_v1",
+        "physics_catalog_revision": "declared_primitive_physics_catalog_v25",
+        "physics_runtime_revision": "record_bound_physics_runtime_v26",
+        "required_field_revision": "required_field_value_constraints_v7",
+        "result_algorithm_revision": "durable_context_segmented_result_v7",
+        "rk4_dense_path_revision": null,
+        "rk4_enclosure_revision": null,
+        "rng_algorithm_revision": "philox4x32_10_v2",
+        "source_algorithm_revision": "realized_internal_surface_contact_schedule_v5",
+        "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+        "topology_algorithm_revision": null
+      },
+      "boundary_event_count": 0,
+      "macro_step_count": 1,
+      "maximum_peak_rss_bytes": 510857216,
+      "median_throughput": {
+        "events_per_simulate_s": 0.0,
+        "nominal_particle_macro_steps_per_simulate_s": 4828.111679036046,
+        "particles_per_simulate_s": 4828.111679036046
+      },
+      "median_timing_s": {
+        "load_case": 0.011030799942091107,
+        "open_result": 0.015359899960458279,
+        "public_end_to_end": 0.0794145999243483,
+        "simulate": 0.053022800013422966
+      },
+      "mode": "warm",
+      "observations": 1,
+      "particle_count": 256,
+      "scenario": "exponential",
+      "semantic_result_sha256": "sha256:fe64699482d5e9876b2d848c4f7526aea19a1a00810cce282b0f9d693315be8e"
+    }
+  ]
+}

@@ -39,7 +39,9 @@ def test_stokes_cunningham_xy_has_fourth_order_and_schedule_independent_final(
         final = result.read_final()
         position_errors.append(float(np.max(np.abs(final.position_m[0] - position_exact))))
         velocity_errors.append(float(np.max(np.abs(final.velocity_m_s[0] - velocity_exact))))
-        prepared_ratio = float(result.manifest["maximum_dt_over_tau"])
+        prepared_ratio = float(
+            result.manifest["prepared_stability_upper_bounds"]["dt_times_drag_velocity_lipschitz"]
+        )
         exact_ratio = dt_s * rate_s_inv
         assert exact_ratio <= prepared_ratio <= exact_ratio * (1.0 + 1.0e-12)
         assert result.manifest["resolved"]["physics_models"]["drag"] == {

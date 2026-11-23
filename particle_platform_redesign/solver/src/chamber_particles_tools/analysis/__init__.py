@@ -10,17 +10,17 @@ from collections.abc import Iterable
 from dataclasses import dataclass
 from os import PathLike
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import numpy as np
 
-from chamber_particles import open_result
+from chamber_particles.lifecycle import ACTIVE, NAMES, PENDING, STUCK, TERMINAL
 from chamber_particles.output import BoundaryEvents, FinalParticles, ResultContext, ResultView
 
-from ..selection import select_particles
+from ..selection import ResultInput, select_result
 
 ANALYSIS_REVISION = "result_population_interaction_terminal_v3"
-_LIFECYCLE_NAMES = {0: "pending", 1: "active", 2: "stuck", 3: "escaped", 4: "failed", 5: "held"}
 
 
 @dataclass(slots=True)
@@ -41,7 +41,7 @@ class _ParticleEvents:
 
 
 def summarize_result(
-    path: str | PathLike[str],
+    path: ResultInput,
     *,
     event_batch_rows: int = 4096,
     source_ids: tuple[int, ...] | None = None,
@@ -54,21 +54,24 @@ def summarize_result(
     Histogram edges are explicit physical inputs. Interactions include repeated
     hits; first material-wall hits and terminal events are separate quantities.
     """
-    result = open_result(path)
-    context = result.read_context()
-    final = result.read_final()
-    selected = select_particles(final, context, source_ids=source_ids, particle_ids=particle_ids)
-    events, interactions = _scan_events(result, final.particle_id[selected], event_batch_rows)
+    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
+    result, context, final, selected = (
+        cohort.result,
+        cohort.context,
+        cohort.final,
+        cohort.selected,
+    )
+    events, interactions = _scan_events(result, cohort.selected_ids, event_batch_rows)
     return {
         "analysis_revision": ANALYSIS_REVISION,
         "parameters": {
             "event_batch_rows": event_batch_rows,
-            "source_ids": source_ids,
-            "particle_ids": particle_ids,
+            "source_ids": cohort.source_ids,
+            "particle_ids": cohort.particle_ids,
             "coordinate0_bin_edges_m": coordinate0_bin_edges_m,
             "terminal_time_bin_edges_s": terminal_time_bin_edges_s,
         },
-        "source_result": _source_identity(result),
+        "source_result": result.source_identity(),
         "population": {
             "selected_particles": int(selected.sum()),
             "model_weight": float(final.model_weight[selected].sum()),
@@ -82,10 +85,10 @@ def summarize_result(
         "terminal": _terminal_rows(final, selected, events),
         "deposition": _deposition_rows(final, selected, events),
         "deposition_coverage": {
-            "eligible_stuck_particles": int(np.count_nonzero(final.lifecycle[selected] == 2)),
+            "eligible_stuck_particles": int(np.count_nonzero(final.lifecycle[selected] == STUCK)),
             "missing_terminal_boundary": int(
                 np.count_nonzero(
-                    (final.lifecycle[selected] == 2) & (events.terminal_boundary_id < 0)
+                    (final.lifecycle[selected] == STUCK) & (events.terminal_boundary_id < 0)
                 )
             ),
         },
@@ -103,25 +106,6 @@ def summarize_result(
             "first_boundary_hit": "first recorded material-wall hit per particle; excludes periodic transfers",
             "terminal": "stop, hold, escape or failure; not first arrival",
             "deposition": "one numerically stuck final particle counted once; not certified physical adhesion",
-        },
-    }
-
-
-def _source_identity(result: ResultView) -> dict[str, object]:
-    manifest = dict(result.manifest)
-    encoded = json.dumps(manifest, allow_nan=False, sort_keys=True, separators=(",", ":")).encode()
-    return {
-        "manifest_sha256": "sha256:" + hashlib.sha256(encoded).hexdigest(),
-        **{
-            key: manifest.get(key)
-            for key in (
-                "case_name",
-                "case_file_hash",
-                "data_content_hash",
-                "result_schema_version",
-                "result_algorithm_revision",
-                "context",
-            )
         },
     }
 
@@ -207,7 +191,7 @@ def _interaction_rows(
 def _fate_rows(lifecycle: np.ndarray, weights: np.ndarray) -> list[dict[str, object]]:
     return [
         {
-            "lifecycle": _LIFECYCLE_NAMES[int(code)],
+            "lifecycle": NAMES[int(code)],
             "particles": int(np.count_nonzero(lifecycle == code)),
             "model_weight": float(weights[lifecycle == code].sum()),
         }
@@ -258,21 +242,21 @@ def _terminal_rows(
     lifecycle, weights = final.lifecycle[selected], final.model_weight[selected]
     return [
         {
-            "lifecycle": _LIFECYCLE_NAMES[code],
+            "lifecycle": NAMES[code],
             "eligible_particles": int(np.count_nonzero(lifecycle == code)),
             "missing_terminal_events": int(
                 np.count_nonzero((lifecycle == code) & ~np.isfinite(events.terminal_time_s))
             ),
             **_time_summary(events.terminal_time_s[lifecycle == code], weights[lifecycle == code]),
         }
-        for code in (2, 3, 4, 5)
+        for code in TERMINAL
     ]
 
 
 def _deposition_rows(
     final: FinalParticles, selected: np.ndarray, events: _ParticleEvents
 ) -> list[dict[str, object]]:
-    retained = (final.lifecycle[selected] == 2) & (events.terminal_boundary_id >= 0)
+    retained = (final.lifecycle[selected] == STUCK) & (events.terminal_boundary_id >= 0)
     keys = np.column_stack(
         (events.terminal_boundary_id[retained], events.terminal_material_id[retained])
     )
@@ -295,7 +279,7 @@ def _active_curve(
     rows = []
     for frame in result.iter_frames():
         source, index = _selected_event_rows(frame.particle_id, ids)
-        active = frame.lifecycle[source] == 1
+        active = frame.lifecycle[source] == ACTIVE
         rows.append(
             {
                 "time_s": frame.time_s,
@@ -332,8 +316,8 @@ def _ledger_active_curve(
     release = result.read_release_events()
     rows, index = _selected_event_rows(release.particle_id, ids)
     occurrences = np.bincount(index, minlength=ids.size)
-    expected_released = final.lifecycle[selected] != 0
-    expected_terminal = np.isin(final.lifecycle[selected], (2, 3, 4, 5))
+    expected_released = final.lifecycle[selected] != PENDING
+    expected_terminal = np.isin(final.lifecycle[selected], TERMINAL)
     complete = np.array_equal(occurrences, expected_released.astype(np.int64))
     complete &= np.array_equal(np.isfinite(events.terminal_time_s), expected_terminal)
     if not complete or not clock.size:
@@ -409,10 +393,10 @@ def _histograms(
     time_edges: tuple[float, ...] | None,
     coordinate0_name: str,
 ) -> dict[str, object]:
-    retained, weights = final.lifecycle[selected] == 2, final.model_weight[selected]
+    retained, weights = final.lifecycle[selected] == STUCK, final.model_weight[selected]
     terminal = _explicit_histogram(events.terminal_time_s, weights, time_edges)
     if terminal is not None:
-        nonterminal = np.isin(final.lifecycle[selected], (0, 1))
+        nonterminal = np.isin(final.lifecycle[selected], (PENDING, ACTIVE))
         terminal["excluded_nonterminal_particles"] = int(nonterminal.sum())
         terminal["missing_terminal_event_particles"] = int(
             np.count_nonzero(~nonterminal & ~np.isfinite(events.terminal_time_s))
@@ -427,7 +411,7 @@ def _histograms(
 
 
 def export_result(
-    path: str | PathLike[str],
+    path: ResultInput,
     output_directory: str | PathLike[str],
     *,
     particle_ids: tuple[int, ...] | None = None,
@@ -435,33 +419,40 @@ def export_result(
     event_batch_rows: int = 4096,
 ) -> dict[str, object]:
     """Stream selected rows to CSV while preserving context and result identity."""
-    result = open_result(path)
-    final, context = result.read_final(), result.read_context()
-    selected = select_particles(final, context, source_ids=source_ids, particle_ids=particle_ids)
-    ids = final.particle_id[selected]
+    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
+    result, final, ids = cohort.result, cohort.final, cohort.selected_ids
     destination = Path(output_directory).expanduser().resolve()
     if destination == result.path or result.path in destination.parents:
         raise ValueError("export output must be outside the source result directory")
-    destination.mkdir(parents=True, exist_ok=False)
-    counts = _export_tables(result, final, ids, destination, event_batch_rows)
-    shutil.copyfile(result.path / "context.h5", destination / "context.h5")
-    report: dict[str, object] = {
-        "analysis_revision": ANALYSIS_REVISION,
-        "source_result": _source_identity(result),
-        "selection": {
-            "particle_ids": particle_ids,
-            "source_ids": source_ids,
-            "selected_particles": int(ids.size),
-        },
-        "rows": counts,
-        "units": "SI",
-        "boundary_meaning": "recorded interactions, including repeats; not first arrivals",
-        "row_order": "frames/probes by time; boundary interaction storage order with explicit physical event identity",
-        "files": {file.name: _file_hash(file) for file in destination.iterdir()},
-    }
-    (destination / "export.json").write_text(
-        json.dumps(report, allow_nan=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
-    )
+    if destination.exists():
+        raise FileExistsError(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".result-export-", dir=destination.parent) as temporary:
+        staging = Path(temporary) / "export"
+        staging.mkdir()
+        counts = _export_tables(result, final, ids, staging, event_batch_rows)
+        shutil.copyfile(result.path / "context.h5", staging / "context.h5")
+        files = {file.name: _file_hash(file) for file in staging.iterdir()}
+        if files["context.h5"] != result.manifest_document()["context"]["file_sha256"]:
+            raise ValueError("result context changed after opening; export was not published")
+        report: dict[str, object] = {
+            "analysis_revision": ANALYSIS_REVISION,
+            "source_result": result.source_identity(),
+            "selection": {
+                "particle_ids": cohort.particle_ids,
+                "source_ids": cohort.source_ids,
+                "selected_particles": int(ids.size),
+            },
+            "rows": counts,
+            "units": "SI",
+            "boundary_meaning": "recorded interactions, including repeats; not first arrivals",
+            "row_order": "frames/probes by time; boundary interaction storage order with explicit physical event identity",
+            "files": files,
+        }
+        (staging / "export.json").write_text(
+            json.dumps(report, allow_nan=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
+        staging.rename(destination)
     return report
 
 

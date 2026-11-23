@@ -172,7 +172,8 @@ def _native_terminal_intervals(
 
 def _candidate(path: Path) -> _Population:
     result = open_result(path)
-    if result.manifest.get("motion_mode") != "axisymmetric_rz_meridional":
+    manifest = result.manifest_document()
+    if manifest.get("motion_mode") != "axisymmetric_rz_meridional":
         raise ValueError("candidate must use the native RZ meridional coordinate meaning")
     final = result.read_final()
     ids = final.particle_id
@@ -180,7 +181,7 @@ def _candidate(path: Path) -> _Population:
     if not frames:
         raise ValueError("candidate requires saved full-population trajectory frames")
     times = np.asarray([frame.time_s for frame in frames])
-    span = cast(dict[str, Any], result.manifest["time"])
+    span = cast(dict[str, Any], manifest["time"])
     if times[0] != span["start_s"] or times[-1] != span["end_s"]:
         raise ValueError("candidate frames must cover its complete executed time window")
     states, status, observed = _candidate_frame_arrays(frames, ids)
@@ -193,9 +194,9 @@ def _candidate(path: Path) -> _Population:
     )
     evidence = {
         "run_manifest": _artifact(path / "run.json"),
-        "case_file_hash": result.manifest.get("case_file_hash"),
-        "data_content_hash": result.manifest.get("data_content_hash"),
-        "failure_reason_counts": result.manifest.get("failure_reason_counts"),
+        "case_file_hash": manifest.get("case_file_hash"),
+        "data_content_hash": manifest.get("data_content_hash"),
+        "failure_reason_counts": manifest.get("failure_reason_counts"),
         "stop_time_meaning": "terminal boundary event; failures are separate",
     }
     return _Population(

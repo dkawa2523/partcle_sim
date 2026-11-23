@@ -138,10 +138,8 @@ def test_prescribed_charge_electric_diffusion_matches_independent_ou_and_scalar_
         )
     np.testing.assert_allclose(final.charge_number, 0.5 + 2.5 * c, rtol=1.0e-14)
     counts = result.manifest["failure_reason_counts"]
-    assert isinstance(counts, dict)
     assert not any(counts.values())
     resolved = result.manifest["resolved"]
-    assert isinstance(resolved, dict)
     assert (
         resolved["physics_models"]["noise"]["revision"]
         == "prescribed_force_diffusion_midpoint_2d_v1"
@@ -332,7 +330,6 @@ def test_coulomb_cap_crossing_preserves_dynamic_charge_and_quadratic_ion_feedbac
     np.testing.assert_allclose(final.position_m[0], [position, 0], rtol=0, atol=1e-6)
     assert -1 < final.charge_number[0] < 1
     failures = result.manifest["failure_reason_counts"]
-    assert isinstance(failures, dict)
     assert not any(failures.values())
 
 

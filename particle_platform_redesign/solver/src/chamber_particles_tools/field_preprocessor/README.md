@@ -5,13 +5,13 @@ geometry, fields and realized sources. It uses the production sampler; it does n
 change physics, integrate particles or repair geometry.
 
 ```console
-uv run --locked python -m chamber_particles inputs cache cache.yaml cached.h5 --report cache.json
-uv run --locked python -m chamber_particles inputs cache cache.yaml cached.h5 --report cache.json --source-time-diagnostic
+uv run --locked python -m chamber_particles inputs cache cache.yaml cached
+uv run --locked python -m chamber_particles inputs cache cache.yaml cached --source-time-diagnostic
 ```
 
 The same CLI ships in the wheel. Python uses
-`chamber_particles_tools.field_preprocessor.preprocess_from_configuration(configuration_path, output_path, *, report_path=None, source_time_diagnostic_requested=False)`.
-Outputs/reports are fresh paths. Use `cached.h5` as a format-1 recipe's `input_bundle`, explicitly select the new
+`chamber_particles_tools.field_preprocessor.preprocess_from_configuration(configuration_path, output_directory, *, source_time_diagnostic_requested=False)`.
+The fresh output directory publishes `bundle.h5` and `report.json` together. Use `cached/bundle.h5` as a format-2 recipe's `input_bundle`, explicitly select the new
 field names in physics settings, then use the common `create` publisher and `check`. No YAML path/hash is hand-maintained.
 
 ## Format 2

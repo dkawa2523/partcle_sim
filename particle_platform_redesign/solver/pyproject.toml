@@ -65,7 +65,7 @@ select = [
 ]
 
 [tool.pyrefly]
-project-includes = ["src/chamber_particles", "src/chamber_particles_tools", "tools"]
+project-includes = ["src/chamber_particles", "src/chamber_particles_tools", "tools", "tests/performance"]
 project-excludes = []
 search-path = ["src", "."]
 python-version = "3.12"
@@ -83,6 +83,8 @@ name = "Low-level numerics stay independent of orchestration and I/O"
 type = "forbidden"
 source_modules = [
   "chamber_particles.cpu",
+  "chamber_particles.time_grid",
+  "chamber_particles.lifecycle",
   "chamber_particles.field_numerics",
   "chamber_particles.coordinates",
   "chamber_particles.geometry",

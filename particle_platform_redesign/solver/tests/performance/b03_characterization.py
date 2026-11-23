@@ -532,7 +532,7 @@ def _observation(
     rss_after: int | None,
     rss_source: str,
 ) -> dict[str, Any]:
-    manifest = result.manifest
+    manifest = result.manifest_document()
     if int(manifest["counts"]["particles"]) != particle_count:
         raise RuntimeError("B03 worker particle count does not match the requested case")
     memory_plan = _mapping(manifest, "memory_plan")

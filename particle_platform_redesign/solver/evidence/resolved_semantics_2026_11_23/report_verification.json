@@ -1,0 +1,177 @@
+{
+  "scope": "Existing report updated in place; no publication or access change",
+  "status": "complete",
+  "app_id": "report:c9a85c07-6c83-42c2-9aa3-5d3037be4638",
+  "identity_presentation_filters_block_ids_preserved": true,
+  "protected_runtime": {
+    "official_verifier": "Protected Data app runtime verified (234 files).",
+    "independently_rehashed_files": 234,
+    "all_unchanged": true
+  },
+  "source_snapshot": {
+    "path": "report_app/src/data.json",
+    "sha256": "sha256:f254e405dfc99b9d33716e59846db9c7ebaecf2f03099df8d9c41bb9e12b2ecd",
+    "authorities": 18,
+    "queries": 10,
+    "buildStatus": "complete"
+  },
+  "build": {
+    "version": 1,
+    "kind": "separate-data-v1",
+    "html": {
+      "path": "index.html",
+      "sha256": "90f0b41d5dd85210f9216cf14be8d3dfd23ef1078118f6ada1e1fda979d12384",
+      "bytes": 2404519
+    },
+    "snapshot": {
+      "path": "snapshot.f254e405dfc99b9d33716e59846db9c7ebaecf2f03099df8d9c41bb9e12b2ecd.json",
+      "sha256": "f254e405dfc99b9d33716e59846db9c7ebaecf2f03099df8d9c41bb9e12b2ecd",
+      "bytes": 189138
+    },
+    "runtimeSha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "sourceSnapshotSha256": "f254e405dfc99b9d33716e59846db9c7ebaecf2f03099df8d9c41bb9e12b2ecd"
+  },
+  "official_build": "Installed Data prebuilt split build via existing WSL Linux Node; no source build, installation or protected changes",
+  "checks": [
+    {
+      "command": "uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q",
+      "result": "4 passed"
+    },
+    {
+      "command": "uv run --locked ruff check ../analysis/build_report_snapshot.py",
+      "result": "passed"
+    },
+    {
+      "command": "uv run --locked ruff format --check ../analysis/build_report_snapshot.py",
+      "result": "passed"
+    },
+    {
+      "command": "<codex-node> scripts/verify-protected-runtime.mjs",
+      "result": "234 verified"
+    },
+    {
+      "command": "<linux-node> <installed-data-plugin>/output_formats/html/scripts/data-app.mjs build --project-dir report_app --separate-data",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check -- <report-owned paths>",
+      "result": "passed"
+    }
+  ],
+  "rendered_checks": {
+    "browser": "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe",
+    "desktop": {
+      "width": 1440,
+      "height": 1000
+    },
+    "mobile": {
+      "viewport": 390,
+      "document": 375,
+      "tables": [
+        {
+          "label": "製品判断 table",
+          "width": 335,
+          "scrollWidth": 1255
+        },
+        {
+          "label": "物理catalog table",
+          "width": 335,
+          "scrollWidth": 1747
+        },
+        {
+          "label": "数値処理 table",
+          "width": 335,
+          "scrollWidth": 1553
+        },
+        {
+          "label": "module ownership table",
+          "width": 335,
+          "scrollWidth": 1312
+        },
+        {
+          "label": "利用者フロー table",
+          "width": 335,
+          "scrollWidth": 1639
+        },
+        {
+          "label": "result layers table",
+          "width": 335,
+          "scrollWidth": 1257
+        },
+        {
+          "label": "品質証拠 table",
+          "width": 335,
+          "scrollWidth": 1226
+        },
+        {
+          "label": "現行範囲 table",
+          "width": 335,
+          "scrollWidth": 947
+        }
+      ]
+    },
+    "source_inspection": [
+      {
+        "component": "今回取込んだ品質証拠と未取得事項",
+        "selected_source": null,
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "利用者フローごとの完成条件",
+        "selected_source": null,
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "native証拠と今回の設計snapshotを分ける",
+        "selected_source": "変更後A/P各40seed再実行・保存native参照",
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      },
+      {
+        "component": "native証拠と今回の設計snapshotを分ける",
+        "selected_source": "同じ再実行で保持した探索的な局所差",
+        "tabs": [
+          "Overview",
+          "Data preview",
+          "Evidence flow"
+        ]
+      }
+    ],
+    "catalog_pagination": "forward and back passed",
+    "current_values": "W1/W4 times, owned-memory before/after, eight quality rows and A/P source selections checked against reviewed rows",
+    "internal_table_scroll": true,
+    "browser_errors": [],
+    "complete_marker": "Updating indicator cleared in final rendered build",
+    "screenshot_record": {
+      "desktop-hero.png": "sha256:f8404ee5d57486c5590616cd7f8ad875dcbd19d1166cea4e4ed0def910f1da6d",
+      "desktop-inputs.png": "sha256:bee294aec3db21f3bd6f7708254b2a0dd0d46fe7717ebd657c5c1e9ba7b57a8b",
+      "desktop-evidence.png": "sha256:b3a95b02a10dd0c5670005387ad49bdc8f5e20b44a9a367b57d1a92f66e6486f",
+      "mobile-hero.png": "sha256:4c8991373f772b2645af34e79253b3ba50db422370ee6eb6236898d931137746",
+      "mobile-inputs.png": "sha256:d0e31d239239adbe763e72bfe03f3bc5967fb89b816b9ad6c1365270d6de5695"
+    },
+    "full_receipt": {
+      "path": "solver/.artifacts/resolved_semantics_20261123/report/render_receipt.json",
+      "sha256": "sha256:8d78825815c6b04935b40e624c6238aa6caddce28f9aa6ab438a475d5ce46268"
+    }
+  },
+  "build_advisory": "DATA_NARRATIVE_DYNAMIC from shared Narrative wrapper; representative narrative and actual DataTable headers/cells were rendered and checked, no Markdown pipe table was authored",
+  "content_review": "Independent read-only review found no mandatory defect; clarified MacroGrid exposure ownership and optional supplied editing files",
+  "preview": "http://127.0.0.1:4176/",
+  "limits": [
+    "Report consumes source-bound conclusions and does not run a solver or V&V verdict.",
+    "No new native COMSOL solve; current same-seed A/P replay is not a new independent Monte Carlo sample.",
+    "Qualified numerical/native parity and physical adhesion remain outside the reported certification scope.",
+    "No publication, sharing, offline export or whole-runtime interaction sweep was performed."
+  ]
+}

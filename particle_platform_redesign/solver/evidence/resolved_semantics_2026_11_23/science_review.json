@@ -1,0 +1,194 @@
+{
+  "status": "INDEPENDENT_REVIEW_CLOSED",
+  "scope": "Current dirty implementation scientific/numerical review, small public cases and read-only reaggregation. No full native COMSOL parity or physical adhesion certification.",
+  "base_head": "824a7ac8df1e4d69f9fc17f8fa3f7b27598af290",
+  "tool_revision": "deterministic_pre_event_trajectory_v5",
+  "source_sha256": {
+    "src/chamber_particles/engine.py": "78a39e8aeb03e8535aa2dfb5c35366d96f5bdf94f24fa54af5d7cc172b38e2bc",
+    "src/chamber_particles/transport.py": "67cfd8083603921116a05eab45d639982415660a6d32092d4dee9d5b89d623f7",
+    "src/chamber_particles/cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+    "src/chamber_particles/lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+    "src/chamber_particles/time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+    "src/chamber_particles/fields.py": "08f83de33fe45f7aef9426faf540631cc1b27eef80640baecc37382c1ae577f4",
+    "src/chamber_particles/physics/catalog.py": "76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d",
+    "src/chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+    "src/chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+    "src/chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "8de218808679b61b36ec997285722baff328ab2b23fcf2ee6d057d60be6375da"
+  },
+  "changed_reviewed_sources_since_initial_receipt": [
+    "tools/vv/comsol/evaluate_matched_trajectory.py"
+  ],
+  "current_independent_reaggregation": {
+    "accepted_partition_v2": {
+      "macro": "SUPPORTED",
+      "fixed_root": "NOT_TESTED",
+      "observed_order": "NOT_TESTED",
+      "self": "NOT_TESTED",
+      "raw_medium_fine_max": {
+        "position": 0.0,
+        "velocity": 0.0,
+        "charge": 0.0
+      },
+      "descriptive_pair": "PASS",
+      "qualified_pair": "NOT_TESTED",
+      "qualification_issues": [],
+      "raw_metrics_unchanged_from_original_witness": true
+    },
+    "accepted_partition_rk4": {
+      "macro": "SUPPORTED",
+      "fixed_root": "NOT_TESTED",
+      "observed_order": "NOT_TESTED",
+      "self": "NOT_TESTED",
+      "raw_medium_fine_max": {
+        "position": 0.0,
+        "velocity": 0.0,
+        "charge": 0.0
+      },
+      "descriptive_pair": "PASS",
+      "qualified_pair": "NOT_TESTED",
+      "qualification_issues": [],
+      "raw_metrics_unchanged_from_original_witness": true
+    },
+    "accepted_partition_refined": {
+      "macro": "SUPPORTED",
+      "fixed_root": "SUPPORTED",
+      "observed_order": "SUPPORTED",
+      "self": "FAIL",
+      "raw_medium_fine_max": {
+        "position": 1.2782349068096721e-08,
+        "velocity": 1.2090346716911449e-06,
+        "charge": 0.0
+      },
+      "descriptive_pair": "PASS",
+      "qualified_pair": "NOT_TESTED",
+      "qualification_issues": [],
+      "raw_metrics_unchanged_from_original_witness": true
+    },
+    "witness": {
+      "macro": "NOT_TESTED",
+      "fixed_root": "SUPPORTED",
+      "observed_order": "NOT_TESTED",
+      "self": "NOT_TESTED",
+      "raw_medium_fine_max": {
+        "position": 0.0,
+        "velocity": 0.0,
+        "charge": 0.0
+      },
+      "descriptive_pair": "PASS",
+      "qualified_pair": "NOT_TESTED",
+      "qualification_issues": []
+    }
+  },
+  "code_judgment": "Known deterministic engine/proposal/event/path contracts plus whole-run zero adaptation/interactions/failures are a sufficient conservative link from the macro grid to accepted particle integration intervals. Positive global work is not localized to the selected window; unknown contract remains NOT_TESTED. Both self qualification and observed order now consume this prerequisite; raw/practical gates remain independent.",
+  "closed_findings": [
+    {
+      "id": "global-vs-window macro refinement",
+      "evidence": "witness_closure.json",
+      "status": "RESOLVED: selected 64/64/64 identical partitions remain macro/self NOT_TESTED despite 66/68/72 whole-run counts"
+    },
+    {
+      "id": "exact constant zero nonnegative coefficient",
+      "evidence_before": "zero_alpha/check.json",
+      "evidence_after": "zero_alpha/resolved-check.json",
+      "status": "RESOLVED: saved public check and run succeeded, no epsilon/floor/clamp; analytic charge error 0"
+    },
+    {
+      "id": "macro-vs-accepted-root qualification",
+      "evidence": [
+        "accepted_partition_v2_closure.json",
+        "accepted_partition_rk4_closure.json",
+        "accepted_partition_refined_closure.json"
+      ],
+      "status": "RESOLVED: reused original public results independently; both plateau cases qualify neither fixed roots nor self/order, genuine root-refined control remains eligible and correctly fails tight self budget"
+    }
+  ],
+  "previously_executed_independent_checks": [
+    {
+      "kind": "existing independent/scientific tests",
+      "count": 5,
+      "elapsed_s": 5.78,
+      "coverage": "OU covariance/conditioning, prescribed stage algebra/bounds, Decimal charge invariant, public OU/linear charge limit, isotropic distribution"
+    },
+    {
+      "kind": "existing independent/scientific tests",
+      "count": 11,
+      "elapsed_s": 21.64,
+      "coverage": "Coupled RK4/exp midpoint matrix convergence; charge cap vs uncapped charge/Z2 ion; 5-hit XY/RZ remainders; Epstein Maxwellian velocity integral; explicit Coulomb/buoyancy expectations"
+    },
+    {
+      "kind": "existing scenario tests",
+      "count": 2,
+      "elapsed_s": 13.8,
+      "coverage": "RZ axis fold then wall and remaining time; output/workers preserve prescribed noisy accepted state"
+    },
+    {
+      "kind": "fresh public 3-level macro witness",
+      "evidence": "witness/witness.json",
+      "whole_run_macro_counts": [
+        66,
+        68,
+        72
+      ],
+      "selected_window_interval_counts": [
+        64,
+        64,
+        64
+      ],
+      "macro_resolution": "NOT_TESTED",
+      "self_resolution": "NOT_TESTED",
+      "maximum_selected_interval_s": 0.00390625,
+      "interpretation": "P2 false prerequisite fixed. Zero differences on identical window partitions do not qualify refinement; no full qualified parity verdict fabricated."
+    },
+    {
+      "kind": "constant-E analytic public output",
+      "evidence": "constant_electric_analytic.json",
+      "maximum_position_abs_error_m": 1.3600232051658168e-15,
+      "velocity_charge_error": 0.0
+    },
+    {
+      "kind": "clock refactor preservation",
+      "evidence": "macro_clock_preservation.json",
+      "random_grids": 1000,
+      "macro_intervals": 69840,
+      "mismatches": 0,
+      "interpretation": "Comparison to base824 arithmetic, not an independent accuracy proof."
+    },
+    {
+      "kind": "resolved valid zero coefficient regression",
+      "before": "zero_alpha/check.json",
+      "after": "zero_alpha/resolved-check.json",
+      "public_check": "accepted",
+      "public_simulate_failures": 0,
+      "linear_charge_analytic_abs_error": 0.0
+    }
+  ],
+  "implementation_owner_checks_not_rerun_by_this_reviewer": {
+    "receipt": ".artifacts/fixed_root_evaluator_v5_20261123/receipt.json",
+    "tests": "21 passed / 16.03 s",
+    "ruff": "PASS",
+    "pyrefly": "0 errors"
+  },
+  "parent_checks_not_claimed_as_own_execution": [
+    "full external suite currently being reexecuted by root",
+    "full core/scenario suite and A/P full result regeneration"
+  ],
+  "not_executed_in_this_review": [
+    "new native COMSOL solves",
+    "full Vigus/native numerical convergence campaign",
+    "complete stochastic path/mesh/ensemble qualification",
+    "full qualified_solver_parity comparison with native semantic inventory"
+  ],
+  "outstanding_mandatory_findings": [],
+  "scores": {
+    "research_alpha_scientific_reliability": 88,
+    "full_numerical_qualification_maturity": 62,
+    "meaning": "Subjective review rubric, not a physical-accuracy percentage."
+  },
+  "limits": [
+    "Zero-counter prerequisite is deliberately sufficient rather than necessary: otherwise useful runs with adaptation elsewhere may retain unqualified numerical roots.",
+    "Existing macro sensitivity and practical result comparisons remain useful independently.",
+    "A/P retained practical conclusions do not certify numerical native all-equation parity, individual Brownian paths or physical capture laws.",
+    "Independent scientific tests, exact equations and actual execution remain distinct from owner reports and preserved history."
+  ]
+}

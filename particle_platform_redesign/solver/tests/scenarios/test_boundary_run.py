@@ -73,8 +73,7 @@ def test_c07_stick_event_and_terminal_state_are_published_by_public_api(
         "line_quadratic_curved_capsule_periodic_first_hit_v23"
     )
     assert result.manifest["boundary_algorithm_revision"] == "contact_wall_laws_v8"
-    memory_plan = result.manifest["memory_plan"]
-    assert isinstance(memory_plan, dict)
+    memory_plan = result.manifest_document()["memory_plan"]
     assert memory_plan["geometry_preparation_transient_bytes"] > 0
     assert memory_plan["components"]["prepared_geometry"] > 0
 

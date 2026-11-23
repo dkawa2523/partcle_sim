@@ -58,6 +58,13 @@ readerの検証中に必要なgeometry一時配列もprepare/writer峰値へ計�
 結果だけで形状付き表示・source/boundaryの意味の確認ができますが、背景場を持たないcontextだけで元計算を再実行することはできません。
 旧result3のcompleted/partialは受理せず、checkpoint配列schemaが2でもresult version4を要求します。
 
+`ResultView.manifest`はobjectをread-only mapping、arrayをtupleとする再帰的なimmutable snapshotです。
+serializationや利用者の編集には`manifest_document()`で独立したJSON documentを取得します。
+`manifest_sha256`は読込み時のcanonical JSON（UTF-8、sorted keys、compact separators）へbindし、
+`source_identity()`は派生結果の共通receiptを返します。返されたdocument/receiptの編集は元のviewへ影響しません。
+粒子lifecycleのcode/name/basic terminal分類は`chamber_particles.lifecycle`が所有し、
+集計上の付着、first wall hit、field support、数値精度やrun integrityとは区別します。
+
 ## `segments/epoch-NNNNNN.h5`
 
 root attributeは次のとおりです。
@@ -196,6 +203,12 @@ checkpoint schema versionは2です。commit IDが偶数なら`A.h5`、奇数な
 置換します。checkpointは次のaccepted macro barrierから再開するためのmutable solver stateだけを保存し、
 完成resultの科学datasetを複製しません。
 
+永続particle列の型、shape、finite条件は`cpu.PersistentParticleState`の一つの宣言が所有し、
+resident `ParticleState`、checkpointへのprojection、HDF5の列I/O・layout検査が同じ宣言を使います。
+`CheckpointState`はこのparticle snapshotと親時計・cursor・統計・field hintを組み合わせます。
+active maskは保存せず、sorted active indexから再構成してlifecycleへ照合します。
+writerによる構造検査と、engineによるschedule/cursor/hintの意味検査は別の責務です。
+
 ```text
 attributes:
   checkpoint_schema_version, result_schema_version, result_algorithm_revision
@@ -296,12 +309,17 @@ manifestは少なくとも次を記録します。
   Maxwell wallとBrownian root/splitに限定する
 - BrownianではRNG、joint OU、conditional split、tree policyのrevision、base/max depth、root/split draw kind、
   macro-root coefficient policy
-- requested/resolved integrator、backend、seed、path kind、`maximum_dt_charge_lipschitz`、
+- requested/resolved integrator、backend、seed、path kind、
   physics model revision、required field binding
 - contextのpath、canonical content hash、file SHA-256
 - source ID/name/type、解決済みboundary law・priority・fallback law・反発係数・付着確率
-- start/end/dt、field snapshotによる追加macro split時刻、YAML順の`source_id_to_name`
+- start/end/dt、親時計の`macro_grid_revision`、field snapshotによる追加macro split時刻、YAML順の`source_id_to_name`
 - resolved event設定。一般RK4材料boundary経路ではaccepted particle-piece、candidate query、refinement、最大深さの集約
+- `numerical_work_policy`：proposal/certificate/coefficient guard/residualの解決済みwork上限、容量、停止意味。
+  既存event設定の用途を区別するもので、実際の精度や到達depthを表さない
+- `prepared_stability_upper_bounds`：要求base dtと全必須field域の準備済み上界による
+  `dt_times_drag_velocity_lipschitz`、`dt_times_charge_lipschitz`。
+  実accepted stepで観測した最大値や精度推定ではなく、field knots等で実区間が短くても保守的gateを緩和しない
 - wall event、residual split、RZ axis crossingの集約
 - solver-owned memory plan revision、semantics、limit/planned bytes、slab幅、phase peak、component内訳
 - 実行資源のworkers/process policy。数値設定、particle IDやRNG keyとは分けて記録する

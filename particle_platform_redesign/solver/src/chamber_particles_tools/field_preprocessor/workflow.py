@@ -94,34 +94,34 @@ class PreprocessorSpecification:
 
 def preprocess_from_configuration(
     configuration_path: str | Path,
-    output_path: str | Path,
+    output_directory: str | Path,
     *,
-    report_path: str | Path | None = None,
     source_time_diagnostic_requested: bool = False,
 ) -> dict[str, object]:
-    """Resample selected fields and atomically publish a new canonical bundle."""
+    """Publish a resampled canonical bundle and receipt in a fresh directory."""
+
+    from ..bundle_publication import bundle_publication
 
     configuration = Path(configuration_path).expanduser().resolve()
-    output = Path(output_path).expanduser().resolve()
-    report = Path(report_path).expanduser().resolve() if report_path is not None else None
-    if report == output:
-        raise ValueError("report_path and output_path must be different")
+    output = Path(output_directory).expanduser().resolve()
     if output.exists():
         raise FileExistsError(output)
-    if report is not None and report.exists():
-        raise FileExistsError(report)
     raw = configuration.read_bytes()
     if type(source_time_diagnostic_requested) is not bool:
         raise ValueError("source_time_diagnostic_requested must be a boolean")
     specification = parse_configuration(raw, base_directory=configuration.parent)
     configuration_sha256 = f"sha256:{hashlib.sha256(raw).hexdigest()}"
-    result = _preprocess(
-        specification, configuration_sha256, output, source_time_diagnostic_requested
-    )
-    if report is not None:
-        report.parent.mkdir(parents=True, exist_ok=True)
-        with report.open("x", encoding="utf-8", errors="strict") as stream:
-            stream.write(json.dumps(result, allow_nan=False, indent=2, sort_keys=True) + "\n")
+    with bundle_publication(output) as staging:
+        result = _preprocess(
+            specification,
+            configuration_sha256,
+            staging / "bundle.h5",
+            source_time_diagnostic_requested,
+        )
+        result["output_path"] = str(output / "bundle.h5")
+        (staging / "report.json").write_text(
+            json.dumps(result, allow_nan=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
     return result
 
 
@@ -408,7 +408,7 @@ def _certify_solver_ready_cache(data: DataBundle, fields: list[FieldData]) -> No
             unit=field.unit,
             components=field.components,
             stored_basis=field.stored_basis,
-            positive=False,
+            value_constraint="finite",
         )
         for field in fields
     }

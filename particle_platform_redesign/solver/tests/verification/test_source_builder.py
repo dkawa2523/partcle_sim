@@ -292,7 +292,7 @@ def test_public_case_roundtrip_records_frame_assumption_and_refuses_overwrite(
     recipe.write_text(
         yaml.safe_dump(
             {
-                "format_version": 1,
+                "format_version": 2,
                 "input_bundle": "template.h5",
                 "sources": [{"csv": "rows.csv", "configuration": "config.json"}],
                 "settings": document,

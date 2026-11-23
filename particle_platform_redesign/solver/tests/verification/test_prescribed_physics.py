@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from decimal import Decimal, localcontext
+from pathlib import Path
 
 import numpy as np
 import pytest
+import yaml
 
+from chamber_particles import CaseError, check_case, load_case
+from chamber_particles.case_format import write
 from chamber_particles.physics.catalog import resolve_physics_plan
 from chamber_particles.physics.charge import (
     prescribed_exponential_linear_collection,
@@ -16,6 +21,7 @@ from chamber_particles.physics.runtime import (
     PrimitiveRange,
     prepare_physics_runtime,
 )
+from tests.verification.microcases import materialize_microcase
 
 
 def _models() -> dict[str, dict[str, object]]:
@@ -97,7 +103,11 @@ def _runtime(
     }
     properties.update(changes)
     ranges = {
-        name: PrimitiveRange(value.min(axis=0), value.max(axis=0), value[0])
+        name: PrimitiveRange(
+            value.min(axis=0),
+            value.max(axis=0),
+            value[0] if bool((value == value[0]).all()) else None,
+        )
         for name, value in sampled.items()
     }
     return prepare_physics_runtime(
@@ -272,3 +282,116 @@ def test_prescribed_stage_failures_remain_particle_local() -> None:
     _, noise_status = runtime.brownian_thermal_velocity_variance_batch(indices, sampled)
     assert noise_status[1] != 0
     np.testing.assert_array_equal(noise_status[[0, 2, 3]], np.zeros(3))
+
+
+@pytest.mark.parametrize("name", ["alpha", "Ai", "betaZ"])
+def test_nonnegative_coefficients_accept_zero_and_reject_a_negative_stage_row(name: str) -> None:
+    sampled = _sampled()
+    models = _models()
+    indices = np.arange(4, dtype="<i8")
+    sampled[name][1, 0] = 0.0
+    if name == "Ai":
+        # A zero ion current with a finite electron current need not admit a
+        # finite invariant. Use the independently supported zero-current limit.
+        sampled[name][:, 0] = 0.0
+        models["charge"]["electron_rate_reference_number_s"] = 0.0
+    runtime = _runtime(models, sampled)
+    _, status = runtime.evaluate_batch(indices, np.zeros((4, 2)), np.zeros(4), sampled)
+    np.testing.assert_array_equal(status, np.zeros(4))
+    sampled[name][1, 0] = np.nextafter(0.0, -np.inf)
+    with pytest.raises(PhysicsEvaluationError, match="nonnegative"):
+        _runtime(models, sampled)
+    _, status = runtime.evaluate_batch(indices, np.zeros((4, 2)), np.zeros(4), sampled)
+    assert status[1] != 0
+    np.testing.assert_array_equal(status[[0, 2, 3]], np.zeros(3))
+
+
+def test_velocity_dependent_contribution_prevents_constant_acceleration_specialization() -> None:
+    sampled = _sampled()
+    models = _models()
+    selected: dict[str, dict[str, object]] = {
+        "charge": {"model": "fixed"},
+        "lift": models["lift"],
+    }
+    runtime = _runtime(selected, sampled)
+    assert runtime.constant_acceleration_m_s2 is None
+    indices = np.arange(4, dtype="<i8")
+    zero_velocity = runtime.evaluate(indices, np.zeros((4, 2)), np.zeros(4), sampled)
+    first = zero_velocity.acceleration_m_s2.copy()
+    second = runtime.evaluate(indices, np.ones((4, 2)), np.zeros(4), sampled)
+    assert not np.array_equal(first, second.acceleration_m_s2)
+
+
+def _zero_coefficient_case(directory: Path, coefficient: str, *, constant: bool = True) -> Path:
+    paths = materialize_microcase("C02", directory)
+    case = load_case(paths.case_path)
+    source = case.data.sources[0]
+    scalar = next(field for field in case.data.fields if field.components == ("value",))
+    values = {"c": -1.0, "alpha": 0.5, "Ai": 1.0, "betaZ": 2.0}
+    values[coefficient] = 0.0
+    fields = tuple(
+        replace(
+            scalar,
+            name=name,
+            unit="1/s" if name == "Ai" else "1",
+            values=np.full_like(scalar.values, value),
+        )
+        for name, value in values.items()
+    )
+    if not constant:
+        target = next(field for field in fields if field.name == coefficient)
+        target.values.reshape(-1)[-1] = 0.5
+    info = write(directory / "coefficients.h5", replace(case.data, fields=fields))
+    model = dict(_models()["charge"])
+    model["electron_rate_reference_number_s"] = 2.0 if coefficient == "betaZ" else 0.0
+    model["particle_properties"] = {
+        "mass_kg": float(source.mass_kg[0]),
+        "drag_diameter_m": float(source.drag_diameter_m[0]),
+        "electrostatic_radius_m": float(source.electrostatic_radius_m[0]),
+        "displaced_volume_m3": float(source.displaced_volume_m3[0]),
+    }
+    document = yaml.safe_load(paths.case_path.read_text(encoding="utf-8"))
+    document["case"].update(data_path="coefficients.h5", expected_content_hash=info.content_hash)
+    document["physics"] = {"charge": model}
+    document["time"] = {"start_s": 0.0, "end_s": 0.02, "dt_s": 0.01}
+    document["output"] = {"trajectories": None}
+    paths.case_path.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    return paths.case_path
+
+
+@pytest.mark.parametrize("coefficient", ["alpha", "Ai", "betaZ"])
+def test_public_prepare_accepts_certified_constant_zero_coefficient(
+    tmp_path: Path, coefficient: str
+) -> None:
+    path = _zero_coefficient_case(tmp_path / coefficient, coefficient)
+    assert check_case(load_case(path)).status == "valid"
+
+
+def test_public_prepare_does_not_replace_nonconstant_roundoff_enclosure_with_zero(
+    tmp_path: Path,
+) -> None:
+    path = _zero_coefficient_case(tmp_path / "nonconstant", "alpha", constant=False)
+    with pytest.raises(CaseError, match="nonnegative"):
+        check_case(load_case(path))
+
+
+def test_positive_constant_enclosure_reaches_charge_bound_derivation() -> None:
+    sampled = _sampled()
+    ranges = {name: PrimitiveRange(value[0], value[0], value[0]) for name, value in sampled.items()}
+    ranges["alpha"] = PrimitiveRange(np.asarray([0.49]), np.asarray([0.51]), np.asarray([0.5]))
+    charge = np.asarray([-3.0, -1.0, 0.0, 3.0])
+    runtime = prepare_physics_runtime(
+        plan=resolve_physics_plan(_models(), "cartesian_xy"),
+        coordinate_system="cartesian_xy",
+        mass_kg=np.full(4, 2.0),
+        drag_diameter_m=np.ones(4),
+        electrostatic_radius_m=np.full(4, 0.5),
+        displaced_volume_m3=np.zeros(4),
+        charge_number=charge,
+        primitive_ranges=ranges,
+    )
+    expected = prescribed_exponential_linear_global_bounds(
+        charge, 2.0, (-1.0, -1.0), (0.49, 0.51), (1.0, 1.0), (2.0, 2.0)
+    )
+    assert runtime.charge_bounds is not None
+    assert runtime.charge_bounds.model == expected

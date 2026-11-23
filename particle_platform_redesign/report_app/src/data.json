@@ -4,7 +4,7 @@
   "surface": "report",
   "status": "complete",
   "buildStatus": "complete",
-  "generatedAt": "2026-11-23T01:19:07.772787+00:00",
+  "generatedAt": "2026-11-23T04:03:21.620401+00:00",
   "filters": [],
   "report": {
     "asOf": null,
@@ -13,7 +13,7 @@
   },
   "queries": {
     "case_audit": {
-      "label": "A/P287粒子・候補各40実現",
+      "label": "変更後A/P各40seed再実行・保存native参照",
       "rows": [
         {
           "case": "A",
@@ -26,7 +26,9 @@
           "restricted_mean_active_native_us": 200.3969264894903,
           "restricted_mean_active_candidate_us": 203.4885515137035,
           "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
-          "qualification": "Numerical/native parity and physical adhesion not certified"
+          "qualification": "Numerical/native parity and physical adhesion not certified",
+          "execution_scope": "Current solver replay of the same 40 seeds/window; saved native reference unchanged",
+          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict"
         },
         {
           "case": "P",
@@ -39,12 +41,15 @@
           "restricted_mean_active_native_us": 187.38328244202265,
           "restricted_mean_active_candidate_us": 203.05462371889976,
           "judgment": "大局的な輸送・総停止率・代表時間・人口曲線は実用的に対応",
-          "qualification": "Numerical/native parity and physical adhesion not certified"
+          "qualification": "Numerical/native parity and physical adhesion not certified",
+          "execution_scope": "Current solver replay of the same 40 seeds/window; saved native reference unchanged",
+          "judgment_origin": "Previously reviewed practical interpretation retained under exact scientific-payload replay; no new confirmatory verdict"
         }
       ],
       "source": {
-        "label": "A/P287粒子・候補各40実現",
+        "label": "変更後A/P各40seed再実行・保存native参照",
         "files": [
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
           "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
           "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
           "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
@@ -53,13 +58,17 @@
         "metricDefinitions": [
           {
             "label": "A/P287粒子・候補各40実現",
-            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged.",
+            "definition": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged. Current solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification.",
             "componentIds": [
               "dataset-role"
             ]
           }
         ],
         "evidenceFlow": [
+          {
+            "title": "Current candidate replay and unchanged native scope",
+            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+          },
           {
             "title": "Exact source identities",
             "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
@@ -69,18 +78,18 @@
             "detail": "Computational particles, weight1. SD is replica SD, not a mean CI. Original windows/clocks retained. Native reference is unchanged."
           },
           {
-            "title": "Current-reader reanalysis, no new replicas",
+            "title": "Historical retirement-reader reanalysis",
             "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       }
     },
     "trajectory_divergence": {
-      "label": "探索的な局所差",
+      "label": "同じ再実行で保持した探索的な局所差",
       "rows": [
         {
           "case": "A",
@@ -120,8 +129,9 @@
         }
       ],
       "source": {
-        "label": "探索的な局所差",
+        "label": "同じ再実行で保持した探索的な局所差",
         "files": [
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json",
           "solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json",
           "solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json",
           "solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json",
@@ -130,13 +140,17 @@
         "metricDefinitions": [
           {
             "label": "探索的な局所差",
-            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations.",
+            "definition": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations. Current solver re-execution uses the same seeds/window and unchanged saved native reference; it is not a new independent Monte Carlo sample or a newly certified numerical qualification.",
             "componentIds": [
               "dataset-role"
             ]
           }
         ],
         "evidenceFlow": [
+          {
+            "title": "Current candidate replay and unchanged native scope",
+            "detail": "{\"receipt\": {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}, \"scope\": \"Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching\"}"
+          },
           {
             "title": "Exact source identities",
             "detail": "[{\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/practical_summary.json\", \"sha256\": \"sha256:04f9b9fb410450f1b8bd88f5a6edd9ccb0795cda793ba9ba262f4e6c88d799b4\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/identity_receipt.json\", \"sha256\": \"sha256:27bd4076fa2d0b5604794a8f9153ad6248baeb060cb45afbf046cfad944a3721\"}, {\"path\": \"solver/evidence/platform_restructure_2026_11_23/science/population_revalidation.json\", \"sha256\": \"sha256:761649f11658611285629a1a7e73d2596358fa2afe7972509cf88585fc698524\"}]"
@@ -146,12 +160,12 @@
             "detail": "Independent Brownian paths; no paired trajectory error. A/P must not be pooled as80 independent realizations."
           },
           {
-            "title": "Current-reader reanalysis, no new replicas",
+            "title": "Historical retirement-reader reanalysis",
             "detail": "15 metric groups per case reproduced exactly; solver/evidence/retirement_2026_11_23/population_recheck.json sha256:060d008d9fb9793d5e6d13f20f1f68099eefa821e56ca9fad265c4cd2c8e22f0"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       }
@@ -179,8 +193,8 @@
         },
         {
           "area": "publication",
-          "decision": "One inputs.create_case publisher",
-          "reason": "Canonical hash and shared check before publication"
+          "decision": "inputs.create_case(bundle, settings, output_directory)",
+          "reason": "One bundle owns source tables; atomic case, editable inputs and producer receipts"
         },
         {
           "area": "native_boundary",
@@ -189,8 +203,13 @@
         },
         {
           "area": "result_reuse",
-          "decision": "Result schema 4 with immutable context.h5",
-          "reason": "Interpret results without original case or background fields"
+          "decision": "Result schema 4, nested immutable manifest and reusable ResultCohort",
+          "reason": "One source identity and exact selected population across analysis/export/view"
+        },
+        {
+          "area": "resolved_ownership",
+          "decision": "Catalog inputs/proof roles; parent clocks and worker numeric settings",
+          "reason": "Stage computability, path proof, global bounds and accuracy remain distinct"
         }
       ],
       "source": {
@@ -202,12 +221,18 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
@@ -233,7 +258,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -263,7 +288,13 @@
           "required_parameters": [
             "model"
           ],
-          "field_parameters": []
+          "field_parameters": [],
+          "required_fields": [],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": true
+          }
         },
         {
           "capability": "charge / plasma_continuous",
@@ -295,7 +326,132 @@
             "positive_ion_number_density_field",
             "positive_ion_temperature_field",
             "positive_ion_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field",
+              "electron_number_density_field",
+              "positive_ion_number_density_field",
+              "electron_temperature_field",
+              "positive_ion_temperature_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "charge / plasma_continuous",
@@ -328,7 +484,132 @@
             "positive_ion_number_density_field",
             "positive_ion_temperature_field",
             "positive_ion_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field",
+              "electron_number_density_field",
+              "positive_ion_number_density_field",
+              "electron_temperature_field",
+              "positive_ion_temperature_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "charge / plasma_continuous",
@@ -364,7 +645,172 @@
             "positive_ion_thermal_voltage_field",
             "positive_ion_velocity_field",
             "screening_length_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "charge / plasma_continuous",
@@ -408,7 +854,263 @@
             "positive_ion_thermal_voltage_field",
             "positive_ion_velocity_field",
             "screening_length_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_negative_ion_mass_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "negative_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_negative_ion_mass_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field",
+              "negative_ion_velocity_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "charge / prescribed_exponential_linear",
@@ -438,7 +1140,102 @@
             "electron_exponent_offset_field",
             "ion_charge_slope_field",
             "ion_rate_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_exponent_offset_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_charge_slope_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_rate_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_charge_slope_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_exponent_offset_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_charge_slope_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_rate_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_charge_slope_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "nonnegative",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "drag / epstein_linear",
@@ -469,7 +1266,108 @@
             "gas_mean_free_path_field",
             "gas_temperature_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_mean_free_path_field",
+              "gas_temperature_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "drag / epstein_linear",
@@ -501,7 +1399,108 @@
             "gas_mean_free_path_field",
             "gas_temperature_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_mean_free_path_field",
+              "gas_temperature_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "drag / epstein_finite_speed",
@@ -532,7 +1531,108 @@
             "gas_mean_free_path_field",
             "gas_temperature_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_mean_free_path_field",
+              "gas_temperature_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "drag / stokes_cunningham",
@@ -560,7 +1660,109 @@
             "gas_dynamic_viscosity_field",
             "gas_mean_free_path_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_mean_free_path_field",
+              "gas_density_field",
+              "gas_dynamic_viscosity_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "drag / prescribed_linear_friction",
@@ -585,7 +1787,60 @@
           "field_parameters": [
             "friction_coefficient_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "friction_coefficient_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "friction_coefficient_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "noise / inertial_langevin_fdt",
@@ -603,7 +1858,13 @@
             "model",
             "revision"
           ],
-          "field_parameters": []
+          "field_parameters": [],
+          "required_fields": [],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "noise / prescribed_force_diffusion",
@@ -625,7 +1886,36 @@
           ],
           "field_parameters": [
             "force_spectral_density_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "force_spectral_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "N^2*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "force_spectral_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "N^2*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "thermophoresis / waldmann_gallis",
@@ -655,7 +1945,110 @@
             "gas_temperature_field",
             "gas_translational_heat_flux_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_translational_heat_flux_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "W/m^2",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_translational_heat_flux_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "W/m^2",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_temperature_field",
+              "gas_mean_free_path_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "thermophoresis / waldmann_gallis",
@@ -686,7 +2079,110 @@
             "gas_temperature_field",
             "gas_translational_heat_flux_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_translational_heat_flux_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "W/m^2",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_translational_heat_flux_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "W/m^2",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_velocity_field",
+              "gas_temperature_field",
+              "gas_mean_free_path_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "thermophoresis / talbot",
@@ -723,7 +2219,155 @@
             "gas_temperature_field",
             "gas_temperature_gradient_field",
             "gas_thermal_conductivity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_gradient_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K/m",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_thermal_conductivity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "W/(m*K)",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_temperature_gradient_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K/m",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_thermal_conductivity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "W/(m*K)",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_temperature_field",
+              "gas_density_field",
+              "gas_dynamic_viscosity_field",
+              "gas_thermal_conductivity_field",
+              "gas_mean_free_path_field",
+              "gas_temperature_gradient_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "ion_drag / barnes_collisionless",
@@ -758,7 +2402,155 @@
             "positive_ion_number_density_field",
             "positive_ion_temperature_field",
             "positive_ion_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_neutral_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_temperature_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "K",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_neutral_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field",
+              "electron_number_density_field",
+              "positive_ion_number_density_field",
+              "electron_temperature_field",
+              "positive_ion_temperature_field",
+              "ion_neutral_mean_free_path_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "ion_drag / screened_collection_orbital",
@@ -792,7 +2584,157 @@
             "positive_ion_thermal_voltage_field",
             "positive_ion_velocity_field",
             "screening_length_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_neutral_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "ion_neutral_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "positive_ion_velocity_field"
+            ],
+            "local_additive_fields": [
+              "positive_ion_number_density_field",
+              "positive_ion_thermal_voltage_field",
+              "positive_ion_velocity_field",
+              "effective_positive_ion_mass_field",
+              "screening_length_field",
+              "ion_neutral_mean_free_path_field"
+            ],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "ion_drag / image_orbital_sensitivity",
@@ -827,7 +2769,172 @@
             "positive_ion_thermal_voltage_field",
             "positive_ion_velocity_field",
             "screening_length_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V/m",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_number_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "positive_ion_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "effective_positive_ion_mass_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electron_thermal_voltage_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "screening_length_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V/m",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "ion_drag / prescribed_charge_polynomial",
@@ -854,7 +2961,86 @@
             "constant_force_field",
             "linear_charge_force_field",
             "quadratic_charge_force_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "constant_force_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "N",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "linear_charge_force_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "N",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "quadratic_charge_force_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "N",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "constant_force_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "N",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "linear_charge_force_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "N",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "quadratic_charge_force_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "N",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "dielectrophoresis / quasistatic_spherical",
@@ -879,7 +3065,38 @@
           ],
           "field_parameters": [
             "gradient_mean_e_squared_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gradient_mean_e_squared_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V^2/m^3",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gradient_mean_e_squared_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V^2/m^3",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": true
+          }
         },
         {
           "capability": "lift / rarefied_vorticity_sensitivity",
@@ -908,7 +3125,61 @@
             "gas_density_field",
             "gas_mean_free_path_field",
             "gas_velocity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "azimuthal_gas_vorticity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": true
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_mean_free_path_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "lift / saffman",
@@ -939,7 +3210,132 @@
             "gas_mean_free_path_field",
             "gas_velocity_field",
             "out_of_plane_gas_vorticity_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "out_of_plane_gas_vorticity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "1/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_dynamic_viscosity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "Pa*s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_mean_free_path_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "out_of_plane_gas_vorticity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "1/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": true
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [
+              "gas_mean_free_path_field",
+              "gas_velocity_field",
+              "gas_density_field",
+              "gas_dynamic_viscosity_field",
+              "out_of_plane_gas_vorticity_field"
+            ],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "lift / prescribed_rotational_lift",
@@ -964,7 +3360,60 @@
           "field_parameters": [
             "gas_velocity_field",
             "rotation_coefficient_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "m/s",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "rotation_coefficient_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_velocity_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "m/s",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "rotation_coefficient_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/s",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": true
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": false
+          }
         },
         {
           "capability": "electric / coulomb",
@@ -986,7 +3435,40 @@
           ],
           "field_parameters": [
             "electric_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V/m",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V/m",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [
+              "electric_field"
+            ],
+            "constant_acceleration": true
+          }
         },
         {
           "capability": "electric / coulomb",
@@ -1009,7 +3491,40 @@
           ],
           "field_parameters": [
             "electric_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "V/m",
+              "components": [
+                "x",
+                "y"
+              ],
+              "stored_basis": "cartesian_xy",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "electric_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "V/m",
+              "components": [
+                "r",
+                "z"
+              ],
+              "stored_basis": "axisymmetric_rz",
+              "value_constraint": "finite",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [
+              "electric_field"
+            ],
+            "constant_acceleration": true
+          }
         },
         {
           "capability": "gravity_buoyancy / standard",
@@ -1032,7 +3547,36 @@
           ],
           "field_parameters": [
             "gas_density_field"
-          ]
+          ],
+          "required_fields": [
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "cartesian_xy",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            },
+            {
+              "parameter": "gas_density_field",
+              "coordinate_system": "axisymmetric_rz",
+              "unit": "kg/m^3",
+              "components": [
+                "value"
+              ],
+              "stored_basis": "scalar",
+              "value_constraint": "positive",
+              "zero_on_rz_axis": false
+            }
+          ],
+          "certificate_roles": {
+            "local_applicability_fields": [],
+            "local_additive_fields": [],
+            "constant_acceleration": true
+          }
         }
       ],
       "source": {
@@ -1044,12 +3588,18 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
@@ -1072,7 +3622,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -1107,8 +3657,13 @@
           "must_not": "Endpoint-only passage, nudge or invented event"
         },
         {
+          "module": "chamber_particles.time_grid / lifecycle / cpu",
+          "owns": "Macro partition/window rules, lifecycle meaning and resident/persistent column declarations",
+          "must_not": "Accuracy verdicts, adhesion claims or duplicated state schemas"
+        },
+        {
           "module": "chamber_particles.engine / transport / execution",
-          "owns": "One engine, parent clocks and exclusive worker slabs",
+          "owns": "One engine; parent clocks/provenance and typed worker settings/exclusive slabs",
           "must_not": "Producer-specific engines or worker HDF5 writers"
         },
         {
@@ -1123,12 +3678,12 @@
         },
         {
           "module": "chamber_particles_tools.analysis / visualization",
-          "owns": "Public ResultView consumers",
+          "owns": "Reusable ResultView/cohort consumers and complete export/view publication",
           "must_not": "Private case access or implicit new simulation"
         },
         {
           "module": "tools/vv / native COMSOL",
-          "owns": "External observation, companions and qualified comparison",
+          "owns": "External native producers/receipts, observation, companions and qualified comparison",
           "must_not": "Normal wheel runtime dependency"
         }
       ],
@@ -1141,12 +3696,18 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
@@ -1164,7 +3725,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -1178,6 +3739,16 @@
     "numerical_contracts": {
       "label": "numerical contracts",
       "rows": [
+        {
+          "topic": "macro/window",
+          "decision": "Shared MacroGrid merges field knots and exposes the actual selected-window partition",
+          "acceptance": "Known-window macro refinement and justified numerical-path refinement are separate prerequisites; nominal dt/global counts certify neither"
+        },
+        {
+          "topic": "primitive/proof",
+          "decision": "Catalog finite/positive/nonnegative inputs and selected model/proof roles",
+          "acceptance": "Separate global/local enclosure from actual-stage sampling and coupled path proof"
+        },
         {
           "topic": "check_case",
           "decision": "Same prepare as simulate; no worker/writer/update",
@@ -1202,6 +3773,11 @@
           "topic": "identity",
           "decision": "Stable particle IDs, physical RNG streams and observation-independent production steps",
           "acceptance": "Worker/tile/output/resume scientific identity"
+        },
+        {
+          "topic": "stability",
+          "decision": "Prepared stability upper bounds use requested dt and global bounds",
+          "acceptance": "Not an observed stage maximum or an accuracy estimate"
         }
       ],
       "source": {
@@ -1213,19 +3789,27 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
             "label": "numerical contracts",
             "definition": "Reviewed current contracts or explicitly unavailable evidence; not an inferred execution result.",
             "componentIds": [
-              "numerics-table"
+              "numerics-table",
+              "complexity",
+              "start-gate"
             ]
           }
         ],
@@ -1236,7 +3820,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -1257,18 +3841,18 @@
         },
         {
           "layer": "ResultView",
-          "contents": "Final, streamed interactions, saved frames/probes and context",
-          "rule": "Public consumer interface; strict result schema 4"
+          "contents": "Final, interactions, saved frames/probes, context and immutable nested manifest",
+          "rule": "manifest_document() copies JSON; source_identity() owns derived receipts; strict result schema 4"
         },
         {
           "layer": "analysis",
-          "contents": "Fates, first hit, terminal and repeated interactions",
-          "rule": "Exact cohort and computational count/weight meaning; no inferred adhesion/flux"
+          "contents": "ResultCohort, fates, first hit, terminal and repeated interactions",
+          "rule": "Reuse final/context and exact selection; computational count/weight, no inferred adhesion/flux"
         },
         {
           "layer": "visualization / report",
           "contents": "Geometry, bounded views and reviewed exported evidence",
-          "rule": "No simulation or invented missing states; presentation stays separate"
+          "rule": "Complete receipt-bound export/view before atomic publication; no invented missing states"
         }
       ],
       "source": {
@@ -1280,12 +3864,18 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
@@ -1304,7 +3894,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -1319,59 +3909,74 @@
       "rows": [
         {
           "package": "利用の一巡",
-          "capability": "wheelの13 CLI操作・5例題と自分のCSV入力",
-          "deliverable": "入力→check/run→元caseなしのJSON/CSV/形状付きSVG",
-          "gate": "checkout外のruntime-only環境で実行成功"
+          "capability": "Windows/Linux wheelで13操作・5例題と独自CSV入力",
+          "deliverable": "入力→check/run→元caseなしのanalysis/export/view",
+          "gate": "文書更新後の同じwheelを両OSで再install・再実行"
         },
         {
-          "package": "現在の性能経路",
-          "capability": "9つのdistinctなworkloadを現行engineで実行",
-          "deliverable": "proposal/memory/JIT/exponential/matrix/representative/Brownian/local applicability/workers",
-          "gate": "全経路の小型実行成功。解析/OU/charge等の独立6確認も別に実行"
+          "package": "9つの性能系列",
+          "capability": "proposal/memory/JIT/exponential/matrix/representative/Brownian/local applicability/workers",
+          "deliverable": "現行sourceの小型実行と独立した数値検査",
+          "gate": "9系列exit0。P14-U release matrixと1M積分は未再実行"
         },
         {
           "package": "1 process / 1万粒子",
-          "capability": "公開API 29.278202 s /320 macro",
-          "deliverable": "入力作成・warmup・検査・hashingは計時外",
+          "capability": "公開API 28.771412 s / 320 macro",
+          "deliverable": "load/simulate/open、spawn/IPC/writer/shutdownを含む",
           "gate": "既知targetへ全粒子capture、failure0、残留child0"
         },
         {
           "package": "4 process / 同一入力",
-          "capability": "公開API 18.353255 s /320 macro",
-          "deliverable": "同条件の1 process比 1.5953倍",
-          "gate": "全emitted science一致。frames/probesなし、各1観測で一般SLAは認定しない"
+          "capability": "公開API 17.400465 s / 320 macro",
+          "deliverable": "同条件の1 process比 1.6535倍、科学payload一致",
+          "gate": "frames/probesなし。各1観測、一般SLAや普遍的speedupの認定なし"
         },
         {
-          "package": "精度と実装identity",
-          "capability": "XY/RZ・time/mesh refinement・解析target・OU/charge",
-          "deliverable": "独立参照と同一出力検査を区別",
-          "gate": "比較値の一致だけで正しさを判断しない"
+          "package": "同一入力のbefore/after",
+          "capability": "owned plan: W1 135.455 MBで不変、W4 432.417→432.355 MB",
+          "deliverable": "同一YAML/H5と条件を確認。各1標本・別session/host負荷",
+          "gate": "速度改善の統計的認定なし。solver-owned予測量はprocess RSSと別",
+          "before_owned_plan_bytes": {
+            "1": 135454767,
+            "4": 432417248
+          },
+          "after_owned_plan_bytes": {
+            "1": 135454767,
+            "4": 432354878
+          }
+        },
+        {
+          "package": "計時の範囲と資源",
+          "capability": "実行前1回serial warmup、入力作成・検証・hashingは計時外",
+          "deliverable": "同じ1万粒子・320 macro・0–4 s。その他小型計時には並行host負荷あり",
+          "gate": "solver-owned memory planはRSSと別。独立収束検査とworker identityも別"
         }
       ],
       "source": {
-        "label": "現行sourceの公開経路・性能実行",
+        "label": "変更後sourceの性能実行と明示した条件",
         "files": [
-          "solver/evidence/retirement_2026_11_23/performance/process_workers.json",
-          "solver/evidence/retirement_2026_11_23/performance/README.md",
-          "solver/evidence/retirement_2026_11_23/installed_workflow.json"
+          "solver/evidence/resolved_semantics_2026_11_23/performance.json",
+          "solver/evidence/resolved_semantics_2026_11_23/performance/process.json",
+          "solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json"
         ],
         "metricDefinitions": [
           {
-            "label": "実行条件と限定",
-            "definition": "Single measured observation per worker count after one untimed serial warmup; public API includes spawn/IPC/writer/shutdown. No frames/probes, no portable SLA.",
+            "label": "変更後sourceの性能実行と明示した条件",
+            "definition": "One observation per worker count after one serial warmup; public API includes load/simulate/open, process team, IPC, writer and shutdown. No frames/probes, no portable throughput SLA. Other small timings may share host load.",
             "componentIds": [
-              "work-package-table"
+              "work-package-table",
+              "implementation-sequence"
             ]
           }
         ],
         "evidenceFlow": [
           {
-            "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/performance/process_workers.json\", \"sha256\": \"sha256:cb66b8251df834db7096af32cb8fa635c9d8034d85974a37e3b068b941c9ca97\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/performance/README.md\", \"sha256\": \"sha256:04497508bbeffeb98db4d32e64ee1f07d169ce66cdd7b3c61edeea3c939fe8fb\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/installed_workflow.json\", \"sha256\": \"sha256:f007273c7b84fe24a8e63efe8fdd0a50a18122c668518efeeb6b49218b5ed48b\"}]"
+            "title": "Exact executed receipt identities",
+            "detail": "[{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/performance.json\", \"sha256\": \"sha256:2fb79a1dc72dc594b13d0159010b4d41ff422d2ce827ee948b3bc4f8a811ef60\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/performance/process.json\", \"sha256\": \"sha256:95eb794a05a932419fbf1343c6c19230a34bedbf46cf3d939dec68b569343da8\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json\", \"sha256\": \"sha256:7c6d69a793576fe2d2e6c7ffd6bd56e48fd848c234bdad8d0d7680107a90dd0f\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       }
@@ -1380,71 +3985,82 @@
       "rows": [
         {
           "severity": "passed",
-          "finding": "現行経路のcore/scenario全体1,190件と最終event62件",
-          "disposition": "独立レビューで復元した2件を含む現行collectionは1,192件。全体実行と追加確認を区別",
-          "evidence": "verification.json"
+          "finding": "標準品質gate合格・core/scenario 1227件",
+          "disposition": "最終sourceで全件実行。invalid-budget probeの期待overflow warningを実計算のwarningと区別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         },
         {
           "severity": "passed",
-          "finding": "隔離した予定commitで外部134件",
-          "disposition": "native小型参照・ログを同梱。原MPHや旧campaignへ依存しない",
-          "evidence": "verification.json"
+          "finding": "変更後の外部V&V tests 146件",
+          "disposition": "native小型参照・比較器・独立衝突参照の検査。全native方程式や実装置の認定とは別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         },
         {
           "severity": "passed",
-          "finding": "wheelだけの13操作・5例題と自分のCSV入力",
-          "disposition": "元caseなしの結果再利用、console/module/Python、process科学一致とcleanup",
-          "evidence": "installed_workflow.json / clean_wheel.json"
+          "finding": "Windows/Linux clean wheel: 各49 Python filesとMETADATA一致",
+          "disposition": "同じwheelで四API、console/module、workers2科学payload一致、contact/time-fieldを実行。一般性能SLAは対象外",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         },
         {
           "severity": "passed",
-          "finding": "native/解析参照でXY・RZ・曲線壁を再実行",
-          "disposition": "RZ132/132。意味とcoverageを限定した科学検査",
-          "evidence": "vv/README.md"
+          "finding": "Windows/Linuxのruntime-only環境で13操作と5例題",
+          "disposition": "checkoutをimportせず独自CSV入力→計算→元caseなしの解析/export/view。両環境のreceiptを区別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         },
         {
           "severity": "passed",
-          "finding": "独立衝突積分・jumpと平均則を照合",
-          "disposition": "2条件、20万jump、1万interval。関連7件成功",
-          "evidence": "gas_collision/README.md"
+          "finding": "独自CSV・複数source・明示table削減・cohort再利用を実行",
+          "disposition": "入力→run→analysis/export/view、cache/electrostaticのbundle+reportを確認。利用者reviewの必須指摘なし",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "reviewed",
+          "finding": "利用者・構造・科学の独立reviewに未解決の必須指摘なし",
+          "disposition": "macro/実再積分pathの前提不足はNOT_TESTED。raw/practical比較は各scopeで有用。review scoreは物理精度率ではない",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         },
         {
           "severity": "passed",
-          "finding": "必要な数値確認を現行kernelへ移し旧経路を撤去",
-          "disposition": "残存数値定義のAST不変を独立確認。時区間・遠方facetの2回帰を復元",
-          "evidence": "independent_review.json / scientific_review.json"
+          "finding": "A/P各40seedを現行solverで再実行、科学payload 80/80一致",
+          "disposition": "保存native参照は不変。同じseed/windowの再実行で新標本ではない。実用的population対応と局所留保を保持",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json"
         },
         {
           "severity": "not_certified",
-          "finding": "全native方程式・乱数path・実機付着量は認定外",
-          "disposition": "A/P40実現の実用比較と局所留保を保持。新しい標本とは数えない",
-          "evidence": "population_recheck.json"
+          "finding": "全native方程式・連続OU first passage・実機付着量は認定外",
+          "disposition": "実用的population対応、数値資格、装置妥当性を区別。今回の実行scopeを越えたPASSは補わない",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
         }
       ],
       "source": {
-        "label": "現行整理後の実行・独立レビュー",
+        "label": "変更後sourceで実行した検査と明示した限界",
         "files": [
-          "solver/evidence/retirement_2026_11_23/verification.json",
-          "solver/evidence/retirement_2026_11_23/independent_review.json",
-          "solver/evidence/retirement_2026_11_23/scientific_review.json"
+          "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json",
+          "solver/evidence/resolved_semantics_2026_11_23/verification.json",
+          "solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json",
+          "solver/evidence/resolved_semantics_2026_11_23/numerical_qualification_fix.json",
+          "solver/evidence/resolved_semantics_2026_11_23/reviews.json",
+          "solver/evidence/resolved_semantics_2026_11_23/science_review.json",
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json"
         ],
         "metricDefinitions": [
           {
-            "label": "現行整理後の実行・独立レビュー",
-            "definition": "Source-bound executed checks; counts have distinct scopes. No historical result is promoted to current certification.",
+            "label": "変更後sourceで実行した検査と明示した限界",
+            "definition": "Executed current-source scopes are separate observations; counts are not an accuracy score or general qualification. Historical receipts never supply a current PASS.",
             "componentIds": [
-              "quality-table"
+              "quality-table",
+              "dataset-role"
             ]
           }
         ],
         "evidenceFlow": [
           {
-            "title": "Exact source identities",
-            "detail": "[{\"path\": \"solver/evidence/retirement_2026_11_23/verification.json\", \"sha256\": \"sha256:305e9e44464845f873ab5493e309418490f23f85d57e1b72a0a7d74e9455b22e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/independent_review.json\", \"sha256\": \"sha256:61b6040fbfda249cb7fcf91934a31cad1c0309608a0013cbe0742fcb2232052e\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/scientific_review.json\", \"sha256\": \"sha256:f02263d620c85879c59a85135303086621531dcef1a123c27d8ab9676c7158ca\"}]"
+            "title": "Exact executed receipt identities",
+            "detail": "[{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json\", \"sha256\": \"sha256:3baf2c2e9aa901d59cf82277d124c7b341376d43ec5e2486589c21cece82f8d6\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/verification.json\", \"sha256\": \"sha256:795ad8ca202fb6e17d63ed1caa3823223e3ab2a2547300deee6c93585e6c5b17\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json\", \"sha256\": \"sha256:7c6d69a793576fe2d2e6c7ffd6bd56e48fd848c234bdad8d0d7680107a90dd0f\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/numerical_qualification_fix.json\", \"sha256\": \"sha256:a5d7c4ff1e791feb97aa4a9346813451d1feabd416a36c2508e1a21f39700578\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/reviews.json\", \"sha256\": \"sha256:5e96c20f67c0989515f679afa8ba40aff6a4448dfffeb389bc3849b9df56aab2\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/science_review.json\", \"sha256\": \"sha256:d08a709c3459f0282d87c9e2f13a0566402560de9b5ebff3a184f9be90ba14fb\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}]"
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       }
@@ -1478,12 +4094,18 @@
           "implementation_plan.md",
           "vv_methodology.md",
           "solver/pyproject.toml",
+          "solver/README.md",
           "solver/docs/case_format_v3.md",
           "solver/docs/result_format_v4.md",
           "solver/docs/physics_models.md",
           "solver/docs/numerics.md",
           "solver/src/chamber_particles/physics/catalog.py",
-          "solver/src/chamber_particles_tools/inputs.py"
+          "solver/src/chamber_particles/time_grid.py",
+          "solver/src/chamber_particles/lifecycle.py",
+          "solver/src/chamber_particles/output.py",
+          "solver/src/chamber_particles_tools/inputs.py",
+          "solver/src/chamber_particles_tools/bundle_publication.py",
+          "solver/src/chamber_particles_tools/selection.py"
         ],
         "metricDefinitions": [
           {
@@ -1505,7 +4127,7 @@
           },
           {
             "title": "Bound authority snapshot and catalog",
-            "detail": "{\"catalog_sha256\": \"sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44\"}, {\"path\": \"solver/evidence/retirement_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9\"}]}"
+            "detail": "{\"catalog_sha256\": \"sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400\", \"authorities\": [{\"path\": \"AGENTS.md\", \"sha256\": \"sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72\"}, {\"path\": \"product_specification.md\", \"sha256\": \"sha256:90234d3cdf0063602c6862f77a29e0cc2085ad497b275b6e1ee77b94e1ab9f86\"}, {\"path\": \"architecture_proposal.md\", \"sha256\": \"sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8\"}, {\"path\": \"implementation_plan.md\", \"sha256\": \"sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377\"}, {\"path\": \"vv_methodology.md\", \"sha256\": \"sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb\"}, {\"path\": \"solver/pyproject.toml\", \"sha256\": \"sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae\"}, {\"path\": \"solver/README.md\", \"sha256\": \"sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5\"}, {\"path\": \"solver/docs/case_format_v3.md\", \"sha256\": \"sha256:7ceef6604bf57c216c52245a5d0ed4f65472c377b4b45394c1351c52507b1d05\"}, {\"path\": \"solver/docs/result_format_v4.md\", \"sha256\": \"sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f\"}, {\"path\": \"solver/docs/physics_models.md\", \"sha256\": \"sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0\"}, {\"path\": \"solver/docs/numerics.md\", \"sha256\": \"sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc\"}, {\"path\": \"solver/src/chamber_particles/physics/catalog.py\", \"sha256\": \"sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d\"}, {\"path\": \"solver/src/chamber_particles/time_grid.py\", \"sha256\": \"sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad\"}, {\"path\": \"solver/src/chamber_particles/lifecycle.py\", \"sha256\": \"sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc\"}, {\"path\": \"solver/src/chamber_particles/output.py\", \"sha256\": \"sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5\"}, {\"path\": \"solver/src/chamber_particles_tools/inputs.py\", \"sha256\": \"sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d\"}, {\"path\": \"solver/src/chamber_particles_tools/bundle_publication.py\", \"sha256\": \"sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f\"}, {\"path\": \"solver/src/chamber_particles_tools/selection.py\", \"sha256\": \"sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01\"}], \"optional_inputs\": [{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json\", \"sha256\": \"sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json\", \"sha256\": \"sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json\", \"sha256\": \"sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031\"}]}"
           }
         ]
       },
@@ -1521,12 +4143,12 @@
     "snapshot_revision": "platform_design_report_v1",
     "producer": {
       "path": "analysis/build_report_snapshot.py",
-      "sha256": "sha256:580e5b6e875d958af3b339d2fe5a3743a219365111c26e66ef297c2cb32d47d7"
+      "sha256": "sha256:75517059896f95cdd6382be963208cc9f5afa46c0ed5c0539ac9949563884757"
     },
     "authorities": [
       {
         "path": "AGENTS.md",
-        "sha256": "sha256:21186c6547f4e678fbcd49e7eab36e37c7165358243bdb0bf4fa1f4b9c9d9fda"
+        "sha256": "sha256:6ab487e05c2ae6cca2e5f46c003139b03341882a5746787f716a371da942ba72"
       },
       {
         "path": "product_specification.md",
@@ -1534,19 +4156,23 @@
       },
       {
         "path": "architecture_proposal.md",
-        "sha256": "sha256:89bd2ab9fca014bea58d69cd6ce9536ff64d28ea589d2da589c1acb3c4291858"
+        "sha256": "sha256:86b608a9ae578752f1a63adffad9764e0db876c10b4df896f18e732e49b519e8"
       },
       {
         "path": "implementation_plan.md",
-        "sha256": "sha256:5f575f86cdead3efee8dce04bdc9c2488e09323320f6424b9ad4978ebcbd2931"
+        "sha256": "sha256:f6e92c6db32ed8ae600808a327b4189c708cb365a4e2e1ad974fbc6ff7c79377"
       },
       {
         "path": "vv_methodology.md",
-        "sha256": "sha256:753cd5a75301b90b38f47fbccb417b32d4d7db449dc4c341b63b899adc155e2b"
+        "sha256": "sha256:c4c8152950dec398d05866f311b721aa6a96cd4d4f70137b36e213293d1ce7cb"
       },
       {
         "path": "solver/pyproject.toml",
-        "sha256": "sha256:dc9eed0c4963ed9c17b44a02f44df5b992ee425386bd1a4808730d7f929adfd3"
+        "sha256": "sha256:5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae"
+      },
+      {
+        "path": "solver/README.md",
+        "sha256": "sha256:4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5"
       },
       {
         "path": "solver/docs/case_format_v3.md",
@@ -1554,40 +4180,60 @@
       },
       {
         "path": "solver/docs/result_format_v4.md",
-        "sha256": "sha256:6d88948bb59bc3f90c369f4b2b821ca764958a78a3a08f87344452f7ae3d982c"
+        "sha256": "sha256:c264477d0ed6c803bce8039ba6b0e8e217d0a25503c9aae05bb94238b7ddfb7f"
       },
       {
         "path": "solver/docs/physics_models.md",
-        "sha256": "sha256:88aa601b82af81000e04d71efd97f7cf464d17185e58b7459cf5ac6f858a45e9"
+        "sha256": "sha256:f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0"
       },
       {
         "path": "solver/docs/numerics.md",
-        "sha256": "sha256:31e5ddcb118dafa8b062c9a7ac0ec000d4c9bc758c87a5f5d8f0ff8189174856"
+        "sha256": "sha256:641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc"
       },
       {
         "path": "solver/src/chamber_particles/physics/catalog.py",
-        "sha256": "sha256:f17a17bd73ef53cb57af80d321d03e8743b25666174835d4e052a0839c0f203d"
+        "sha256": "sha256:76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d"
+      },
+      {
+        "path": "solver/src/chamber_particles/time_grid.py",
+        "sha256": "sha256:6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad"
+      },
+      {
+        "path": "solver/src/chamber_particles/lifecycle.py",
+        "sha256": "sha256:f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc"
+      },
+      {
+        "path": "solver/src/chamber_particles/output.py",
+        "sha256": "sha256:85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5"
       },
       {
         "path": "solver/src/chamber_particles_tools/inputs.py",
-        "sha256": "sha256:48220e4222e0bbb7f23613f62389164beb6b9279c38e72f306b58ef58507c863"
+        "sha256": "sha256:0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d"
+      },
+      {
+        "path": "solver/src/chamber_particles_tools/bundle_publication.py",
+        "sha256": "sha256:62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f"
+      },
+      {
+        "path": "solver/src/chamber_particles_tools/selection.py",
+        "sha256": "sha256:c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01"
       }
     ],
-    "catalog_sha256": "sha256:97d757c40c6c8f714559e438657390715801073b322094bba2a8548b5fe72002",
+    "catalog_sha256": "sha256:5cdde9da447a2c00a01fdeca6cdf885dc9613b15e8994875481f298fcd0b6400",
     "optional_inputs": [
       {
-        "path": "solver/evidence/retirement_2026_11_23/report_inputs/assessment.json",
-        "sha256": "sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3"
+        "path": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json",
+        "sha256": "sha256:8b0833f7bed9acc13102d4c2a195fc12c6eb9379383a75285c084fb8b294bfd7"
       },
       {
-        "path": "solver/evidence/retirement_2026_11_23/report_inputs/quality.json",
-        "sha256": "sha256:3bf773e6282b9eb6f74974bc651f3caf3f1b44c725b5f6d535b54c29b9612c44"
+        "path": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/quality.json",
+        "sha256": "sha256:43a8c6ace6a3bbf9ac6f2165b66971ee26936b14bc8f8c99eb83478ed335c893"
       },
       {
-        "path": "solver/evidence/retirement_2026_11_23/report_inputs/performance.json",
-        "sha256": "sha256:680f34159c0491d81585647e60010b8bd39270d86c312759f2ebc1620c0fdfb9"
+        "path": "solver/evidence/resolved_semantics_2026_11_23/report_inputs/performance.json",
+        "sha256": "sha256:4cbe4887f86b60e77649b993853ea99a1c12e8378a9fdb6f144bbca40fc8b031"
       }
     ],
-    "optional_evidence_policy": "Missing is unavailable, never zero; source receipts do not imply rerunning scientific calculations"
+    "optional_evidence_policy": "Missing is unavailable, never zero; snapshot generation does not run scientific calculations, and imported receipts retain their declared execution scope"
   }
 }

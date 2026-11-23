@@ -253,7 +253,7 @@ def test_canonical_workflow_preserves_input_and_adds_particle_ready_fields(
 ) -> None:
     source = tmp_path / "thermal.h5"
     output = tmp_path / "augmented.h5"
-    report = tmp_path / "builder-report.json"
+    report = output / "report.json"
     write(source, _thermal_bundle())
     config = tmp_path / "builder.yaml"
     config.write_text(_configuration_text(source.name), encoding="utf-8")
@@ -261,8 +261,8 @@ def test_canonical_workflow_preserves_input_and_adds_particle_ready_fields(
     checked = check_from_configuration(config)
     assert checked["status"] == "checked"
     assert not output.exists()
-    summary = build_from_configuration(config, output, report_path=report)
-    built = read(output)
+    summary = build_from_configuration(config, output)
+    built = read(output / "bundle.h5")
     fields = {field.name: field for field in built.fields}
 
     assert summary["status"] == "complete"
@@ -374,10 +374,10 @@ def test_builder_rejects_unprescribed_perimeter_even_when_all_nodes_are_fixed(
         encoding="utf-8",
     )
     output = tmp_path / "augmented.h5"
-    report = tmp_path / "report.json"
+    report = output / "report.json"
 
     with pytest.raises(ValueError, match=r"non-axis perimeter.*potential"):
-        build_from_configuration(config, output, report_path=report)
+        build_from_configuration(config, output)
 
     assert not output.exists()
     assert not report.exists()
@@ -420,7 +420,7 @@ def test_builder_axis_facets_do_not_impose_a_material_groups_potential(tmp_path:
         )
         output = tmp_path / f"augmented-{include_axis}.h5"
         build_from_configuration(configuration, output)
-        built = read(output)
+        built = read(output / "bundle.h5")
         potentials.append(
             next(field.values for field in built.fields if field.name == "electric_potential")
         )

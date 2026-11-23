@@ -1,0 +1,66 @@
+{
+  "tool_revision": "deterministic_pre_event_trajectory_v5",
+  "scope": "Read-only re-evaluation of three independently executed saved review witnesses; same participant on both sides isolates the self-resolution prerequisite, with no native parity claim.",
+  "self_budget": "Original witness diagnostic absolute SI allowance 1e-12; no physical confirmation claim.",
+  "source_sha256": {
+    "tools/vv/comsol/evaluate_matched_trajectory.py": "8de218808679b61b36ec997285722baff328ab2b23fcf2ee6d057d60be6375da",
+    "tools/vv/comsol/tests/test_matched_trajectory_evaluation.py": "2683ac554eee185a87e92ecb1dc6a6c3d70c44a41f3fe374dab7db8baac5d467"
+  },
+  "checks": {
+    "external_tests": "21 passed in 16.03 s",
+    "ruff": "PASS",
+    "pyrefly": "0 errors",
+    "maximum_changed_function_cc": 14
+  },
+  "results": {
+    "accepted_partition_v2": {
+      "series": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_science_review_20261123\\accepted_partition_v2\\series.json",
+      "macro_resolution": "SUPPORTED",
+      "fixed_root_execution": "NOT_TESTED",
+      "observed_order": "NOT_TESTED",
+      "empirical_target_verdict": "PASS",
+      "self_resolution": "NOT_TESTED",
+      "descriptive_cross_verdict": "PASS",
+      "position_medium_fine_maximum_m": 0.0,
+      "velocity_medium_fine_maximum_m_s": 0.0,
+      "global_refinements": {
+        "coarse": 14,
+        "medium": 12,
+        "fine": 8
+      }
+    },
+    "accepted_partition_rk4": {
+      "series": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_science_review_20261123\\accepted_partition_rk4\\series.json",
+      "macro_resolution": "SUPPORTED",
+      "fixed_root_execution": "NOT_TESTED",
+      "observed_order": "NOT_TESTED",
+      "empirical_target_verdict": "PASS",
+      "self_resolution": "NOT_TESTED",
+      "descriptive_cross_verdict": "PASS",
+      "position_medium_fine_maximum_m": 0.0,
+      "velocity_medium_fine_maximum_m_s": 0.0,
+      "global_refinements": {
+        "coarse": 14,
+        "medium": 12,
+        "fine": 8
+      }
+    },
+    "accepted_partition_refined": {
+      "series": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\resolved_science_review_20261123\\accepted_partition_refined\\series.json",
+      "macro_resolution": "SUPPORTED",
+      "fixed_root_execution": "SUPPORTED",
+      "observed_order": "SUPPORTED",
+      "empirical_target_verdict": "FAIL",
+      "self_resolution": "FAIL",
+      "descriptive_cross_verdict": "PASS",
+      "position_medium_fine_maximum_m": 1.2782349068096721e-08,
+      "velocity_medium_fine_maximum_m_s": 1.2090346716911449e-06,
+      "global_refinements": {
+        "coarse": 0,
+        "medium": 0,
+        "fine": 0
+      }
+    }
+  },
+  "independent_followup": "Requested from final_science_review; root owns final follow-up scheduling."
+}

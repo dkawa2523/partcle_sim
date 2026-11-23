@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 from chamber_particles.case_format import content_hash
+from chamber_particles.cpu import PersistentParticleState
 from chamber_particles.output import (
     RESULT_ALGORITHM_REVISION,
     RESULT_SCHEMA_VERSION,
@@ -95,6 +96,53 @@ def test_result_context_is_required_and_is_geometry_only_immutable(tmp_path: Pat
         context.geometry.nodes_m[0, 0] = 4
     with h5py.File(output / "context.h5", "r") as handle:
         assert not len(handle["fields"]) and not len(handle["sources"])
+
+
+def test_manifest_snapshot_is_recursively_immutable_and_has_explicit_json_copy(
+    tmp_path: Path,
+) -> None:
+    output = tmp_path / "immutable-result"
+    with ResultWriter(output, 3, _identity("immutable")) as writer:
+        _initialize_context(writer)
+        writer.begin_epoch()
+        writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+        writer.finalize(
+            _final_particles(), {"provenance": {"parameters": [{"value": 7}]}}, macro_step_count=1
+        )
+    result = open_result_store(output)
+    with pytest.raises(TypeError):
+        result.manifest["context"]["content_hash"] = "changed"
+    with pytest.raises(TypeError):
+        result.manifest["provenance"]["parameters"][0]["value"] = 8
+    with pytest.raises(TypeError):
+        result.manifest["provenance"]["parameters"][0] = None
+    document = result.manifest_document()
+    assert json.loads(json.dumps(document)) == json.loads((output / "run.json").read_text())
+    document["provenance"]["parameters"][0]["value"] = 9
+    assert result.manifest["provenance"]["parameters"][0]["value"] == 7
+    receipt = result.source_identity()
+    receipt["context"]["content_hash"] = "changed"
+    assert result.source_identity()["manifest_sha256"] == result.manifest_sha256
+    assert result.source_identity()["context"] == result.manifest["context"]
+    result.read_context()
+
+
+def test_unknown_final_lifecycle_is_rejected_at_publication_and_read(tmp_path: Path) -> None:
+    import h5py
+
+    output = tmp_path / "lifecycle-result"
+    with ResultWriter(output, 3, _identity("lifecycle")) as writer:
+        _initialize_context(writer)
+        writer.begin_epoch()
+        writer.commit_epoch(_checkpoint_state(macro_step_count=1))
+        invalid = replace(_final_particles(), lifecycle=np.asarray([1, 2, 6], dtype="<u1"))
+        with pytest.raises(ResultWriteError, match="unknown particle state"):
+            writer.finalize(invalid, {}, macro_step_count=1)
+        writer.finalize(_final_particles(), {}, macro_step_count=1)
+    with h5py.File(output / "final.h5", "r+") as handle:
+        handle["particles/lifecycle"][0] = 6
+    with pytest.raises(ResultOpenError, match="unknown particle state"):
+        open_result_store(output)
 
 
 @pytest.mark.parametrize("complete", [False, True])
@@ -186,18 +234,20 @@ def _checkpoint_state(*, macro_step_count: int) -> CheckpointState:
         release_cursor=3,
         frame_cursor=0,
         probe_cursor=1,
-        position_m=final.position_m.copy(),
-        velocity_m_s=final.velocity_m_s.copy(),
-        charge_number=final.charge_number.copy(),
-        lifecycle=final.lifecycle.copy(),
-        failure_reason_code=final.failure_reason_code.copy(),
-        terminal_time_s=np.asarray([np.inf, 0.75, 0.5], dtype="<f8"),
-        event_ordinal=np.asarray([0, 1, 1], dtype="<u4"),
-        physical_boundary_event_ordinal=np.zeros(3, dtype="<u4"),
-        exact_origin_time_s=np.zeros(3, dtype="<f8"),
-        exact_origin_position_m=final.position_m.copy(),
-        exact_origin_velocity_m_s=final.velocity_m_s.copy(),
-        start_contact_state=np.zeros(3, dtype="<u1"),
+        particles=PersistentParticleState(
+            position_m=final.position_m.copy(),
+            velocity_m_s=final.velocity_m_s.copy(),
+            charge_number=final.charge_number.copy(),
+            lifecycle=final.lifecycle.copy(),
+            failure_reason_code=final.failure_reason_code.copy(),
+            terminal_time_s=np.asarray([np.inf, 0.75, 0.5], dtype="<f8"),
+            event_ordinal=np.asarray([0, 1, 1], dtype="<u4"),
+            physical_boundary_event_ordinal=np.zeros(3, dtype="<u4"),
+            exact_origin_time_s=np.zeros(3, dtype="<f8"),
+            exact_origin_position_m=final.position_m.copy(),
+            exact_origin_velocity_m_s=final.velocity_m_s.copy(),
+            start_contact_state=np.zeros(3, dtype="<u1"),
+        ),
         active_particle_index=np.asarray([0], dtype="<i8"),
         last_field_cell=None,
         accepted_particle_pieces=4,

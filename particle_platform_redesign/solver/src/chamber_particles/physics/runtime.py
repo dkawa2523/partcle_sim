@@ -81,7 +81,14 @@ from .compiled import (
     THERMOPHORESIS_NONE,
     THERMOPHORESIS_TALBOT,
     THERMOPHORESIS_WALDMANN_GALLIS,
+    PhysicsNumericContext,
+    PhysicsNumericOutputs,
+    PhysicsStageBindings,
     PrescribedPhysicsBindings,
+    _ChargeStageBindings,
+    _IonDragStageBindings,
+    _LiftStageBindings,
+    _ThermophoresisStageBindings,
     evaluate_physics_tile_into,
 )
 from .forces import (
@@ -144,7 +151,7 @@ type UInt8Array = NDArray[np.uint8]
 # global-bound convention and is applied before the final directed rounding.
 _LOCAL_BOUND_ROUNDOFF_FACTOR = 1.0 + 64.0 * np.finfo(np.float64).eps
 
-PHYSICS_RUNTIME_REVISION = "prepared_native_physics_runtime_v25"
+PHYSICS_RUNTIME_REVISION = "record_bound_physics_runtime_v26"
 
 _EMPTY_VECTOR = np.empty((0, 2), dtype=np.float64)
 _EMPTY_BOUND_SCALAR = np.empty(0, dtype=np.float64)
@@ -320,30 +327,6 @@ type _ChargeRuntimeBounds = (
 )
 
 
-class _ChargeStageBindings(NamedTuple):
-    """Resolved sampled inputs for one compiled continuous-charge pass."""
-
-    code: int
-    electron_density_m3: int
-    positive_ion_density_m3: int
-    electron_temperature_K: int
-    positive_ion_temperature_K: int
-    positive_ion_velocity_m_s: int
-    positive_ion_mass_kg: float
-    maximum_ion_drift_ratio: float
-    aggregate_electron_thermal_voltage_V: int
-    aggregate_positive_ion_thermal_voltage_V: int
-    aggregate_effective_positive_ion_mass_kg: int
-    aggregate_negative_ion_number_density_m3: int
-    aggregate_negative_ion_thermal_voltage_V: int
-    aggregate_negative_ion_velocity_m_s: int
-    aggregate_effective_negative_ion_mass_kg: int
-    aggregate_screening_length_m: int
-    aggregate_maximum_relative_ion_speed_m_s: float
-    charge_number_lower: float
-    charge_number_upper: float
-
-
 _NO_CHARGE_STAGE_INPUTS = _ChargeStageBindings(
     CHARGE_FIXED,
     -1,
@@ -429,110 +412,17 @@ class _PrescribedLiftBounds:
 type _LiftRuntimeBounds = _RarefiedVorticityLiftBounds | _SaffmanLiftBounds | _PrescribedLiftBounds
 
 
-class _ThermophoresisStageBindings(NamedTuple):
-    """Sampled neutral-gas inputs for the selected thermophoresis revision."""
-
-    code: int
-    gas_velocity_m_s: int
-    gas_temperature_K: int
-    gas_translational_heat_flux_W_m2: int
-    gas_mean_free_path_m: int
-    gas_molecular_mass_kg: float
-    maximum_speed_ratio: float
-    gas_temperature_gradient_K_m: int
-    gas_density_kg_m3: int
-    gas_dynamic_viscosity_Pa_s: int
-    gas_thermal_conductivity_W_m_K: int
-    particle_thermal_conductivity_W_m_K: float
-    thermal_slip_coefficient: float
-    momentum_exchange_coefficient: float
-    thermal_exchange_coefficient: float
-
-
 _NO_THERMOPHORESIS_STAGE_INPUTS = _ThermophoresisStageBindings(
     THERMOPHORESIS_NONE, -1, -1, -1, -1, 1.0, 1.0, -1, -1, -1, -1, 1.0, 1.0, 1.0, 1.0
 )
 
 
-class _LiftStageBindings(NamedTuple):
-    """Sampled neutral-gas inputs for the selected lift revision."""
-
-    code: int
-    gas_velocity_m_s: int
-    gas_density_kg_m3: int
-    gas_mean_free_path_m: int
-    gas_dynamic_viscosity_Pa_s: int
-    azimuthal_gas_vorticity_s_inv: int
-    lift_coefficient: float
-
-
 _NO_LIFT_STAGE_INPUTS = _LiftStageBindings(LIFT_NONE, -1, -1, -1, -1, -1, 1.0)
-
-
-class _IonDragStageBindings(NamedTuple):
-    """Sampled inputs for one selected ion-drag revision."""
-
-    code: int
-    electron_density_m3: int
-    positive_ion_density_m3: int
-    electron_temperature_K: int
-    positive_ion_temperature_K: int
-    positive_ion_velocity_m_s: int
-    ion_neutral_mean_free_path_m: int
-    positive_ion_mass_kg: float
-    maximum_ion_drift_ratio: float
-    electron_thermal_voltage_V: int
-    positive_ion_thermal_voltage_V: int
-    effective_positive_ion_mass_kg: int
-    screening_length_m: int
-    electric_field_V_m: int
-    maximum_relative_ion_speed_m_s: float
 
 
 _NO_ION_DRAG_STAGE_INPUTS = _IonDragStageBindings(
     ION_DRAG_NONE, -1, -1, -1, -1, -1, -1, 1.0, 1.0, -1, -1, -1, -1, -1, 1.0
 )
-
-
-class PhysicsStageBindings(NamedTuple):
-    """Closed numeric projection of the resolved catalog; primitive offsets are prepare-only."""
-
-    charge_inputs: _ChargeStageBindings
-    drag_code: int
-    gas_velocity: int
-    gas_density: int
-    gas_temperature: int
-    gas_viscosity: int
-    gas_mean_free_path: int
-    gas_molecular_mass_kg: float
-    epstein_delta: float
-    epstein_diffuse_reflection_fraction: float
-    epstein_maximum_speed_ratio: float
-    thermophoresis_inputs: _ThermophoresisStageBindings
-    electric_enabled: bool
-    electric_field: int
-    ion_drag_inputs: _IonDragStageBindings
-    dep_enabled: bool
-    dep_gradient_mean_e_squared: int
-    dep_medium_relative_permittivity: float
-    dep_real_clausius_mossotti_factor: float
-    lift_inputs: _LiftStageBindings
-    gravity_enabled: bool
-    gravity_density: int
-    gravity_vector: tuple[float, float]
-    primitive_rules: NDArray[np.int8]
-    prescribed: PrescribedPhysicsBindings
-    electric_maximum_abs_charge: float
-
-
-class PhysicsNumericContext(NamedTuple):
-    """Read-only resident model arrays and one closed stage binding table."""
-
-    mass_kg: FloatArray
-    drag_diameter_m: FloatArray
-    electrostatic_radius_m: FloatArray
-    displaced_volume_m3: FloatArray
-    bindings: PhysicsStageBindings
 
 
 class AccelerationBoundContext(NamedTuple):
@@ -608,14 +498,14 @@ class ContinuousApplicabilityContext(NamedTuple):
 
 
 @dataclass(frozen=True, slots=True)
-class PhysicsRuntime:
-    """Evaluate one resolved plan without locating fields or changing state."""
+class PreparedPhysicsCertificates:
+    """One prepared result joins stage identity to bounds and path-proof inputs.
 
-    plan: PhysicsPlan
-    mass_kg: FloatArray
-    drag_diameter_m: FloatArray
-    electrostatic_radius_m: FloatArray
-    displaced_volume_m3: FloatArray
+    Local/constant None means no such certificate is available. An absent
+    family guard is distinct from a zero force; some reference models need no
+    extra applicability gate. Directed rounding stays with each proof owner.
+    """
+
     charge_bounds: _ChargeRuntimeBounds | None
     drag_bounds: _DragBounds | None
     thermophoresis_bounds: _ThermophoresisRuntimeBounds | None
@@ -624,9 +514,56 @@ class PhysicsRuntime:
     external_acceleration_abs_upper_m_s2: FloatArray
     localizable_external_base_abs_upper_m_s2: FloatArray | None
     constant_acceleration_m_s2: FloatArray | None
+    local_applicability_offsets: frozenset[int]
+    local_additive_offsets: frozenset[int]
+    globally_bounded_force_categories: frozenset[str]
+
+
+@dataclass(frozen=True, slots=True)
+class PhysicsRuntime:
+    """Evaluate one resolved plan without locating fields or changing state."""
+
+    plan: PhysicsPlan
+    mass_kg: FloatArray
+    drag_diameter_m: FloatArray
+    electrostatic_radius_m: FloatArray
+    displaced_volume_m3: FloatArray
+    certificates: PreparedPhysicsCertificates
     native_context: PhysicsNumericContext
     native_applicability_context: ContinuousApplicabilityContext
     native_acceleration_bound_context: AccelerationBoundContext
+
+    @property
+    def charge_bounds(self) -> _ChargeRuntimeBounds | None:
+        return self.certificates.charge_bounds
+
+    @property
+    def drag_bounds(self) -> _DragBounds | None:
+        return self.certificates.drag_bounds
+
+    @property
+    def thermophoresis_bounds(self) -> _ThermophoresisRuntimeBounds | None:
+        return self.certificates.thermophoresis_bounds
+
+    @property
+    def ion_drag_bounds(self) -> _IonDragRuntimeBounds | None:
+        return self.certificates.ion_drag_bounds
+
+    @property
+    def lift_bounds(self) -> _LiftRuntimeBounds | None:
+        return self.certificates.lift_bounds
+
+    @property
+    def external_acceleration_abs_upper_m_s2(self) -> FloatArray:
+        return self.certificates.external_acceleration_abs_upper_m_s2
+
+    @property
+    def localizable_external_base_abs_upper_m_s2(self) -> FloatArray | None:
+        return self.certificates.localizable_external_base_abs_upper_m_s2
+
+    @property
+    def constant_acceleration_m_s2(self) -> FloatArray | None:
+        return self.certificates.constant_acceleration_m_s2
 
     def brownian_thermal_velocity_variance(
         self,
@@ -1637,99 +1574,15 @@ def _charge_kernel_selection(
     raise PhysicsEvaluationError("continuous charge revision was not resolved")
 
 
-def _local_certificate_offsets(bindings: PhysicsStageBindings) -> set[int]:
-    """Prepare-only component roster for the closed selected model families."""
-
-    result = _local_drag_offsets(bindings)
-    charge = bindings.charge_inputs
-    if charge.code not in (CHARGE_FIXED, CHARGE_PRESCRIBED_EXPONENTIAL_LINEAR):
-        result.add(charge.positive_ion_velocity_m_s)
-    if charge.code == CHARGE_AGGREGATE_RELATIVE_DRIFT_REGULARIZED_THREE_CURRENT:
-        result.add(charge.aggregate_negative_ion_velocity_m_s)
-    if charge.code in (
-        CHARGE_OML_STATIONARY_MAXWELLIAN_DEBYE_HUCKEL,
-        CHARGE_OML_SHIFTED_MAXWELLIAN_SINGLE_ION_NEGATIVE_DEBYE_HUCKEL,
-    ):
-        result.update(
-            (
-                charge.electron_density_m3,
-                charge.positive_ion_density_m3,
-                charge.electron_temperature_K,
-                charge.positive_ion_temperature_K,
-            )
-        )
-    result.update(_local_thermophoresis_offsets(bindings.thermophoresis_inputs))
-    ion = bindings.ion_drag_inputs
-    if ion.code in (ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED, ION_DRAG_RELATIVE_FLOW_SCREENED):
-        result.add(ion.positive_ion_velocity_m_s)
-    if ion.code == ION_DRAG_BARNES_COLLISIONLESS_EFFECTIVE_SPEED:
-        result.update(
-            (
-                ion.electron_density_m3,
-                ion.positive_ion_density_m3,
-                ion.electron_temperature_K,
-                ion.positive_ion_temperature_K,
-                ion.ion_neutral_mean_free_path_m,
-            )
-        )
-    lift = bindings.lift_inputs
-    if lift.code not in (LIFT_NONE, LIFT_PRESCRIBED_ROTATIONAL):
-        result.add(lift.gas_mean_free_path_m)
-    if lift.code in (LIFT_SAFFMAN_XY, LIFT_SAFFMAN_RZ):
-        result.update(
-            (
-                lift.gas_velocity_m_s,
-                lift.gas_density_kg_m3,
-                lift.gas_dynamic_viscosity_Pa_s,
-                lift.azimuthal_gas_vorticity_s_inv,
-            )
-        )
-    return result
-
-
-def _local_drag_offsets(bindings: PhysicsStageBindings) -> set[int]:
-    if bindings.drag_code in (DRAG_NONE, DRAG_PRESCRIBED_LINEAR):
-        return set()
-    result = {bindings.gas_velocity, bindings.gas_mean_free_path}
-    if bindings.drag_code == DRAG_STOKES_CUNNINGHAM:
-        result.update((bindings.gas_density, bindings.gas_viscosity))
-    else:
-        result.add(bindings.gas_temperature)
-    return result
-
-
-def _local_thermophoresis_offsets(model: _ThermophoresisStageBindings) -> set[int]:
-    if model.code == THERMOPHORESIS_NONE:
-        return set()
-    if model.code == THERMOPHORESIS_TALBOT:
-        return {
-            model.gas_temperature_K,
-            model.gas_density_kg_m3,
-            model.gas_dynamic_viscosity_Pa_s,
-            model.gas_thermal_conductivity_W_m_K,
-            model.gas_mean_free_path_m,
-            model.gas_temperature_gradient_K_m,
-        }
-    return {model.gas_velocity_m_s, model.gas_temperature_K, model.gas_mean_free_path_m}
-
-
-def _local_additive_offsets(bindings: PhysicsStageBindings) -> set[int]:
-    result: set[int] = set()
-    if bindings.electric_enabled:
-        result.add(bindings.electric_field)
-    model = bindings.ion_drag_inputs
-    if model.code == ION_DRAG_RELATIVE_FLOW_SCREENED:
-        result.update(
-            (
-                model.positive_ion_density_m3,
-                model.positive_ion_thermal_voltage_V,
-                model.positive_ion_velocity_m_s,
-                model.effective_positive_ion_mass_kg,
-                model.screening_length_m,
-                model.ion_neutral_mean_free_path_m,
-            )
-        )
-    return result
+def _certificate_offsets(
+    plan: PhysicsPlan, offsets: Mapping[str, int], role: str
+) -> frozenset[int]:
+    """Resolve declared model roles once, alongside the corresponding stage table."""
+    return frozenset(
+        offsets[dict(model.field_names)[parameter]]
+        for model in plan.selected_models
+        for parameter in getattr(model.descriptor.certificates, role)
+    )
 
 
 def _pack_local_ranges(
@@ -1742,7 +1595,9 @@ def _pack_local_ranges(
 
     bindings = runtime.native_context.bindings
     required = (
-        _local_additive_offsets(bindings) if additive else _local_certificate_offsets(bindings)
+        runtime.certificates.local_additive_offsets
+        if additive
+        else runtime.certificates.local_applicability_offsets
     )
     lower = np.zeros((count, bindings.primitive_rules.size), dtype=np.float64)
     upper = np.zeros_like(lower)
@@ -2483,6 +2338,54 @@ def local_additive_acceleration_abs_upper_into(
         result[row, 0], result[row, 1], applicable[row] = x_hi, y_hi, verdict and numerical
 
 
+def _prepare_primitive_ranges(
+    plan: PhysicsPlan, primitive_ranges: Mapping[str, PrimitiveRange]
+) -> dict[str, PrimitiveRange]:
+    """Resolve value certificates before validating and deriving model bounds."""
+    result: dict[str, PrimitiveRange] = {}
+    for requirement in plan.required_fields:
+        value = _primitive_range(primitive_ranges, requirement.name, len(requirement.components))
+        # A constant zero remains zero under the supported finite weighted
+        # interpolation. Positive constants still need the outward enclosure
+        # because the weights need not sum to bitwise one.
+        if requirement.value_constraint == "nonnegative" and value.constant is not None:
+            zero = value.constant == 0.0
+            value = PrimitiveRange(
+                np.where(zero, 0.0, value.lower),
+                np.where(zero, 0.0, value.upper),
+                value.constant,
+            )
+        if requirement.value_constraint == "positive" and bool((value.lower <= 0.0).any()):
+            raise PhysicsEvaluationError(f"primitive {requirement.name!r} must be positive")
+        if requirement.value_constraint == "nonnegative" and bool((value.lower < 0.0).any()):
+            raise PhysicsEvaluationError(f"primitive {requirement.name!r} must be nonnegative")
+        result[requirement.name] = value
+    return result
+
+
+def _complete_force_bound_coverage(
+    plan: PhysicsPlan,
+    globally_bounded: set[str],
+    drag_bounds: _DragBounds | None,
+    lift_bounds: _LiftRuntimeBounds | None,
+) -> frozenset[str]:
+    """Require an actual bound for every selected force before publishing certificates."""
+    if drag_bounds is not None:
+        globally_bounded.add("drag")
+    if lift_bounds is not None:
+        globally_bounded.add("lift")
+    missing_bounds = {
+        model.descriptor.category
+        for model in plan.selected_models
+        if model.descriptor.category not in ("charge", "noise")
+    } - globally_bounded
+    if missing_bounds:
+        raise PhysicsEvaluationError(
+            f"selected forces have no prepared global bound: {sorted(missing_bounds)}"
+        )
+    return frozenset(globally_bounded)
+
+
 def prepare_physics_runtime(
     *,
     plan: PhysicsPlan,
@@ -2512,8 +2415,7 @@ def prepare_physics_runtime(
     _require_reference_particle_properties(
         plan, mass_kg, drag_diameter_m, electrostatic_radius_m, displaced_volume_m3
     )
-    if isinstance(plan.noise, PrescribedForceDiffusionNoisePlan):
-        _positive_scalar_range(primitive_ranges, plan.noise.force_spectral_density_field)
+    primitive_ranges = _prepare_primitive_ranges(plan, primitive_ranges)
 
     charge_bounds = _prepare_charge_bounds(
         plan,
@@ -2553,7 +2455,7 @@ def prepare_physics_runtime(
         drag_diameter_m,
         primitive_ranges,
     )
-    external = _prepare_external_acceleration_bound(
+    external, globally_bounded = _prepare_external_acceleration_bound(
         plan,
         mass_kg,
         displaced_volume_m3,
@@ -2563,6 +2465,9 @@ def prepare_physics_runtime(
         thermophoresis_acceleration_bound,
         dielectrophoresis_acceleration_bound,
         primitive_ranges,
+    )
+    globally_bounded = _complete_force_bound_coverage(
+        plan, globally_bounded, drag_bounds, lift_bounds
     )
     localizable_external_base = _prepare_localizable_external_base(
         plan,
@@ -2587,12 +2492,15 @@ def prepare_physics_runtime(
         localizable_external_base.setflags(write=False)
     if constant is not None:
         constant.setflags(write=False)
+    stage_bindings, local_applicability_offsets, local_additive_offsets = (
+        _prepare_physics_stage_bindings(plan, charge_bounds)
+    )
     native_context = PhysicsNumericContext(
         mass_kg,
         drag_diameter_m,
         electrostatic_radius_m,
         displaced_volume_m3,
-        _prepare_physics_stage_bindings(plan, charge_bounds),
+        stage_bindings,
     )
     native_applicability_context = _prepare_continuous_applicability_context(
         native_context,
@@ -2618,14 +2526,19 @@ def prepare_physics_runtime(
         drag_diameter_m,
         electrostatic_radius_m,
         displaced_volume_m3,
-        charge_bounds,
-        drag_bounds,
-        thermophoresis_bounds,
-        ion_drag_bounds,
-        lift_bounds,
-        external,
-        localizable_external_base,
-        constant,
+        PreparedPhysicsCertificates(
+            charge_bounds,
+            drag_bounds,
+            thermophoresis_bounds,
+            ion_drag_bounds,
+            lift_bounds,
+            external,
+            localizable_external_base,
+            constant,
+            local_applicability_offsets,
+            local_additive_offsets,
+            globally_bounded,
+        ),
         native_context,
         native_applicability_context,
         native_acceleration_bound_context,
@@ -3275,8 +3188,8 @@ def _prepare_charge_bounds(
                 ion_velocity_abs_upper,
                 _EMPTY_VECTOR,
             )
-        negative_density = _nonnegative_scalar_range(
-            ranges, cast(str, charge.negative_ion_number_density_field)
+        negative_density = _primitive_range(
+            ranges, cast(str, charge.negative_ion_number_density_field), 1
         )
         negative_voltage = _positive_scalar_range(
             ranges, cast(str, charge.negative_ion_thermal_voltage_field)
@@ -3862,8 +3775,9 @@ def _prepare_external_acceleration_bound(
     thermophoresis_acceleration_abs_upper_m_s2: FloatArray | None,
     dielectrophoresis_acceleration_abs_upper_m_s2: FloatArray | None,
     ranges: Mapping[str, PrimitiveRange],
-) -> FloatArray:
+) -> tuple[FloatArray, set[str]]:
     external = np.zeros((mass_kg.size, 2), dtype=np.float64)
+    proven: set[str] = set()
     electric = plan.electric
     if electric is not None:
         field = _primitive_range(ranges, electric.electric_field, 2)
@@ -3887,6 +3801,7 @@ def _prepare_external_acceleration_bound(
             electric_field_abs_upper_V_m=field_abs,
         )
         external = np.nextafter(external + contribution, np.inf)
+        proven.add("electric")
     gravity = plan.gravity_buoyancy
     if gravity is not None:
         density = _positive_scalar_range(ranges, gravity.gas_density_field)
@@ -3898,21 +3813,25 @@ def _prepare_external_acceleration_bound(
             gravity_m_s2=gravity.gravity_m_s2,
         )
         external = np.nextafter(external + contribution, np.inf)
+        proven.add("gravity_buoyancy")
     if ion_drag_acceleration_abs_upper_m_s2 is not None:
         external = np.nextafter(external + ion_drag_acceleration_abs_upper_m_s2, np.inf)
+        proven.add("ion_drag")
     if thermophoresis_acceleration_abs_upper_m_s2 is not None:
         external = np.nextafter(
             external + thermophoresis_acceleration_abs_upper_m_s2,
             np.inf,
         )
+        proven.add("thermophoresis")
     if dielectrophoresis_acceleration_abs_upper_m_s2 is not None:
         external = np.nextafter(
             external + dielectrophoresis_acceleration_abs_upper_m_s2,
             np.inf,
         )
+        proven.add("dielectrophoresis")
     if not bool(np.isfinite(external).all()):
         raise PhysicsEvaluationError("force enclosure contains a non-finite bound")
-    return external
+    return external, proven
 
 
 def _prepare_localizable_external_base(
@@ -3970,13 +3889,13 @@ def _constant_acceleration(
         plan.evolves_continuous_state
         or not plan.has_force
         or coordinate_system != "cartesian_xy"
-        or plan.drag is not None
-        or plan.thermophoresis is not None
-        or plan.ion_drag is not None
-        or plan.lift is not None
+        or not all(
+            model.descriptor.certificates.constant_acceleration for model in plan.selected_models
+        )
     ):
         return None
     acceleration = np.zeros((count, 2), dtype=np.float64)
+    proven = {"charge"}
     dielectrophoresis = plan.dielectrophoresis
     if dielectrophoresis is not None:
         gradient = _primitive_range(
@@ -3994,6 +3913,7 @@ def _constant_acceleration(
             medium_relative_permittivity=dielectrophoresis.medium_relative_permittivity,
             real_clausius_mossotti_factor=(dielectrophoresis.real_clausius_mossotti_factor),
         )
+        proven.add("dielectrophoresis")
     electric = plan.electric
     if electric is not None:
         field = _primitive_range(ranges, electric.electric_field, 2).constant
@@ -4013,6 +3933,7 @@ def _constant_acceleration(
             mass_kg=mass_kg,
             electric_field_V_m=np.broadcast_to(field, (count, 2)),
         )
+        proven.add("electric")
     gravity = plan.gravity_buoyancy
     if gravity is not None:
         density = _positive_scalar_range(ranges, gravity.gas_density_field).constant
@@ -4025,6 +3946,9 @@ def _constant_acceleration(
             gas_density_kg_m3=np.full(count, float(density[0]), dtype=np.float64),
             gravity_m_s2=gravity.gravity_m_s2,
         )
+        proven.add("gravity_buoyancy")
+    if any(model.descriptor.category not in proven for model in plan.selected_models):
+        return None
     return acceleration
 
 
@@ -4073,22 +3997,6 @@ def _positive_scalar_range(
     return value
 
 
-def _nonnegative_scalar_range(
-    ranges: Mapping[str, PrimitiveRange],
-    name: str,
-) -> PrimitiveRange:
-    value = _primitive_range(ranges, name, 1)
-    if value.constant is not None:
-        if float(value.constant[0]) < 0.0:
-            raise PhysicsEvaluationError(f"constant primitive {name!r} must be nonnegative")
-        return PrimitiveRange(value.constant, value.constant, value.constant)
-    if float(value.lower[0]) < 0.0:
-        raise PhysicsEvaluationError(
-            f"primitive {name!r} cannot be certified nonnegative after interpolation roundoff"
-        )
-    return value
-
-
 def _particle_count(first: FloatArray, *rest: FloatArray) -> int:
     if first.ndim != 1 or not bool(np.isfinite(first).all()):
         raise PhysicsEvaluationError("particle scalar inputs must be finite one-dimensional arrays")
@@ -4106,14 +4014,17 @@ def _freeze(*arrays: FloatArray) -> None:
 def _prepare_physics_stage_bindings(
     plan: PhysicsPlan,
     charge_bounds: _ChargeRuntimeBounds | None,
-) -> PhysicsStageBindings:
+) -> tuple[PhysicsStageBindings, frozenset[int], frozenset[int]]:
     """Resolve catalog branches once; no sampled-stage arithmetic is performed here."""
 
     sampled_values: dict[str, int] = {}
     rules: list[int] = []
     for item in plan.required_fields:
         sampled_values[item.name] = len(rules)
-        rules.extend([1 if item.positive else 0] * len(item.components))
+        rules.extend(
+            [{"finite": 0, "positive": 1, "nonnegative": 2}[item.value_constraint]]
+            * len(item.components)
+        )
     charge_plan = plan.charge
     charge_inputs = _charge_stage_bindings(charge_plan, charge_bounds, sampled_values)
     drag = plan.drag
@@ -4203,8 +4114,8 @@ def _prepare_physics_stage_bindings(
     )
     gravity_vector = (0.0, 0.0) if gravity is None else gravity.gravity_m_s2
     prescribed = _prepare_prescribed_stage_bindings(plan, sampled_values)
-    primitive_rules = _prepare_nonnegative_primitive_rules(plan, sampled_values, prescribed, rules)
-    return PhysicsStageBindings(
+    primitive_rules = _freeze_primitive_rules(rules)
+    bindings = PhysicsStageBindings(
         charge_inputs,
         drag_code,
         gas_velocity,
@@ -4233,6 +4144,11 @@ def _prepare_physics_stage_bindings(
         math.inf
         if electric is None or electric.maximum_abs_charge_number is None
         else electric.maximum_abs_charge_number,
+    )
+    return (
+        bindings,
+        _certificate_offsets(plan, sampled_values, "local_applicability_fields"),
+        _certificate_offsets(plan, sampled_values, "local_additive_fields"),
     )
 
 
@@ -4272,20 +4188,7 @@ def _prepare_prescribed_stage_bindings(
     )
 
 
-def _prepare_nonnegative_primitive_rules(
-    plan: PhysicsPlan,
-    offsets: Mapping[str, int],
-    prescribed: PrescribedPhysicsBindings,
-    rules: list[int],
-) -> NDArray[np.int8]:
-    """Keep selected nonnegative current coefficients distinct from positive fields."""
-
-    charge = plan.charge
-    if isinstance(charge, AggregateRelativeDriftChargePlan) and charge.has_negative_ion_current:
-        rules[offsets[cast(str, charge.negative_ion_number_density_field)]] = 2
-    for offset in (prescribed.electron_slope, prescribed.ion_rate, prescribed.ion_slope):
-        if offset >= 0:
-            rules[offset] = 2
+def _freeze_primitive_rules(rules: list[int]) -> NDArray[np.int8]:
     result = np.asarray(rules, dtype=np.int8)
     result.setflags(write=False)
     return result
@@ -4295,28 +4198,6 @@ def _primitive_binding(bindings: Mapping[str, int], name: str) -> int:
     """Look up a validated required primitive while preparing the model table."""
 
     return bindings[name]
-
-
-class PhysicsNumericOutputs(NamedTuple):
-    """Slot-owned outputs passed across the native stage boundary."""
-
-    acceleration_m_s2: FloatArray
-    charge_rate_number_s: FloatArray
-    charge_rate_derivative_s_inv: FloatArray
-    applicable: BoolArray
-    linear_drag_rate_s_inv: FloatArray
-    target_velocity_m_s: FloatArray
-    additive_acceleration_m_s2: FloatArray
-
-
-@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
-def _primitive_scalar(values: FloatArray, offset: int) -> FloatArray:
-    return values.reshape(values.size)[:0] if offset < 0 else values[:, offset]
-
-
-@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
-def _primitive_vector(values: FloatArray, offset: int) -> FloatArray:
-    return values[:0, :2] if offset < 0 else values[:, offset : offset + 2]
 
 
 @njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
@@ -4339,122 +4220,7 @@ def evaluate_prepared_physics_into(
     for row in range(particle_index.size):
         incoming_status[row] = error_code[row]
     evaluate_physics_tile_into(
-        particle_index,
-        velocity_m_s,
-        charge_number,
-        context.mass_kg,
-        context.drag_diameter_m,
-        context.electrostatic_radius_m,
-        context.displaced_volume_m3,
-        bindings.charge_inputs.code,
-        _primitive_scalar(sampled_values, bindings.charge_inputs.electron_density_m3),
-        _primitive_scalar(sampled_values, bindings.charge_inputs.positive_ion_density_m3),
-        _primitive_scalar(sampled_values, bindings.charge_inputs.electron_temperature_K),
-        _primitive_scalar(sampled_values, bindings.charge_inputs.positive_ion_temperature_K),
-        _primitive_vector(sampled_values, bindings.charge_inputs.positive_ion_velocity_m_s),
-        bindings.charge_inputs.positive_ion_mass_kg,
-        bindings.charge_inputs.maximum_ion_drift_ratio,
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_electron_thermal_voltage_V
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_positive_ion_thermal_voltage_V
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_effective_positive_ion_mass_kg
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_negative_ion_number_density_m3
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_negative_ion_thermal_voltage_V
-        ),
-        _primitive_vector(
-            sampled_values, bindings.charge_inputs.aggregate_negative_ion_velocity_m_s
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.charge_inputs.aggregate_effective_negative_ion_mass_kg
-        ),
-        _primitive_scalar(sampled_values, bindings.charge_inputs.aggregate_screening_length_m),
-        bindings.charge_inputs.aggregate_maximum_relative_ion_speed_m_s,
-        bindings.charge_inputs.charge_number_lower,
-        bindings.charge_inputs.charge_number_upper,
-        bindings.drag_code,
-        _primitive_vector(sampled_values, bindings.gas_velocity),
-        _primitive_scalar(sampled_values, bindings.gas_density),
-        _primitive_scalar(sampled_values, bindings.gas_temperature),
-        _primitive_scalar(sampled_values, bindings.gas_viscosity),
-        _primitive_scalar(sampled_values, bindings.gas_mean_free_path),
-        bindings.gas_molecular_mass_kg,
-        bindings.epstein_delta,
-        bindings.epstein_diffuse_reflection_fraction,
-        bindings.epstein_maximum_speed_ratio,
-        bindings.thermophoresis_inputs.code,
-        _primitive_vector(sampled_values, bindings.thermophoresis_inputs.gas_velocity_m_s),
-        _primitive_scalar(sampled_values, bindings.thermophoresis_inputs.gas_temperature_K),
-        _primitive_vector(
-            sampled_values, bindings.thermophoresis_inputs.gas_translational_heat_flux_W_m2
-        ),
-        _primitive_scalar(sampled_values, bindings.thermophoresis_inputs.gas_mean_free_path_m),
-        bindings.thermophoresis_inputs.gas_molecular_mass_kg,
-        bindings.thermophoresis_inputs.maximum_speed_ratio,
-        _primitive_vector(
-            sampled_values, bindings.thermophoresis_inputs.gas_temperature_gradient_K_m
-        ),
-        _primitive_scalar(sampled_values, bindings.thermophoresis_inputs.gas_density_kg_m3),
-        _primitive_scalar(
-            sampled_values, bindings.thermophoresis_inputs.gas_dynamic_viscosity_Pa_s
-        ),
-        _primitive_scalar(
-            sampled_values, bindings.thermophoresis_inputs.gas_thermal_conductivity_W_m_K
-        ),
-        bindings.thermophoresis_inputs.particle_thermal_conductivity_W_m_K,
-        bindings.thermophoresis_inputs.thermal_slip_coefficient,
-        bindings.thermophoresis_inputs.momentum_exchange_coefficient,
-        bindings.thermophoresis_inputs.thermal_exchange_coefficient,
-        bindings.ion_drag_inputs.code,
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.electron_density_m3),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.positive_ion_density_m3),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.electron_temperature_K),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.positive_ion_temperature_K),
-        _primitive_vector(sampled_values, bindings.ion_drag_inputs.positive_ion_velocity_m_s),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.ion_neutral_mean_free_path_m),
-        bindings.ion_drag_inputs.positive_ion_mass_kg,
-        bindings.ion_drag_inputs.maximum_ion_drift_ratio,
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.electron_thermal_voltage_V),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.positive_ion_thermal_voltage_V),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.effective_positive_ion_mass_kg),
-        _primitive_scalar(sampled_values, bindings.ion_drag_inputs.screening_length_m),
-        _primitive_vector(sampled_values, bindings.ion_drag_inputs.electric_field_V_m),
-        bindings.ion_drag_inputs.maximum_relative_ion_speed_m_s,
-        bindings.dep_enabled,
-        _primitive_vector(sampled_values, bindings.dep_gradient_mean_e_squared),
-        bindings.dep_medium_relative_permittivity,
-        bindings.dep_real_clausius_mossotti_factor,
-        bindings.lift_inputs.code,
-        _primitive_vector(sampled_values, bindings.lift_inputs.gas_velocity_m_s),
-        _primitive_scalar(sampled_values, bindings.lift_inputs.gas_density_kg_m3),
-        _primitive_scalar(sampled_values, bindings.lift_inputs.gas_mean_free_path_m),
-        _primitive_scalar(sampled_values, bindings.lift_inputs.gas_dynamic_viscosity_Pa_s),
-        _primitive_scalar(sampled_values, bindings.lift_inputs.azimuthal_gas_vorticity_s_inv),
-        bindings.lift_inputs.lift_coefficient,
-        bindings.electric_enabled,
-        _primitive_vector(sampled_values, bindings.electric_field),
-        bindings.gravity_enabled,
-        _primitive_scalar(sampled_values, bindings.gravity_density),
-        bindings.gravity_vector[0],
-        bindings.gravity_vector[1],
-        outputs.acceleration_m_s2,
-        outputs.charge_rate_number_s,
-        outputs.charge_rate_derivative_s_inv,
-        outputs.applicable,
-        outputs.linear_drag_rate_s_inv,
-        outputs.target_velocity_m_s,
-        outputs.additive_acceleration_m_s2,
-        error_code,
-        bindings.prescribed,
-        sampled_values,
-        bindings.electric_maximum_abs_charge,
+        context, particle_index, velocity_m_s, charge_number, sampled_values, outputs, error_code
     )
     # Raw physics codes overlap the shared status vocabulary; normalize only
     # rows that entered the force kernel without a field/state failure.

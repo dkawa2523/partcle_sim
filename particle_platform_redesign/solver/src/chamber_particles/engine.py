@@ -5,10 +5,10 @@ from __future__ import annotations
 import hashlib
 import json
 import math
-from bisect import bisect_right
-from collections.abc import Callable
+from collections.abc import Callable, Mapping
 from dataclasses import dataclass, replace
 from os import PathLike
+from types import MappingProxyType
 
 import numpy as np
 
@@ -21,7 +21,7 @@ from .boundaries import (
     prepare_boundary_rules,
     validate_boundary_rule_frames,
 )
-from .case import CASE_FORMAT_VERSION, SimulationCase, TimeSpec
+from .case import CASE_FORMAT_VERSION, SimulationCase
 from .case_format import resident_array_bytes
 from .cpu import (
     CPU_RUNTIME_LAYOUT_REVISION,
@@ -71,6 +71,7 @@ from .integrators import (
     RK4_ENCLOSURE_REVISION,
     STEP_PROPOSAL_REVISION,
 )
+from .lifecycle import ACTIVE, ESCAPED, FAILED, HELD, PENDING, STUCK
 from .output import (
     CHECKPOINT_SCHEMA_VERSION,
     RESULT_ALGORITHM_REVISION,
@@ -131,6 +132,7 @@ from .stochastic import (
     JOINT_OU_SPLIT_REVISION,
     MAXIMUM_JOINT_OU_RELAXATION_ARGUMENT,
 )
+from .time_grid import MACRO_GRID_REVISION, MacroGrid
 from .topology import (
     TOPOLOGY_ALGORITHM_REVISION,
     PreparedPeriodicTopology,
@@ -140,13 +142,8 @@ from .topology import (
 )
 from .transport import (
     _FAILURE_REASON_NAMES,
-    _LIFECYCLE_ACTIVE,
-    _LIFECYCLE_ESCAPED,
-    _LIFECYCLE_FAILED,
-    _LIFECYCLE_HELD,
-    _LIFECYCLE_PENDING,
-    _LIFECYCLE_STUCK,
     EngineError,
+    NumericalWorkPolicy,
     PreparedTransport,
     TransportCapabilities,
     TransportWorkspaceBudget,
@@ -176,9 +173,6 @@ BROWNIAN_TREE_POLICY_REVISION = "conditional_boundary_refinement_absolute_target
 
 
 _PREPARE_SCAN_BATCH_SIZE = 65_536
-
-
-_TIME_GRID_ROUNDOFF_ULPS = 8.0
 
 
 _DURABLE_COMMIT_MINIMUM_WORK = 1 << 20
@@ -222,14 +216,44 @@ class _RunState(ParticleState):
     event_statistics: _EventStatistics
 
 
+@dataclass(frozen=True, slots=True)
+class _RunFacts:
+    """Prepared scientific/numerical identity, separate from resources and statistics."""
+
+    algorithm_revisions: tuple[tuple[str, object], ...]
+    coordinate_system: str
+    motion_mode: str
+    integrator: str
+    backend: str
+    path_kind: str
+    models: tuple[tuple[str, tuple[tuple[str, str | float], ...]], ...]
+    brownian: Mapping[str, object]
+
+    def revision_document(self) -> dict[str, object]:
+        return dict(self.algorithm_revisions)
+
+    def model_document(self) -> dict[str, dict[str, str | float]]:
+        return {category: dict(parameters) for category, parameters in self.models}
+
+
+@dataclass(frozen=True, slots=True)
+class _PreparedRun:
+    """Parent-owned input provenance and facts beside the worker transport."""
+
+    case: SimulationCase
+    transport: PreparedTransport
+    facts: _RunFacts
+
+
 def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1) -> RunSummary:
     """Run or resume the selected production profile and publish one complete result."""
 
-    prepared = _prepare(case, workers=workers)
+    run = _prepare(case, workers=workers)
+    prepared = run.transport
     schedule = prepared.schedule
     count = schedule.particle_count
     commit_work_threshold = _durable_commit_work_threshold(count)
-    with ResultWriter(output, count, _resume_identity(prepared)) as writer:
+    with ResultWriter(output, count, _resume_identity(run)) as writer:
         if writer.completed_summary is not None:
             return writer.completed_summary
         if not writer.context_initialized:
@@ -240,17 +264,19 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
         try:
             with ProcessTeam(prepared, state, state.active_index, state.event_statistics) as team:
                 prepared = team.prepared
+                run = replace(run, transport=prepared)
+                macro_grid = MacroGrid(
+                    case.spec.time.start_s,
+                    case.spec.time.end_s,
+                    case.spec.time.dt_s,
+                    prepared.field_time_split_s,
+                )
                 while state.macro_start_s < case.spec.time.end_s:
                     if not epoch_open:
                         writer.begin_epoch()
                         epoch_open = True
                     macro_start = state.macro_start_s
-                    macro_end = _macro_step_end(
-                        case.spec.time,
-                        state.macro_step_count,
-                        macro_start_s=macro_start,
-                        split_times_s=prepared.field_time_split_s,
-                    )
+                    macro_end = macro_grid.next_end(state.macro_step_count, macro_start)
                     if macro_end <= macro_start:
                         raise EngineError("macro-step time no longer advances at float64 precision")
 
@@ -346,7 +372,7 @@ def run_simulation(case: SimulationCase, output: _PathInput, *, workers: int = 1
                 return writer.finalize(
                     final,
                     _manifest(
-                        prepared,
+                        run,
                         state.lifecycle,
                         state.failure_reason_code,
                         state.event_statistics,
@@ -436,110 +462,6 @@ def _durable_commit_cadence(particle_count: int) -> dict[str, object]:
     }
 
 
-def _macro_step_end(
-    time: TimeSpec,
-    completed_steps: int,
-    *,
-    macro_start_s: float | None = None,
-    split_times_s: tuple[float, ...] = (),
-) -> float:
-    """Return the indexed macro-grid boundary, snapping only roundoff to the end.
-
-    Repeatedly adding ``dt_s`` can leave a one-ULP tail at an intended decimal
-    endpoint (for example 0.02 s repeated ten times toward 0.2 s).  Such a tail
-    is not a physical integration interval and may be too short to represent a
-    midpoint.  Time-dependent field knots are merged into the same ordered
-    interval sequence without changing the fixed grid on either side.
-    """
-
-    crossed_splits = 0
-    if split_times_s:
-        if macro_start_s is None:
-            raise EngineError("field-time split scheduling requires the current macro time")
-        crossed_splits = bisect_right(split_times_s, macro_start_s)
-    regular_completed_steps = completed_steps - crossed_splits
-    if regular_completed_steps < 0:
-        raise EngineError("field-time split schedule disagrees with the macro-step count")
-    step_number = regular_completed_steps + 1
-    nominal_end_s, construction_roundoff_s = _time_grid_boundary(time, step_number)
-    if not math.isfinite(nominal_end_s) or nominal_end_s >= time.end_s:
-        nominal_end_s = time.end_s
-    elif time.end_s - nominal_end_s <= construction_roundoff_s:
-        nominal_end_s = time.end_s
-    if crossed_splits < len(split_times_s):
-        field_knot_s = split_times_s[crossed_splits]
-        if field_knot_s < nominal_end_s:
-            return field_knot_s
-    return nominal_end_s
-
-
-def _time_grid_boundary(time: TimeSpec, step_number: int) -> tuple[float, float]:
-    """Construct one fixed-grid boundary and its binary64 roundoff budget."""
-
-    nominal_offset_s, offset_residual_s = _time_grid_product(
-        float(step_number),
-        time.dt_s,
-    )
-    nominal_end_s = math.fsum((time.start_s, nominal_offset_s, offset_residual_s))
-    if not math.isfinite(nominal_end_s):
-        return nominal_end_s, 0.0
-    construction_roundoff_s = _TIME_GRID_ROUNDOFF_ULPS * max(
-        math.ulp(time.start_s),
-        math.ulp(time.end_s),
-        math.ulp(time.dt_s) * step_number,
-        math.ulp(nominal_offset_s),
-        math.ulp(nominal_end_s),
-    )
-    return nominal_end_s, construction_roundoff_s
-
-
-def _time_grid_product(left: float, right: float) -> tuple[float, float]:
-    """Return a binary64 product and residual without splitter overflow."""
-
-    product = left * right
-    if not math.isfinite(product) or product == 0.0:
-        return product, 0.0
-    left_fraction, left_exponent = math.frexp(left)
-    right_fraction, right_exponent = math.frexp(right)
-    scaled_product = left_fraction * right_fraction
-    splitter = 134_217_729.0
-    split_left = splitter * left_fraction
-    left_high = split_left - (split_left - left_fraction)
-    left_low = left_fraction - left_high
-    split_right = splitter * right_fraction
-    right_high = split_right - (split_right - right_fraction)
-    right_low = right_fraction - right_high
-    scaled_residual = (
-        ((left_high * right_high - scaled_product) + left_high * right_low) + left_low * right_high
-    ) + left_low * right_low
-    exponent = left_exponent + right_exponent
-    return (
-        math.ldexp(scaled_product, exponent),
-        math.ldexp(scaled_residual, exponent),
-    )
-
-
-def _field_time_split_times(
-    time: TimeSpec,
-    fields: PreparedFieldSet,
-) -> tuple[float, ...]:
-    """Return non-grid snapshot knots that must split production intervals."""
-
-    result: list[float] = []
-    for knot_s in fields.time_knots_s():
-        if knot_s <= time.start_s or knot_s >= time.end_s:
-            continue
-        relative_step = (knot_s - time.start_s) / time.dt_s
-        nearest_step = round(relative_step)
-        aligned = False
-        if nearest_step >= 1:
-            grid_s, roundoff_s = _time_grid_boundary(time, nearest_step)
-            aligned = abs(knot_s - grid_s) <= roundoff_s
-        if not aligned:
-            result.append(knot_s)
-    return tuple(result)
-
-
 def _brownian_provenance(physics: PhysicsPlan) -> dict[str, object]:
     """Return the single manifest/checkpoint description of stochastic motion."""
 
@@ -572,26 +494,15 @@ def _brownian_provenance(physics: PhysicsPlan) -> dict[str, object]:
     }
 
 
-def _resume_identity(prepared: PreparedTransport) -> dict[str, object]:
-    """Return the exact immutable identity accepted by checkpoint resume."""
+def _resolve_run_facts(case: SimulationCase, prepared: PreparedTransport) -> _RunFacts:
+    """Resolve active algorithm/model facts once, at the end of preparation."""
 
-    case = prepared.case
-    integrator = case.spec.solver.integrator
+    integrator = prepared.solver.integrator
     brownian = _brownian_provenance(prepared.physics)
     uses_rk4_dense = prepared.capabilities.dense_rk4
-    particle_bytes = memoryview(prepared.schedule.particle_id).cast("B")
-    return {
-        "case_file_hash": case.case_file_hash,
-        "data_content_hash": case.content_hash,
-        "case_schema_version": CASE_FORMAT_VERSION,
-        "result_schema_version": RESULT_SCHEMA_VERSION,
-        "checkpoint_schema_version": CHECKPOINT_SCHEMA_VERSION,
-        "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
+    revisions = {
         "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
-        "durable_commit_cadence": _durable_commit_cadence(prepared.schedule.particle_count),
         "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
-        "cpu_runtime_layout_revision": CPU_RUNTIME_LAYOUT_REVISION,
-        "memory_plan_revision": MEMORY_PLAN_REVISION,
         "step_proposal_revision": STEP_PROPOSAL_REVISION,
         "rk4_enclosure_revision": RK4_ENCLOSURE_REVISION if uses_rk4_dense else None,
         "rk4_dense_path_revision": RK4_DENSE_PATH_REVISION if uses_rk4_dense else None,
@@ -607,11 +518,13 @@ def _resume_identity(prepared: PreparedTransport) -> dict[str, object]:
         "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
         "field_location_revision": FIELD_LOCATION_REVISION,
         "field_time_revision": FIELD_TIME_REVISION,
-        "field_time_split_s": list(prepared.field_time_split_s),
+        "macro_grid_revision": MACRO_GRID_REVISION,
         "required_field_revision": REQUIRED_FIELD_REVISION,
         "geometry_algorithm_revision": GEOMETRY_ALGORITHM_REVISION,
         "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
-        "topology_algorithm_revision": _topology_algorithm_revision(prepared),
+        "topology_algorithm_revision": (
+            TOPOLOGY_ALGORITHM_REVISION if prepared.topology is not None else None
+        ),
         "boundary_algorithm_revision": (
             BOUNDARY_ALGORITHM_REVISION if prepared.boundary_rules else None
         ),
@@ -620,17 +533,50 @@ def _resume_identity(prepared: PreparedTransport) -> dict[str, object]:
         "brownian_rng_revision": brownian["rng_revision"],
         "joint_ou_revision": brownian["ou_revision"],
         "joint_ou_split_revision": brownian["split_revision"],
-        "brownian_coefficient_policy": brownian["coefficient_policy"],
         "brownian_composition_revision": brownian["composition_revision"],
         "brownian_charge_dense_revision": brownian["charge_dense_revision"],
         "brownian_tree_policy_revision": brownian["tree_policy_revision"],
-        "brownian_interval_tree_depth": brownian["interval_tree_depth"],
-        "brownian_adaptive_max_depth": brownian["adaptive_max_depth"],
-        "coordinate_system": case.data.coordinate_system,
-        "motion_mode": case.spec.motion.mode,
-        "resolved_integrator": integrator,
-        "resolved_backend": "cpu",
-        "resolved_physics_models": prepared.physics.resolved_models(),
+    }
+    return _RunFacts(
+        tuple(revisions.items()),
+        case.data.coordinate_system,
+        case.spec.motion.mode,
+        integrator,
+        prepared.solver.backend,
+        prepared.capabilities.path_kind,
+        tuple(
+            (category, tuple(model.items()))
+            for category, model in prepared.physics.resolved_models().items()
+        ),
+        MappingProxyType(brownian),
+    )
+
+
+def _resume_identity(run: _PreparedRun) -> dict[str, object]:
+    """Project prepared facts with source identity and persistence/layout owners."""
+
+    case, prepared, facts = run.case, run.transport, run.facts
+    particle_bytes = memoryview(prepared.schedule.particle_id).cast("B")
+    return {
+        **facts.revision_document(),
+        "case_file_hash": case.case_file_hash,
+        "data_content_hash": case.content_hash,
+        "case_schema_version": CASE_FORMAT_VERSION,
+        "result_schema_version": RESULT_SCHEMA_VERSION,
+        "checkpoint_schema_version": CHECKPOINT_SCHEMA_VERSION,
+        "result_algorithm_revision": RESULT_ALGORITHM_REVISION,
+        "durable_commit_cadence": _durable_commit_cadence(prepared.schedule.particle_count),
+        "cpu_runtime_layout_revision": CPU_RUNTIME_LAYOUT_REVISION,
+        "memory_plan_revision": MEMORY_PLAN_REVISION,
+        "field_time_split_s": list(prepared.field_time_split_s),
+        "brownian_coefficient_policy": facts.brownian["coefficient_policy"],
+        "brownian_interval_tree_depth": facts.brownian["interval_tree_depth"],
+        "brownian_adaptive_max_depth": facts.brownian["adaptive_max_depth"],
+        "coordinate_system": facts.coordinate_system,
+        "motion_mode": facts.motion_mode,
+        "resolved_integrator": facts.integrator,
+        "resolved_backend": facts.backend,
+        "resolved_physics_models": facts.model_document(),
         "particle_count": prepared.schedule.particle_count,
         "particle_id_sha256": hashlib.sha256(particle_bytes).hexdigest(),
     }
@@ -648,20 +594,9 @@ def _restore_or_initialize_run_state(
     _restore_field_cell_hint(prepared, checkpoint, count)
     _validate_checkpoint_cursors(prepared, checkpoint)
     return _RunState(
-        position_m=checkpoint.position_m,
-        velocity_m_s=checkpoint.velocity_m_s,
-        charge_number=checkpoint.charge_number,
+        **checkpoint.particles.columns(),
         active=active,
         active_index=active_index,
-        lifecycle=checkpoint.lifecycle,
-        failure_reason_code=checkpoint.failure_reason_code,
-        terminal_time_s=checkpoint.terminal_time_s,
-        event_ordinal=checkpoint.event_ordinal,
-        physical_boundary_event_ordinal=checkpoint.physical_boundary_event_ordinal,
-        exact_origin_time_s=checkpoint.exact_origin_time_s,
-        exact_origin_position_m=checkpoint.exact_origin_position_m,
-        exact_origin_velocity_m_s=checkpoint.exact_origin_velocity_m_s,
-        start_contact_state=checkpoint.start_contact_state,
         release_cursor=checkpoint.release_cursor,
         frame_cursor=checkpoint.frame_cursor,
         probe_cursor=checkpoint.probe_cursor,
@@ -688,7 +623,7 @@ def _initial_run_state(prepared: PreparedTransport) -> _RunState:
         schedule.charge_number,
         schedule.release_time_s,
         schedule.source_facet_id,
-        pending_lifecycle=int(_LIFECYCLE_PENDING),
+        pending_lifecycle=PENDING,
         pending_surface=int(SURFACE_STATE_PENDING),
         resolved_surface=int(SURFACE_STATE_RESOLVED),
     )
@@ -699,32 +634,16 @@ def _initial_run_state(prepared: PreparedTransport) -> _RunState:
         frame_cursor=0,
         probe_cursor=0,
         macro_step_count=0,
-        macro_start_s=prepared.case.spec.time.start_s,
+        macro_start_s=prepared.time.start_s,
         event_statistics=_EventStatistics(),
     )
 
 
 def _validate_checkpoint_layout(checkpoint: CheckpointState, count: int) -> None:
-    vectors = (
-        checkpoint.position_m,
-        checkpoint.velocity_m_s,
-        checkpoint.exact_origin_position_m,
-        checkpoint.exact_origin_velocity_m_s,
-    )
-    scalars = (
-        checkpoint.charge_number,
-        checkpoint.lifecycle,
-        checkpoint.failure_reason_code,
-        checkpoint.terminal_time_s,
-        checkpoint.event_ordinal,
-        checkpoint.physical_boundary_event_ordinal,
-        checkpoint.exact_origin_time_s,
-        checkpoint.start_contact_state,
-    )
-    if any(array.shape != (count, 2) for array in vectors):
-        raise EngineError("checkpoint vector state has an incompatible shape")
-    if any(array.shape != (count,) for array in scalars):
-        raise EngineError("checkpoint scalar state has an incompatible shape")
+    try:
+        checkpoint.particles.validate(count)
+    except ValueError as error:
+        raise EngineError(str(error)) from error
     if not math.isfinite(checkpoint.macro_time_s) or checkpoint.macro_step_count < 0:
         raise EngineError("checkpoint macro boundary is invalid")
 
@@ -742,7 +661,7 @@ def _restore_active_index(
         raise EngineError("checkpoint active particle index is not sorted and unique")
     active = np.zeros(count, dtype=np.bool_)
     active[rows] = True
-    if not np.array_equal(active, checkpoint.lifecycle == _LIFECYCLE_ACTIVE):
+    if not np.array_equal(active, checkpoint.particles.lifecycle == ACTIVE):
         raise EngineError("checkpoint active index does not match particle lifecycle")
     active_index = ActiveIndex.allocate(count)
     active_index.add(rows)
@@ -769,7 +688,7 @@ def _validate_checkpoint_cursors(
     prepared: PreparedTransport,
     checkpoint: CheckpointState,
 ) -> None:
-    time = prepared.case.spec.time
+    time = prepared.time
     if not time.start_s <= checkpoint.macro_time_s <= time.end_s:
         raise EngineError("checkpoint macro time lies outside the run interval")
     expected_release = _release_stop(
@@ -794,18 +713,7 @@ def _checkpoint_state(prepared: PreparedTransport, state: _RunState) -> Checkpoi
         release_cursor=state.release_cursor,
         frame_cursor=state.frame_cursor,
         probe_cursor=state.probe_cursor,
-        position_m=state.position_m,
-        velocity_m_s=state.velocity_m_s,
-        charge_number=state.charge_number,
-        lifecycle=state.lifecycle,
-        failure_reason_code=state.failure_reason_code,
-        terminal_time_s=state.terminal_time_s,
-        event_ordinal=state.event_ordinal,
-        physical_boundary_event_ordinal=state.physical_boundary_event_ordinal,
-        exact_origin_time_s=state.exact_origin_time_s,
-        exact_origin_position_m=state.exact_origin_position_m,
-        exact_origin_velocity_m_s=state.exact_origin_velocity_m_s,
-        start_contact_state=state.start_contact_state,
+        particles=state.persistent(),
         active_particle_index=state.active_index.rows,
         last_field_cell=prepared.dynamics.last_field_cell,
         accepted_particle_pieces=statistics.accepted_particle_pieces,
@@ -824,14 +732,15 @@ def _validate_completed_run_state(prepared: PreparedTransport, state: _RunState)
     if state.probe_cursor != len(prepared.probe_times_s):
         raise EngineError("not every requested particle probe was emitted")
     if state.release_cursor != prepared.schedule.particle_count or bool(
-        (state.lifecycle == _LIFECYCLE_PENDING).any()
+        (state.lifecycle == PENDING).any()
     ):
         raise EngineError("not every validated particle was released by the run end")
 
 
-def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
+def _prepare(case: SimulationCase, *, workers: int = 1) -> _PreparedRun:
     validate_worker_count(workers)
     spec = case.spec
+    work_policy = NumericalWorkPolicy.resolve(spec.solver.event)
     _validate_configuration(case)
     memory_limit_bytes = spec.resources.memory_limit_mb * 1024 * 1024
     try:
@@ -862,7 +771,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
                 item.unit,
                 item.components,
                 item.stored_basis,
-                item.positive,
+                item.value_constraint,
                 item.zero_on_rz_axis,
             )
             for item in physics.required_fields
@@ -873,7 +782,9 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
             time_interval_s=(spec.time.start_s, spec.time.end_s),
         )
         validate_periodic_field_seams(fields, topology, base_geometry)
-        field_time_split_s = _field_time_split_times(spec.time, fields)
+        field_time_split_s = MacroGrid.resolve(
+            spec.time.start_s, spec.time.end_s, spec.time.dt_s, fields.time_knots_s()
+        ).snapshot_splits_s
         primitive_ranges = {
             item.name: PrimitiveRange(
                 *fields.component_bounds(item.name),
@@ -944,6 +855,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
         runtime,
         physics,
         capabilities,
+        work_policy,
         frame_times,
         probe_times,
         probe_particle_index,
@@ -967,7 +879,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
     event_paths = capabilities.event_paths
     curved_workspace = _CurvedWavefront.allocate(
         memory_plan.slab_particles,
-        spec.solver.event.max_refinements + 1,
+        work_policy.residual_stack_capacity,
         capabilities.stochastic,
         exact_enabled=exact_enabled,
         event_paths=event_paths,
@@ -978,7 +890,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
     )
     certificate_workspace = _ApplicabilityCertificateWorkspace.allocate(
         memory_plan.slab_particles if dense_certificate else 0,
-        spec.solver.event.max_refinements,
+        work_policy.certificate_max_subdivisions,
     )
     compiled_rules = prepare_boundary_rules(
         rules,
@@ -992,8 +904,11 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
     )
     event_row_capacity = memory_plan.slab_particles * int(event_paths)
     boundary_row_capacity = memory_plan.slab_particles * int(capabilities.material_walls)
-    return PreparedTransport(
-        case,
+    prepared = PreparedTransport(
+        spec.time,
+        spec.solver,
+        case.data.coordinate_system,
+        work_policy,
         capabilities,
         schedule,
         frame_times,
@@ -1017,7 +932,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
         curved_workspace,
         _ExactWavefront.allocate(
             memory_plan.slab_particles,
-            spec.solver.event.max_refinements + 1,
+            work_policy.residual_stack_capacity,
             exact_enabled=exact_enabled,
             event_paths=event_paths,
         ),
@@ -1031,6 +946,7 @@ def _prepare(case: SimulationCase, *, workers: int = 1) -> PreparedTransport:
         ),
         _ProposalReplayWorkspace.allocate(memory_plan.slab_particles, frame_times, probe_times),
     )
+    return _PreparedRun(case, prepared, _resolve_run_facts(case, prepared))
 
 
 def _prepare_memory_plan(
@@ -1043,6 +959,7 @@ def _prepare_memory_plan(
     runtime: PhysicsRuntime,
     physics: PhysicsPlan,
     capabilities: TransportCapabilities,
+    work_policy: NumericalWorkPolicy,
     frame_times_s: tuple[float, ...],
     probe_times_s: tuple[float, ...],
     probe_particle_index: np.ndarray,
@@ -1083,12 +1000,15 @@ def _prepare_memory_plan(
         probe_particle_index,
     )
     workspace_budget = TransportWorkspaceBudget.resolve(
-        case,
+        case.data.coordinate_system,
+        work_policy,
         schedule,
         fields,
         physics,
         capabilities,
         observations=bool(frame_times_s or probe_times_s),
+        has_point_event_view=case.spec.topology is not None
+        or any(rule.contact_geometry == "particle_center" for rule in case.spec.boundaries),
     )
     candidate_columns = (
         3
@@ -1491,7 +1411,7 @@ def _activate_releases(
                 )
             )
         active[released] = True
-        lifecycle[released] = _LIFECYCLE_ACTIVE
+        lifecycle[released] = ACTIVE
     return released, stop
 
 
@@ -1508,13 +1428,13 @@ def _finalize_replay_buffer(
 
     rows = replay.particle_index
     for time_row, requested_time_s in enumerate(replay.time_s):
-        unavailable = (
-            (lifecycle[rows] == _LIFECYCLE_ESCAPED) | (lifecycle[rows] == _LIFECYCLE_FAILED)
-        ) & (terminal_time_s[rows] <= requested_time_s)
+        unavailable = ((lifecycle[rows] == ESCAPED) | (lifecycle[rows] == FAILED)) & (
+            terminal_time_s[rows] <= requested_time_s
+        )
         eligible = (schedule.release_time_s[rows] <= requested_time_s) & ~unavailable
-        retained = (
-            (lifecycle[rows] == _LIFECYCLE_STUCK) | (lifecycle[rows] == _LIFECYCLE_HELD)
-        ) & (terminal_time_s[rows] <= requested_time_s)
+        retained = ((lifecycle[rows] == STUCK) | (lifecycle[rows] == HELD)) & (
+            terminal_time_s[rows] <= requested_time_s
+        )
         retained_rows = np.flatnonzero(retained).astype("<i8", copy=False)
         particles = rows[retained_rows]
         replay.position_m[time_row, retained_rows] = position_m[particles]
@@ -1583,12 +1503,12 @@ def _probe_from_replay(
 def _lifecycle_series_at(time_s: float, lifecycle: np.ndarray) -> LifecycleSeries:
     return LifecycleSeries(
         time_s=np.asarray([time_s], dtype="<f8"),
-        pending=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_PENDING)], dtype="<u8"),
-        active=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_ACTIVE)], dtype="<u8"),
-        stuck=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_STUCK)], dtype="<u8"),
-        held=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_HELD)], dtype="<u8"),
-        escaped=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_ESCAPED)], dtype="<u8"),
-        failed=np.asarray([np.count_nonzero(lifecycle == _LIFECYCLE_FAILED)], dtype="<u8"),
+        pending=np.asarray([np.count_nonzero(lifecycle == PENDING)], dtype="<u8"),
+        active=np.asarray([np.count_nonzero(lifecycle == ACTIVE)], dtype="<u8"),
+        stuck=np.asarray([np.count_nonzero(lifecycle == STUCK)], dtype="<u8"),
+        held=np.asarray([np.count_nonzero(lifecycle == HELD)], dtype="<u8"),
+        escaped=np.asarray([np.count_nonzero(lifecycle == ESCAPED)], dtype="<u8"),
+        failed=np.asarray([np.count_nonzero(lifecycle == FAILED)], dtype="<u8"),
     )
 
 
@@ -1785,7 +1705,7 @@ def _final_particles(
 ) -> FinalParticles:
     count = schedule.particle_count
     valid = np.asarray(
-        (lifecycle != _LIFECYCLE_ESCAPED) & (lifecycle != _LIFECYCLE_FAILED),
+        (lifecycle != ESCAPED) & (lifecycle != FAILED),
         dtype="<u1",
     )
     return FinalParticles(
@@ -1808,10 +1728,11 @@ def _final_particles(
     )
 
 
-def _resolved_boundary_laws(prepared: PreparedTransport) -> list[dict[str, object]]:
+def _resolved_boundary_laws(
+    case: SimulationCase, prepared: PreparedTransport
+) -> list[dict[str, object]]:
     """Describe the resolved response and geometric meaning of each boundary."""
 
-    case = prepared.case
     contact_by_group = {rule.boundary_group: rule.contact_geometry for rule in case.spec.boundaries}
     return [
         {
@@ -1832,22 +1753,21 @@ def _resolved_boundary_laws(prepared: PreparedTransport) -> list[dict[str, objec
 
 
 def _manifest(
-    prepared: PreparedTransport,
+    run: _PreparedRun,
     lifecycle: np.ndarray,
     failure_reason_code: np.ndarray,
     event_statistics: _EventStatistics,
 ) -> dict[str, object]:
-    case = prepared.case
+    case, prepared, facts = run.case, run.transport, run.facts
     spec = case.spec
-    brownian = _brownian_provenance(prepared.physics)
-    uses_rk4_dense = prepared.capabilities.dense_rk4
+    brownian = facts.brownian
     lifecycle_counts = {
-        "pending": int(np.count_nonzero(lifecycle == _LIFECYCLE_PENDING)),
-        "active": int(np.count_nonzero(lifecycle == _LIFECYCLE_ACTIVE)),
-        "stuck": int(np.count_nonzero(lifecycle == _LIFECYCLE_STUCK)),
-        "held": int(np.count_nonzero(lifecycle == _LIFECYCLE_HELD)),
-        "escaped": int(np.count_nonzero(lifecycle == _LIFECYCLE_ESCAPED)),
-        "failed": int(np.count_nonzero(lifecycle == _LIFECYCLE_FAILED)),
+        "pending": int(np.count_nonzero(lifecycle == PENDING)),
+        "active": int(np.count_nonzero(lifecycle == ACTIVE)),
+        "stuck": int(np.count_nonzero(lifecycle == STUCK)),
+        "held": int(np.count_nonzero(lifecycle == HELD)),
+        "escaped": int(np.count_nonzero(lifecycle == ESCAPED)),
+        "failed": int(np.count_nonzero(lifecycle == FAILED)),
     }
     failure_counts = {
         name: int(np.count_nonzero(failure_reason_code == code))
@@ -1858,43 +1778,10 @@ def _manifest(
         "case_file_hash": case.case_file_hash,
         "data_content_hash": case.content_hash,
         "case_schema_version": CASE_FORMAT_VERSION,
-        "data_coordinate_system": case.data.coordinate_system,
-        "motion_mode": spec.motion.mode,
-        "engine_algorithm_revision": ENGINE_ALGORITHM_REVISION,
+        "data_coordinate_system": facts.coordinate_system,
+        "motion_mode": facts.motion_mode,
+        **facts.revision_document(),
         "durable_commit_cadence": _durable_commit_cadence(prepared.schedule.particle_count),
-        "compiled_cpu_tile_revision": COMPILED_CPU_TILE_REVISION,
-        "step_proposal_revision": STEP_PROPOSAL_REVISION,
-        "rk4_enclosure_revision": RK4_ENCLOSURE_REVISION if uses_rk4_dense else None,
-        "rk4_dense_path_revision": RK4_DENSE_PATH_REVISION if uses_rk4_dense else None,
-        "exponential_midpoint_revision": (
-            EXPONENTIAL_MIDPOINT_REVISION
-            if spec.solver.integrator == "exponential_midpoint"
-            else None
-        ),
-        "exponential_midpoint_enclosure_revision": (
-            EXPONENTIAL_MIDPOINT_ENCLOSURE_REVISION
-            if spec.solver.integrator == "exponential_midpoint"
-            else None
-        ),
-        "physics_catalog_revision": PHYSICS_CATALOG_REVISION,
-        "physics_runtime_revision": PHYSICS_RUNTIME_REVISION,
-        "field_location_revision": FIELD_LOCATION_REVISION,
-        "field_time_revision": FIELD_TIME_REVISION,
-        "required_field_revision": REQUIRED_FIELD_REVISION,
-        "geometry_algorithm_revision": (GEOMETRY_ALGORITHM_REVISION),
-        "event_algorithm_revision": EVENT_ALGORITHM_REVISION,
-        "topology_algorithm_revision": _topology_algorithm_revision(prepared),
-        "boundary_algorithm_revision": (
-            BOUNDARY_ALGORITHM_REVISION if prepared.boundary_rules else None
-        ),
-        "source_algorithm_revision": SOURCE_ALGORITHM_REVISION,
-        "rng_algorithm_revision": RNG_ALGORITHM_REVISION,
-        "brownian_rng_revision": brownian["rng_revision"],
-        "joint_ou_revision": brownian["ou_revision"],
-        "joint_ou_split_revision": brownian["split_revision"],
-        "brownian_composition_revision": brownian["composition_revision"],
-        "brownian_charge_dense_revision": brownian["charge_dense_revision"],
-        "brownian_tree_policy_revision": brownian["tree_policy_revision"],
         "brownian_interval_tree_depth": brownian["interval_tree_depth"],
         "brownian_adaptive_max_depth": brownian["adaptive_max_depth"],
         "random_draw_kinds": {
@@ -1919,16 +1806,16 @@ def _manifest(
             "callback_cache_policy": "process_local_overloads",
         },
         "resolved": {
-            "integrator": spec.solver.integrator,
-            "backend": "cpu",
-            "path_kind": prepared.capabilities.path_kind,
-            "physics_models": prepared.physics.resolved_models(),
+            "integrator": facts.integrator,
+            "backend": facts.backend,
+            "path_kind": facts.path_kind,
+            "physics_models": facts.model_document(),
             "brownian_coefficient_policy": brownian["coefficient_policy"],
             "sources": [
                 {"source_id": index, "name": source.name, "type": source.kind}
                 for index, source in enumerate(spec.sources)
             ],
-            "boundary_laws": _resolved_boundary_laws(prepared),
+            "boundary_laws": _resolved_boundary_laws(case, prepared),
             "required_fields": [
                 {
                     "name": name,
@@ -1960,6 +1847,7 @@ def _manifest(
             "max_interactions_per_step": spec.solver.event.max_interactions_per_step,
             "corner_policy": spec.solver.event.corner_policy,
         },
+        "numerical_work_policy": prepared.work_policy.as_manifest(),
         "event_refinement": (
             {
                 "accepted_particle_pieces": event_statistics.accepted_particle_pieces,
@@ -1979,15 +1867,11 @@ def _manifest(
         "lifecycle_counts": lifecycle_counts,
         "failure_reason_codes": {name: code for code, name in _FAILURE_REASON_NAMES.items()},
         "failure_reason_counts": failure_counts,
-        "maximum_dt_over_tau": prepared.maximum_dt_over_tau,
-        "maximum_dt_charge_lipschitz": prepared.maximum_dt_charge_lipschitz,
+        "prepared_stability_upper_bounds": {
+            "requested_base_dt_s": prepared.time.dt_s,
+            "dt_times_drag_velocity_lipschitz": prepared.maximum_dt_over_tau,
+            "dt_times_charge_lipschitz": prepared.maximum_dt_charge_lipschitz,
+            "meaning": "Requested base step times prepared full-domain bounds; not observed accepted-step maxima or accuracy estimates.",
+        },
         "memory_plan": prepared.memory_plan.as_manifest(),
     }
-
-
-def _topology_algorithm_revision(prepared: PreparedTransport) -> str | None:
-    """Return the active topology revision without adding manifest branching."""
-
-    if prepared.topology is None:
-        return None
-    return TOPOLOGY_ALGORITHM_REVISION

@@ -50,7 +50,7 @@ def test_declared_process_private_workspaces_fit_the_shared_prepare_budget(
     tmp_path: Path, case_id: str
 ) -> None:
     paths = materialize_microcase(case_id, tmp_path / case_id)
-    prepared = _prepare(load_case(paths.case_path))
+    prepared = _prepare(load_case(paths.case_path)).transport
     plan = prepared.memory_plan
     # This checks actual allocation roots reached by worker serialization,
     # including nested aliases, against the same public check/run memory plan.

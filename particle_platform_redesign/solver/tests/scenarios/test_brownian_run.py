@@ -470,8 +470,8 @@ def test_brownian_default_max_is_identical_to_explicit_base_depth(tmp_path: Path
         _assert_record_identity(first, second)
     _assert_record_identity(default.read_boundary_events(), explicit.read_boundary_events())
     _assert_record_identity(default.read_failure_events(), explicit.read_failure_events())
-    default_manifest = dict(default.manifest)
-    explicit_manifest = dict(explicit.manifest)
+    default_manifest = default.manifest_document()
+    explicit_manifest = explicit.manifest_document()
     default_manifest.pop("case_file_hash")
     explicit_manifest.pop("case_file_hash")
     default_manifest.pop("resume_identity_hash")
@@ -1849,7 +1849,6 @@ def test_brownian_all_row_adaptive_multi_reflection_respects_memory_and_output_i
     assert memory["stochastic_tree_work_bytes_per_particle"] == 128 * (8 + 4)
     assert memory["event_candidate_capacity"] >= minimum_event_candidate_capacity
     components = memory["components"]
-    assert isinstance(components, dict)
     assert components["geometry_query_scratch"] == (
         3 * memory["event_candidate_capacity"] * np.dtype("<i8").itemsize + 16
     )

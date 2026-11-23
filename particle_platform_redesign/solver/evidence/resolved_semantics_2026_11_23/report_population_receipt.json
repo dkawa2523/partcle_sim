@@ -1,0 +1,32 @@
+{
+  "scope": "Same candidate input/seed/window/clock replay, not new Monte Carlo samples or native random-path matching",
+  "identity_receipt": {
+    "path": "solver/evidence/resolved_semantics_2026_11_23/population_identity.json",
+    "sha256": "sha256:226517301dbe8f797722c92ada320bdb5e82b6f672f7d0865dfbe8b4c1049b9e"
+  },
+  "population_assessment": {
+    "path": "solver/evidence/resolved_semantics_2026_11_23/population_comparison.json",
+    "sha256": "sha256:dded6d02858b639a851a2a6d37339470736f50c0471fd38b3889755c560dc0de"
+  },
+  "historical_reviewed_projection": {
+    "path": "solver/evidence/retirement_2026_11_23/report_inputs/assessment.json",
+    "sha256": "sha256:f8705fc65132eaf24d3a98b6e7fc219bc05e43c059f3da582db27034a5c61ea3"
+  },
+  "all80_scientific_payloads_equal": true,
+  "all80_failure_events_zero": true,
+  "production_source_and_lock_bindings_checked": 50,
+  "comparison_scope": {
+    "scope": "exploratory 40-candidate-replica prediction against one saved native realization per case",
+    "primary": "0–5ms restricted mean active lifetime of the fixed 287-ID cohort",
+    "not_claimed": [
+      "confirmatory equivalence",
+      "qualified native solver parity",
+      "physical validation",
+      "pathwise random matching"
+    ],
+    "dependence": "within-replica IDs/time need not be iid for these replica ranks; A/P with the same seed/native keys may be coupled and are analyzed separately, never pooled as80 independent replicas",
+    "multiple_metrics": "primary and exploratory secondary functional/scalar ranks reported separately; probabilities are not a simultaneous all-metric PASS",
+    "prediction_vs_mean": "40-candidate min/max is a 39/41≈95.12% prediction interval under continuous exchangeable null, not a confidence interval for the ensemble mean; ties make coverage conservative"
+  },
+  "note": "Current candidate replay plus unchanged saved native reference. Same seeds are not new independent Monte Carlo samples. Previously reviewed practical interpretation is retained; no report-owned V&V gate is computed."
+}

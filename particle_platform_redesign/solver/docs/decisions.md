@@ -1475,3 +1475,16 @@ resident Z、charge rateとion多項式は制限しない。既存`electric_coul
 | 解析解またはreference | 平面へのsurface/center hit時刻、center source departure、混在面の順序と端cap、point退化、反射後residual、output/slab/resume identity |
 | 性能・memory影響 | 一つのBVHと既存finite_contact_enabled引数を使用。mode別static maskと既存point/capsule arbitrationの最大candidate scratchをmemory planへ反映。常時particle×facet配列は作らない |
 | 置換・削除する旧経路 | 周期の有無だけによるfinite/point mask dispatchと全candidateへ同じradiusを適用するnormal/residualを置換。第二detector、lawからのmode推論、粒子radiusの上書き、位置nudge、互換aliasは追加しない |
+
+## Prepared physics identity, primitive constraints and proof ownership
+
+| 項目 | 判断 |
+|---|---|
+| 解く利用case | 利用者が公開model情報から自身のfieldを作り、既存categoryのmodel追加・削減でもstage・bounds・適用域・結果説明を対応させる |
+| 既存構造の不足 | positive boolでは0を許す係数を説明できずruntimeがmodel別に補正していた。typed planからmodel名を再推定し、固定recordを大量位置引数へ再展開していた。local proof入力とconstant可否もruntimeがmodel codeから再分類していた |
+| 所有module | catalogはdescriptor identity、値制約、証明field roleとcaller binding。runtimeは準備済みcertificateと連成の合成。compiledは固定numeric recordと同stageの一pass。forces/chargeは共有point bodyと固有のbound導出 |
+| 必要field/state | 新しい物理stateやfieldは不要。finite/positive/nonnegativeは一つの値制約。質量・drag径・電気半径・排除体積のauthorityとstageのx/v/Zを維持する |
+| 対応座標・integrator | 既存XY/RZ、既存RK4/exponential midpoint/OUの適用範囲と数値規則を維持する。metadataをkernelへ渡さず、未知modelへのfallbackも追加しない |
+| 独立確認 | primitiveの0/負境界と局所failure、独立DecimalのG/Jとforce feedback、Epstein速度積分と極限、global/local bound包含、constant specializationの成立条件、公開scenarioを確認する |
+| 性能・memory影響 | 既存primitive slab・出力workspaceを再利用し、数値recordをcompiled境界へ直接渡す。resident配列や常設diagnosticは増やさない。warm stageを同入力で比較しpayload identityと時間を別々に記録する |
+| 置換・削除する旧経路 | reverse model serialization、model別非負rule補正、runtimeのlocal proof offset分類、大量位置引数ABI、Epstein rateとconstant-forceの重複production bodyを撤去する。独立oracleと意味の異なるglobal/local証明は保持する |

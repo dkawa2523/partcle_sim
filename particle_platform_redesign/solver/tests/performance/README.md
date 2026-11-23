@@ -82,4 +82,4 @@ release, canonical boundary/failure events, lifecycle, every emitted frame and
 probe. They do not compare unsaved internal paths or HDF5 container bytes.
 
 Current cleanup execution and limits are recorded in
-[`evidence/retirement_2026_11_23/performance`](../../evidence/retirement_2026_11_23/performance/README.md).
+[`evidence/resolved_semantics_2026_11_23`](../../evidence/resolved_semantics_2026_11_23/README.md).

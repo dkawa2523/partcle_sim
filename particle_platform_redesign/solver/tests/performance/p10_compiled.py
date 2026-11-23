@@ -337,14 +337,15 @@ def _execute_run(
         raise RuntimeError(f"{scenario}: unexpected boundary-event count")
     if summary.frame_count != 0:
         raise RuntimeError(f"{scenario}: timing case unexpectedly wrote frames")
-    resolved = _mapping_value(result.manifest, "resolved")
+    manifest = result.manifest_document()
+    resolved = _mapping_value(manifest, "resolved")
     path_kind = str(resolved["path_kind"])
     if path_kind != expected_path_kind:
         raise RuntimeError(f"{scenario}: unexpected path kind {path_kind!r}")
-    memory_plan = result.manifest["memory_plan"]
+    memory_plan = manifest["memory_plan"]
     if not isinstance(memory_plan, Mapping):
         raise RuntimeError(f"{scenario}: result memory plan is not a mapping")
-    algorithms = {key: value for key, value in result.manifest.items() if key.endswith("_revision")}
+    algorithms = {key: value for key, value in manifest.items() if key.endswith("_revision")}
     # A nested cached kernel can execute without registering a specialization
     # on its Python dispatcher. Observe the actual Python-entered advance;
     # its signature registration works for both compiled and disk-cached code.

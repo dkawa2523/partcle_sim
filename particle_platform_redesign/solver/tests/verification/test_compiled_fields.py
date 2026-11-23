@@ -563,7 +563,7 @@ def _required_regular_sampling(layout: RegularLayout) -> tuple[PreparedFieldSet,
     )
     data = DataBundle("cartesian_xy", provenance, geometry, (layout,), (field,))
     prepared = prepare_required_fields(
-        data, {field.name: RequiredFieldMetadata("1", ("value",), "scalar", False)}
+        data, {field.name: RequiredFieldMetadata("1", ("value",), "scalar", "finite")}
     )
     return prepared, field
 

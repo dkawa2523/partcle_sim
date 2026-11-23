@@ -1,0 +1,24 @@
+{
+  "status": "Implementation and local integration complete; commit/push and resulting remote checks are recorded separately",
+  "scope": "Whole current particle platform, including inherited COMSOL saved-result comparison and user/implementer/scientific review",
+  "requirements": [
+    {"area": "User journey and all major entry routes", "status": "executed", "evidence": ["installed_workflow_windows.json", "installed_workflow_linux.json", "user_review.json"]},
+    {"area": "Main owners and independent handoffs", "status": "investigated and restructured", "evidence": ["README.md", "structure_review.json"]},
+    {"area": "Physics, proof, stage and compiled model extension/removal", "status": "implemented and independently checked", "evidence": ["verification.json", "science_review.json", "physics_stage_before.json", "physics_stage_after.json"]},
+    {"area": "Time semantics, state, worker and checkpoint responsibilities", "status": "implemented and executed", "evidence": ["verification.json", "numerical_qualification_fix.json", "science_review.json"]},
+    {"area": "Input/settings, examples and reduction", "status": "implemented and executed", "evidence": ["user_review.json", "producer_publication.json", "installed_workflow_windows.json"]},
+    {"area": "Result interpretation, selection, reuse and complete publication", "status": "implemented and executed", "evidence": ["user_review.json", "selection_benchmark.json", "structure_review.json"]},
+    {"area": "Inherited saved COMSOL comparison", "status": "current A/P40-per-case replay and native reanalysis executed", "evidence": ["population_identity.json", "population_comparison.json", "vv/xy/comparison_summary.json", "vv/rz/gates.csv", "vv/curved/comparison_summary.json"]},
+    {"area": "Appropriate scientific tests and verification infrastructure", "status": "obsolete container/type and stale caller assumptions replaced, independent oracles retained", "evidence": ["verification.json", "reviews.json"]},
+    {"area": "Affected performance and memory", "status": "nine current families executed, same-input time/owned-memory before-after measured", "evidence": ["performance.json"]},
+    {"area": "Distribution and independent operating systems", "status": "final documented wheel installed and main routes executed on Windows and Linux", "evidence": ["distribution_identity.json"]},
+    {"area": "Documentation, AGENTS, project skills and report", "status": "updated and executed", "evidence": ["report_verification.json", "verification.json"], "documentation_check": "33 maintained documents,4 skills,0 errors;7 documentation/snapshot tests passed"},
+    {"area": "Independent reviews and mandatory fixes", "status": "three perspectives closed, mandatory findings zero", "evidence": ["reviews.json"]}
+  ],
+  "preserved": ["One production engine", "Same-stage x/v/Z and charge/force feedback", "Accepted-prefix-only commit and first-hit/remainder", "Counter RNG and conditional OU split", "Axis semantics and independent mass/radii/weight", "Read-only old_code and reference-only model_dataset", "All234 protected report runtime files"],
+  "external_conditions": [
+    {"claim": "Historical43220particle S2/S3-M replay", "status": "not executed", "reason": "Historical portable case and separately managed full artifacts are absent from the current clone", "resume_condition": "Supply the corresponding case, native export/result and source-map with verified hashes"},
+    {"claim": "Full native numerical parity and physical device prediction", "status": "not certified", "reason": "Practical population agreement and platform refactoring do not provide all-cohort resolution/path/field convergence or source-rate/adhesion experimental evidence", "resume_condition": "Define the requested physical observable and accuracy budget, obtain matched reference-resolution and physical-source/capture evidence, and run the independent qualification appropriate to that claim"}
+  ],
+  "no_unresolved_executable_mandatory_work_in_current_scope": true
+}

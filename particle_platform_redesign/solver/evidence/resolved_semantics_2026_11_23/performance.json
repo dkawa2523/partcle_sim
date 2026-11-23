@@ -1,0 +1,257 @@
+{
+  "status": "9 current families executed",
+  "families": {
+    "p06": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p06.json",
+        "sha256": "761db90fa66d6662529aa09db4406dc04d03f9ada556249f6d2c07b80d3a4802"
+      },
+      "retained": "performance/p06.json",
+      "conditions": {
+        "numpy": "2.5.3",
+        "particles": 32,
+        "platform": "Windows-11-10.0.26200-SP0",
+        "processor": "Intel64 Family 6 Model 198 Stepping 2, GenuineIntel",
+        "python": "3.12.13",
+        "repeats": 1,
+        "timed_scope": "load_case + simulate + open_result",
+        "warmups": 1
+      }
+    },
+    "p09": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p09.json",
+        "sha256": "d1cfddd7bec5f146d797bc9b224f1f99f0f141fd7769c7fac1a92458b479aac9"
+      },
+      "retained": "performance/p09.json",
+      "conditions": {
+        "case_materialization_in_measured_scope": false,
+        "fresh_process_note": "fresh means a new Python process; filesystem caches are not flushed",
+        "memory_limit_mb": 4096,
+        "modes": [
+          "warm"
+        ],
+        "particle_counts": [
+          256
+        ],
+        "repeats": 1,
+        "scopes": [
+          "load",
+          "prepare",
+          "run"
+        ],
+        "warmup_runs_for_warm_mode": 1
+      }
+    },
+    "p10": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p10.json",
+        "sha256": "3cbebbf275bb15c18482481575a69e6cea46dc745d59d3d83a060f0ddda6635a"
+      },
+      "retained": "performance/p10.json",
+      "conditions": {
+        "case_materialization_in_measured_scope": false,
+        "compiled_execution": "fastmath=False, serial compiled kernels, NUMBA_DISABLE_JIT=0, NUMBA_NUM_THREADS=1",
+        "event_particles": 32,
+        "field_particles": 256,
+        "jit_isolation": "each observation uses a fresh process and a unique initially empty NUMBA_CACHE_DIR",
+        "repeats": 1,
+        "scenarios": [
+          "field",
+          "event"
+        ],
+        "timed_scope": "load_case + simulate + open_result",
+        "warmup_runs_for_warm_mode": 1
+      }
+    },
+    "p11": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p11.json",
+        "sha256": "dc54c47871f3b3c01c59e49826fca44a6bc1a08af3f384d78c8b41ea8e70472f"
+      },
+      "retained": "performance/p11.json",
+      "conditions": {
+        "case_materialization_in_measured_scope": false,
+        "compiled_execution": "compiled_cpu_tile_v31 with NUMBA_DISABLE_JIT=0, fastmath=False, serial compiled kernels, NUMBA_NUM_THREADS=1",
+        "jit_isolation": "each observation uses a fresh process and a unique initially empty NUMBA_CACHE_DIR",
+        "macro_step_dt_s": 0.75,
+        "maximum_dt_over_tau": 3.0,
+        "particle_count": 256,
+        "repeats": 1,
+        "scenario": "expanded C03 constant linear relaxation and additive force",
+        "timed_scope": "load_case + simulate + open_result",
+        "warmup_runs_for_warm_mode": 1
+      }
+    },
+    "p14": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p14.json",
+        "sha256": "7480c2cba035e82bb86d4faf13f075bcf9591b1a7721e0333880ea80e5a3c4a1"
+      },
+      "retained": "performance/p14.json",
+      "conditions": {
+        "case_materialization_in_measured_scope": false,
+        "compiled_execution": "NUMBA_DISABLE_JIT=0; NUMBA_NUM_THREADS=1; the case schema has no thread-count setting",
+        "execution_mode": "single-thread compiled CPU",
+        "matrix_policy": "orthogonal coverage; output=all is limited to one short regular-field row per suite",
+        "memory_limit_mb": 1024,
+        "process_isolation": "each observation uses a fresh process and private initially empty NUMBA_CACHE_DIR",
+        "repeats_per_row": 1,
+        "rows": 8,
+        "timed_scope": "load_case + simulate + open_result",
+        "warmup_runs_for_warm_mode": 1
+      }
+    },
+    "p14u": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p14u.json",
+        "sha256": "b34c0636a4739e2d9ccc001a56139e58ebce70d6104f7f8d0f5580d05772ec8d"
+      },
+      "retained": "performance/p14u.json",
+      "conditions": {
+        "absolute_seconds_are_gating": false,
+        "execution_mode": "single-thread compiled CPU",
+        "harness_input_generation_uses_canonical_writer": true,
+        "harness_uses_test_only_artifact_helpers": true,
+        "memory_limit_mb": 8192,
+        "performance_particle_counts": [
+          256
+        ],
+        "performance_repeats_per_mode": 1,
+        "release_gate_complete": false,
+        "release_gate_reason": "smoke or custom particle counts are evidence only, not P14-U release completion",
+        "rss_note": "peak RSS is the process high-water since worker start, sampled after load/simulate/open and before external result validation; additional high-water is max(0, peak_after - peak_before), not instantaneous allocation",
+        "solver_execution_uses_only_public_api": true
+      }
+    },
+    "b03": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/b03.json",
+        "sha256": "e81544bad9db15194d750d4b6446f8fee1fbfdb42424f9dfcc489882a3d7841f"
+      },
+      "retained": "performance/b03.json",
+      "conditions": {
+        "brownian_adaptive_max_depth": 3,
+        "brownian_interval_tree_depth": 3,
+        "case_materialization_in_measured_scope": false,
+        "dt_s": 0.02,
+        "end_s": 0.2,
+        "macro_steps": 10,
+        "maximum_leaves_per_root": 8,
+        "memory_limit_mb": 512,
+        "output_schedule": "none for every row",
+        "particle_counts": [
+          32
+        ],
+        "repeats_per_row": 1,
+        "same_process_warmups_per_observation": 1,
+        "seed": 1741,
+        "time_grid_note": "The original decimal 0.2/0.02 ten-step grid is retained to exercise the indexed macro-grid endpoint handling; engine revision is read from each result manifest.",
+        "uniform_leaves_per_root": 8
+      }
+    },
+    "p19": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/p19.json",
+        "sha256": "65bd6b10c18ad3619b5e18258bddf877551f28b4776f3225b3b3812dee2af2a7"
+      },
+      "retained": "performance/p19.json",
+      "conditions": {}
+    },
+    "process": {
+      "exit_code": 0,
+      "raw": {
+        "path": ".artifacts/resolved_semantics_20261123/performance/process/measurement.json",
+        "sha256": "95eb794a05a932419fbf1343c6c19230a34bedbf46cf3d939dec68b569343da8"
+      },
+      "retained": "performance/process.json",
+      "conditions": {
+        "particles": 10000,
+        "macro_steps": 320,
+        "interval_s": [
+          0.0,
+          4.0
+        ],
+        "workers": [
+          1,
+          4
+        ],
+        "repeats": 1,
+        "timed_scope": "load_case + simulate (spawn, IPC, writer, shutdown included) + open_result",
+        "untimed": "input generation, one serial warmup, outcome validation, scientific hashing",
+        "input": "editable input/case.yaml and case.h5; P14-U XY regular32x4 surface release, Epstein, electric, gravity",
+        "cache": "persistent disk cache, one serial warmup; fresh process team for every simulate",
+        "output": "no trajectory frames or probes; complete final/release/boundary/failure/lifecycle payload"
+      }
+    }
+  },
+  "conditions": "Some small workloads ran alongside A/P replay, root tests or report work. Timings are descriptive; process1/4 workload began after A/P finished. No guaranteed scaling or universal before/after speed claim.",
+  "worker_public_seconds": {
+    "1": 28.771412400063127,
+    "4": 17.400465299957432
+  },
+  "worker_scientific_identity": true,
+  "independent_checks": [
+    "P14-U separate XY time/regular-P1-Q1 mesh refinement and RZ axis/parity",
+    "B03 translated pair/axis/charge checks",
+    "P19 same reached fields global/local identity",
+    "Process10000 known target captures plus zero failures/children"
+  ],
+  "before_after": {
+    "physics_stage": [
+      "physics_stage_before.json",
+      "physics_stage_after.json"
+    ],
+    "physics_interpretation": "4096 rows in three families, identical payloads; timing distributions measured under changing host load, no general speedup claim.",
+    "selection": "selection_benchmark.json",
+    "selection_interpretation": "Same-session1M rows/30k ID selection only, five samples before/after; not particle integration speed.",
+    "same_input_worker": {
+      "baseline_path": "evidence\\retirement_2026_11_23\\performance\\process_workers.json",
+      "baseline_sha256": "cb66b8251df834db7096af32cb8fa635c9d8034d85974a37e3b068b941c9ca97",
+      "same_exact_yaml_h5_and_conditions": true,
+      "input_sha256": {
+        "case.yaml": "2b0dbc7196464f7445172cb3947009a2f6f398d01a75b30b6c88eb4d6c9486d7",
+        "case.h5": "afd949a8c1cefc07c0831cbdca271b5e18f36d82054990f47486e65e2b9c0641"
+      },
+      "before_public_seconds": {
+        "1": 29.278202099958435,
+        "4": 18.353255200083368
+      },
+      "after_public_seconds": {
+        "1": 28.771412400063127,
+        "4": 17.400465299957432
+      },
+      "before_owned_plan_bytes": {
+        "1": 135454767,
+        "4": 432417248
+      },
+      "after_owned_plan_bytes": {
+        "1": 135454767,
+        "4": 432354878
+      },
+      "scratch_bytes_per_particle_before_after": [
+        2048,
+        2048
+      ],
+      "stage_composition_bytes_per_particle_before_after": [
+        382,
+        382
+      ],
+      "interpretation": "One sample for each worker count per source; same host/input/settings, different session and host activity. No statistically supported implementation speedup claim. Owned plan is not process RSS."
+    }
+  },
+  "not_claimed": [
+    "P14-U release completeness",
+    "1M scale rerun",
+    "COMSOL accuracy from worker equality",
+    "portable throughput SLA"
+  ]
+}

@@ -1,0 +1,44 @@
+{
+  "description": "Warm prepared stage only; 4096 rows, five blocks of 200 calls; public force-composition verification inputs, fixed process.",
+  "records": [
+    {
+      "rows": 4096,
+      "median_s": 0.0015683890000218526,
+      "samples_s": [
+        0.0015509035001741722,
+        0.0015683890000218526,
+        0.0015454120002686977,
+        0.0016939479997381567,
+        0.001707946000387892
+      ],
+      "payload_sha256": "607f5c5a6141cd3ad1472ff0c14d2ffdb83a42117aee67b4b95d628e755c3a09",
+      "model": "epstein"
+    },
+    {
+      "rows": 4096,
+      "median_s": 0.0016626329999417067,
+      "samples_s": [
+        0.0016710894997231662,
+        0.0016626329999417067,
+        0.00166847950022202,
+        0.0015280194999650121,
+        0.0016564565000589937
+      ],
+      "payload_sha256": "a59c676376f750ed9b021ea175292cf2fa5165852ab64a7b466e32c2015747d7",
+      "model": "finite_epstein"
+    },
+    {
+      "rows": 4096,
+      "median_s": 0.001638088999898173,
+      "samples_s": [
+        0.0016744024999206886,
+        0.001612223500269465,
+        0.001638088999898173,
+        0.0018077629996696488,
+        0.001597466500243172
+      ],
+      "payload_sha256": "9654500dc618e71d22ecdebe63668c3466431eea48e023e6645216c4bcf91da2",
+      "model": "stokes"
+    }
+  ]
+}

@@ -110,29 +110,25 @@ class BuilderSpecification:
 
 def build_from_configuration(
     configuration_path: str | Path,
-    output_path: str | Path,
-    *,
-    report_path: str | Path | None = None,
+    output_directory: str | Path,
 ) -> dict[str, object]:
-    """Build and atomically publish an augmented canonical ``case.h5``."""
+    """Build and publish an augmented bundle with its receipt in a fresh directory."""
+
+    from ..bundle_publication import bundle_publication
 
     config_path = Path(configuration_path).expanduser().resolve()
-    output = Path(output_path).expanduser().resolve()
-    report = Path(report_path).expanduser().resolve() if report_path is not None else None
-    if report == output:
-        raise ValueError("report_path and output_path must be different")
+    output = Path(output_directory).expanduser().resolve()
     if output.exists():
         raise FileExistsError(output)
-    if report is not None and report.exists():
-        raise FileExistsError(report)
     raw = config_path.read_bytes()
     specification = parse_configuration(raw, base_directory=config_path.parent)
     config_hash = "sha256:" + hashlib.sha256(raw).hexdigest()
-    result = _build(specification, config_hash, output)
-    if report is not None:
-        report.parent.mkdir(parents=True, exist_ok=True)
-        with report.open("x", encoding="utf-8", errors="strict") as stream:
-            stream.write(json.dumps(result, allow_nan=False, indent=2, sort_keys=True) + "\n")
+    with bundle_publication(output) as staging:
+        result = _build(specification, config_hash, staging / "bundle.h5")
+        result["output_path"] = str(output / "bundle.h5")
+        (staging / "report.json").write_text(
+            json.dumps(result, allow_nan=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        )
     return result
 
 

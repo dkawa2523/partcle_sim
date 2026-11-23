@@ -8,7 +8,7 @@ solver実行や比較判定は行いません。app ID、タイトル、block ID
 独立solver projectから実行します。
 
 ```console
-uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/retirement_2026_11_23/report_inputs/assessment.json --quality evidence/retirement_2026_11_23/report_inputs/quality.json --performance evidence/retirement_2026_11_23/report_inputs/performance.json --build-status complete
+uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/resolved_semantics_2026_11_23/report_inputs/assessment.json --quality evidence/resolved_semantics_2026_11_23/report_inputs/quality.json --performance evidence/resolved_semantics_2026_11_23/report_inputs/performance.json --build-status complete
 uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q
 ```
 
@@ -18,8 +18,13 @@ reviewed projectionsを読み、現行authority・catalog・producerと入力の
 
 各projectionはqueries配下へ、対象queryのrowsと実ファイル・母集団・単位・条件を明示したsourceを持ちます。
 assessmentはcase_audit/trajectory_divergence、qualityはquality_findings、performanceはimplementation_work_packagesを更新します。
-A/Pの保存比較は元の入力と40実現に限定した科学参照です。新しい計算標本や現行全体の数値認定としません。
+A/P比較は入力receiptのsource、seed集合、40実現/各case、windowへ限定します。
+過去の保存比較と変更後の再実行をsource identityで区別し、再利用native参照を新しい標本とは数えません。
+過去のretirement projectionはその当時のsourceに対する履歴であり、変更後の品質・性能のPASSを補いません。
 generatedAtはsnapshot作成時刻、共通の科学的cutoffがないreport.asOfはnullです。
+
+recipe 2は完成bundleのsource table全量を明示し、通常bundle producerはbundle.h5/report.jsonをdirectory単位で公開します。
+ResultView/ResultCohort、manifest_document/source_identity、macro window・stability boundの説明も現行ownerへ対応させます。
 
 ## ビルドと閲覧
 
@@ -40,6 +45,6 @@ dist全体をloopback HTTPでserveします。snapshot、HTML、runtimeのidenti
 公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/report.htmlへ書き出せます。
 dist/offline HTMLはGitへ同梱せず、sourceとreviewed inputsから再生成します。
 
-今回の実行範囲と結果は[整理・実行記録](../solver/evidence/retirement_2026_11_23/README.md)に記載します。
+今回の実行範囲と結果は[整理・実行記録](../solver/evidence/resolved_semantics_2026_11_23/README.md)に記載します。
 authoringのbuildStatus: completeは未実施のbuild、表示確認、公開を成功にする値ではありません。
 公開先・共有設定は変更していません。

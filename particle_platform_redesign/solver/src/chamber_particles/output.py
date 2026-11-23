@@ -9,7 +9,8 @@ import os
 import sys
 import time
 from collections.abc import Iterator, Mapping
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from dataclasses import fields as dataclass_fields
 from os import PathLike
 from pathlib import Path
 from types import MappingProxyType
@@ -31,6 +32,8 @@ from .case_format import (
 from .case_format import (
     write as write_canonical,
 )
+from .cpu import PersistentParticleState
+from .lifecycle import FAILED, NAMES
 
 type FloatArray = NDArray[np.float64]
 type Int64Array = NDArray[np.int64]
@@ -366,7 +369,7 @@ def _context_from_bundle(bundle: DataBundle) -> ResultContext:
 
 def _read_context(path: Path, manifest: Mapping[str, object]) -> ResultContext:
     binding = manifest.get("context")
-    if not isinstance(binding, dict) or binding.get("path") != "context.h5":
+    if not isinstance(binding, Mapping) or binding.get("path") != "context.h5":
         raise ResultOpenError("result context binding is missing")
     identity = _validated_manifest_identity(manifest)
     try:
@@ -386,7 +389,7 @@ def _read_context(path: Path, manifest: Mapping[str, object]) -> ResultContext:
 
 def _validated_manifest_identity(manifest: Mapping[str, object]) -> dict[str, object]:
     stored = manifest.get("resume_identity")
-    if not isinstance(stored, dict):
+    if not isinstance(stored, Mapping):
         raise ResultOpenError("result resume identity object is missing")
     try:
         encoded, identity = _canonical_identity(stored)
@@ -428,18 +431,7 @@ class CheckpointState:
     release_cursor: int
     frame_cursor: int
     probe_cursor: int
-    position_m: FloatArray
-    velocity_m_s: FloatArray
-    charge_number: FloatArray
-    lifecycle: UInt8Array
-    failure_reason_code: UInt16Array
-    terminal_time_s: FloatArray
-    event_ordinal: UInt32Array
-    physical_boundary_event_ordinal: UInt32Array
-    exact_origin_time_s: FloatArray
-    exact_origin_position_m: FloatArray
-    exact_origin_velocity_m_s: FloatArray
-    start_contact_state: UInt8Array
+    particles: PersistentParticleState
     active_particle_index: Int64Array
     last_field_cell: Int64Array | None
     accepted_particle_pieces: int
@@ -1283,6 +1275,22 @@ class ResultWriter:
             raise
 
 
+def _immutable_json(value: object) -> object:
+    if isinstance(value, Mapping):
+        return MappingProxyType({key: _immutable_json(item) for key, item in value.items()})
+    if isinstance(value, (list, tuple)):
+        return tuple(_immutable_json(item) for item in value)
+    return value
+
+
+def _plain_json(value: object) -> Any:
+    if isinstance(value, Mapping):
+        return {key: _plain_json(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_plain_json(item) for item in value]
+    return value
+
+
 @dataclass(frozen=True, slots=True)
 class ResultView:
     """Lazy read-only view over committed segments of one logical result."""
@@ -1292,6 +1300,44 @@ class ResultView:
     segment_paths: tuple[Path, ...]
     complete: bool
     context_source_count: int
+    manifest_sha256: str = field(init=False)
+
+    def __post_init__(self) -> None:
+        document = self.manifest_document()
+        encoded = json.dumps(
+            document, allow_nan=False, sort_keys=True, separators=(",", ":")
+        ).encode("utf-8")
+        object.__setattr__(self, "manifest_sha256", _sha256_bytes(encoded))
+        object.__setattr__(
+            self,
+            "manifest",
+            MappingProxyType({key: _immutable_json(value) for key, value in document.items()}),
+        )
+
+    def manifest_document(self) -> dict[str, Any]:
+        """Return an independent JSON document for serialization or editing.
+
+        The view's manifest is recursively immutable; editing this copy never
+        changes the opened result or its identity.
+        """
+        return {key: _plain_json(value) for key, value in self.manifest.items()}
+
+    def source_identity(self) -> dict[str, object]:
+        """Return the common JSON receipt binding derived artifacts to this result."""
+        return {
+            "manifest_sha256": self.manifest_sha256,
+            **{
+                key: _plain_json(self.manifest.get(key))
+                for key in (
+                    "case_name",
+                    "case_file_hash",
+                    "data_content_hash",
+                    "result_schema_version",
+                    "result_algorithm_revision",
+                    "context",
+                )
+            },
+        }
 
     def read_context(self) -> ResultContext:
         """Read validated geometry and semantic labels independently of input files."""
@@ -1416,7 +1462,7 @@ def open_result_store(path: _PathInput, *, recovery: bool = False) -> ResultView
     )
     return ResultView(
         partial_path,
-        MappingProxyType(recovery_manifest),
+        recovery_manifest,
         paths,
         False,
         context_source_count,
@@ -1443,7 +1489,7 @@ def _dispatch_segment_write(sink: _SegmentSink, operation: str, payload: object)
 def _canonical_identity(identity: Mapping[str, object]) -> tuple[str, dict[str, object]]:
     try:
         encoded = json.dumps(
-            dict(identity),
+            _plain_json(identity),
             allow_nan=False,
             separators=(",", ":"),
             sort_keys=True,
@@ -1702,27 +1748,13 @@ def _write_checkpoint(
         for name, count in counts.as_dict().items():
             count_group.attrs[name] = count
         state_group = handle.create_group("state")
-        arrays = (
-            ("position_m", state.position_m, "<f8"),
-            ("velocity_m_s", state.velocity_m_s, "<f8"),
-            ("charge_number", state.charge_number, "<f8"),
-            ("lifecycle", state.lifecycle, "<u1"),
-            ("failure_reason_code", state.failure_reason_code, "<u2"),
-            ("terminal_time_s", state.terminal_time_s, "<f8"),
-            ("event_ordinal", state.event_ordinal, "<u4"),
-            (
-                "physical_boundary_event_ordinal",
-                state.physical_boundary_event_ordinal,
-                "<u4",
-            ),
-            ("exact_origin_time_s", state.exact_origin_time_s, "<f8"),
-            ("exact_origin_position_m", state.exact_origin_position_m, "<f8"),
-            ("exact_origin_velocity_m_s", state.exact_origin_velocity_m_s, "<f8"),
-            ("start_contact_state", state.start_contact_state, "<u1"),
-            ("active_particle_index", state.active_particle_index, "<i8"),
+        for item in dataclass_fields(PersistentParticleState):
+            state_group.create_dataset(
+                item.name, data=getattr(state.particles, item.name), dtype=item.metadata["dtype"]
+            )
+        state_group.create_dataset(
+            "active_particle_index", data=state.active_particle_index, dtype="<i8"
         )
-        for name, array, dtype in arrays:
-            state_group.create_dataset(name, data=array, dtype=dtype)
         if state.last_field_cell is not None:
             state_group.create_dataset("last_field_cell", data=state.last_field_cell, dtype="<i8")
         handle.flush()
@@ -1756,24 +1788,12 @@ def _read_checkpoint(
                 release_cursor=int(handle.attrs["release_cursor"]),
                 frame_cursor=int(handle.attrs["frame_cursor"]),
                 probe_cursor=int(handle.attrs["probe_cursor"]),
-                position_m=np.asarray(group["position_m"][...], dtype="<f8"),
-                velocity_m_s=np.asarray(group["velocity_m_s"][...], dtype="<f8"),
-                charge_number=np.asarray(group["charge_number"][...], dtype="<f8"),
-                lifecycle=np.asarray(group["lifecycle"][...], dtype="<u1"),
-                failure_reason_code=np.asarray(group["failure_reason_code"][...], dtype="<u2"),
-                terminal_time_s=np.asarray(group["terminal_time_s"][...], dtype="<f8"),
-                event_ordinal=np.asarray(group["event_ordinal"][...], dtype="<u4"),
-                physical_boundary_event_ordinal=np.asarray(
-                    group["physical_boundary_event_ordinal"][...], dtype="<u4"
+                particles=PersistentParticleState(
+                    **{
+                        item.name: np.asarray(group[item.name][...], dtype=item.metadata["dtype"])
+                        for item in dataclass_fields(PersistentParticleState)
+                    }
                 ),
-                exact_origin_time_s=np.asarray(group["exact_origin_time_s"][...], dtype="<f8"),
-                exact_origin_position_m=np.asarray(
-                    group["exact_origin_position_m"][...], dtype="<f8"
-                ),
-                exact_origin_velocity_m_s=np.asarray(
-                    group["exact_origin_velocity_m_s"][...], dtype="<f8"
-                ),
-                start_contact_state=np.asarray(group["start_contact_state"][...], dtype="<u1"),
                 active_particle_index=np.asarray(group["active_particle_index"][...], dtype="<i8"),
                 last_field_cell=(
                     np.asarray(last_field[...], dtype="<i8")
@@ -1790,7 +1810,7 @@ def _read_checkpoint(
             )
     except (OSError, KeyError, TypeError, ValueError) as error:
         raise ResultOpenError("checkpoint cannot be read") from error
-    _validate_checkpoint_state(state, int(state.position_m.shape[0]))
+    _validate_checkpoint_state(state, int(state.particles.position_m.shape[0]))
     return state, counts
 
 
@@ -1880,46 +1900,15 @@ def _validate_checkpoint_counters(state: CheckpointState) -> None:
 
 
 def _validate_checkpoint_arrays(state: CheckpointState, particle_count: int) -> None:
-    vectors = (
-        state.position_m,
-        state.velocity_m_s,
-        state.exact_origin_position_m,
-        state.exact_origin_velocity_m_s,
-    )
-    if any(
-        array.shape != (particle_count, 2) or array.dtype != np.dtype("<f8") for array in vectors
-    ):
-        raise ResultWriteError("checkpoint vector arrays have invalid layouts")
-    scalars = (
-        (state.charge_number, "<f8"),
-        (state.lifecycle, "<u1"),
-        (state.failure_reason_code, "<u2"),
-        (state.terminal_time_s, "<f8"),
-        (state.event_ordinal, "<u4"),
-        (state.physical_boundary_event_ordinal, "<u4"),
-        (state.exact_origin_time_s, "<f8"),
-        (state.start_contact_state, "<u1"),
-    )
-    if any(
-        array.shape != (particle_count,) or array.dtype != np.dtype(dtype)
-        for array, dtype in scalars
-    ):
-        raise ResultWriteError("checkpoint scalar arrays have invalid layouts")
+    try:
+        state.particles.validate(particle_count)
+    except ValueError as error:
+        raise ResultWriteError(str(error)) from error
     if state.last_field_cell is not None and (
         state.last_field_cell.shape != (particle_count,)
         or state.last_field_cell.dtype != np.dtype("<i8")
     ):
         raise ResultWriteError("checkpoint field-cell hint has an invalid layout")
-    finite = (
-        state.position_m,
-        state.velocity_m_s,
-        state.charge_number,
-        state.exact_origin_time_s,
-        state.exact_origin_position_m,
-        state.exact_origin_velocity_m_s,
-    )
-    if any(not bool(np.isfinite(array).all()) for array in finite):
-        raise ResultWriteError("checkpoint physical state must be finite")
 
 
 def _validate_checkpoint_active_index(active: Int64Array, particle_count: int) -> None:
@@ -1967,7 +1956,7 @@ def _open_completed_path(path: Path) -> ResultView:
             _validate_final_file(final, summary.particle_count, context_source_count)
     except (OSError, KeyError) as error:
         raise ResultOpenError("final result artifact cannot be read") from error
-    return ResultView(path, MappingProxyType(manifest), paths, True, context_source_count)
+    return ResultView(path, manifest, paths, True, context_source_count)
 
 
 def _validate_completed_checkpoint(
@@ -2010,7 +1999,7 @@ def _summary_from_counts(
 
 def _summary_from_manifest(path: Path, manifest: Mapping[str, object]) -> RunSummary:
     counts = manifest.get("counts")
-    if not isinstance(counts, dict):
+    if not isinstance(counts, Mapping):
         raise ResultOpenError("completed manifest counts are missing")
     durable_counts = _counts_from_mapping(
         {name: counts.get(name) for name in _ResultCounts().as_dict()},
@@ -2362,7 +2351,9 @@ def _validate_final_shapes(final: FinalParticles, count: int) -> None:
         raise ResultWriteError("final kinematics_valid values must be 0 or 1")
     if final.failure_reason_code.dtype != np.dtype("<u2"):
         raise ResultWriteError("final failure reason codes must use uint16")
-    failed = final.lifecycle == np.uint8(4)
+    if not bool(np.isin(final.lifecycle, tuple(NAMES)).all()):
+        raise ResultWriteError("final lifecycle contains an unknown particle state")
+    failed = final.lifecycle == FAILED
     if bool((final.failure_reason_code[failed] == 0).any()) or bool(
         (final.failure_reason_code[~failed] != 0).any()
     ):
@@ -2829,7 +2820,9 @@ def _validate_final_particle_blocks(
             raise ResultOpenError("final kinematics_valid values must be 0 or 1")
         lifecycle = particles["lifecycle"][begin:end]
         reasons = particles["failure_reason_code"][begin:end]
-        failed = lifecycle == np.uint8(4)
+        if not bool(np.isin(lifecycle, tuple(NAMES)).all()):
+            raise ResultOpenError("final lifecycle contains an unknown particle state")
+        failed = lifecycle == FAILED
         if bool((reasons[failed] == 0).any()) or bool((reasons[~failed] != 0).any()):
             raise ResultOpenError("final failure reason does not match lifecycle")
 

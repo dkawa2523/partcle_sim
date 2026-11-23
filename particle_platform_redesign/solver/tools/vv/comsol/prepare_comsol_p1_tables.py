@@ -13,6 +13,7 @@ import argparse
 import csv
 import json
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 import numpy as np
 
@@ -39,7 +40,7 @@ def _prepared_fields(data: DataBundle) -> PreparedFieldSet:
             unit=fields[name].unit,
             components=fields[name].components,
             stored_basis=fields[name].stored_basis,
-            positive=False,
+            value_constraint="finite",
         )
         for name in FIELD_NAMES
     }
@@ -65,7 +66,18 @@ def write_sectionwise_p1(
 
 
 def prepare(candidate_h5: Path, output: Path) -> None:
-    output.mkdir(parents=True, exist_ok=False)
+    """Publish the complete native table set without exposing partial inputs."""
+    destination = output.expanduser().resolve()
+    if destination.exists():
+        raise FileExistsError(destination)
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".p1-tables-", dir=destination.parent) as temporary:
+        staging = Path(temporary)
+        _write_tables(candidate_h5, staging)
+        staging.rename(destination)
+
+
+def _write_tables(candidate_h5: Path, output: Path) -> None:
     data = read(candidate_h5)
     if len(data.layouts) != 1 or data.coordinate_system != "axisymmetric_rz":
         raise ValueError("matched candidate must have one axisymmetric RZ layout")

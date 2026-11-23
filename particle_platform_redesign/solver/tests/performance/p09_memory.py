@@ -59,7 +59,7 @@ _STABLE_MANIFEST_KEYS = (
     "lifecycle_counts",
     "failure_reason_codes",
     "failure_reason_counts",
-    "maximum_dt_over_tau",
+    "prepared_stability_upper_bounds",
     "counts",
 )
 
@@ -339,7 +339,7 @@ def _execute_scope(
         from chamber_particles.engine import _prepare
 
         prepare_started = time.perf_counter()
-        prepared = _prepare(case)
+        prepared = _prepare(case).transport
         timings["prepare_s"] = time.perf_counter() - prepare_started
         particle_count = prepared.schedule.particle_count
         memory_plan = _prepared_memory_plan(prepared)
@@ -352,10 +352,9 @@ def _execute_scope(
         timings["open_result_s"] = time.perf_counter() - open_started
         particle_count = summary.particle_count
         artifact_bytes = _directory_bytes(output)
-        algorithms = {
-            key: value for key, value in result.manifest.items() if key.endswith("_revision")
-        }
-        memory_plan = _manifest_memory_plan(result.manifest)
+        manifest = result.manifest_document()
+        algorithms = {key: value for key, value in manifest.items() if key.endswith("_revision")}
+        memory_plan = _manifest_memory_plan(manifest)
         peak_after, rss_after, _ = _process_memory_bytes()
         if include_digest:
             semantic_digest = _semantic_result_digest(result)
@@ -541,7 +540,7 @@ def _windows_process_memory() -> _WindowsProcessMemoryCounters:
 
 
 def _semantic_result_digest(result: Any) -> str:
-    manifest = result.manifest
+    manifest = result.manifest_document()
     stable_manifest = {key: manifest[key] for key in _STABLE_MANIFEST_KEYS if key in manifest}
     stable_manifest.update(
         {key: value for key, value in manifest.items() if key.endswith("_revision")}

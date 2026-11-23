@@ -362,14 +362,10 @@ def test_c10_corner_policy_and_probe_schedule_use_the_same_event_path(tmp_path: 
 
     assert probed_summary.probe_count == 3
     assert probed_summary.probe_row_count == 3
-    base_plan = result.manifest["memory_plan"]
-    probe_plan = probed.manifest["memory_plan"]
-    assert isinstance(base_plan, dict)
-    assert isinstance(probe_plan, dict)
+    base_plan = result.manifest_document()["memory_plan"]
+    probe_plan = probed.manifest_document()["memory_plan"]
     base_components = base_plan["components"]
     probe_components = probe_plan["components"]
-    assert isinstance(base_components, dict)
-    assert isinstance(probe_components, dict)
     assert probe_components["probe_index"] == np.dtype("<i8").itemsize
     assert probe_components["output_buffer"] > base_components["output_buffer"]
     assert probe_components["replay_work"] > base_components["replay_work"]

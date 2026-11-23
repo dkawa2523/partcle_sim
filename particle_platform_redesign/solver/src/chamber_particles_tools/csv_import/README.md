@@ -5,13 +5,13 @@ It writes a canonical HDF5 bundle; it does not read MPH, solve fields, select pa
 The explicit provider is `csv` for caller-owned data or `comsol` for identified native exports.
 
 ```console
-uv run --locked python -m chamber_particles inputs import-csv mapping.yaml background.h5 --report import.json
+uv run --locked python -m chamber_particles inputs import-csv mapping.yaml background
 uv run --locked python -m chamber_particles create recipe.yaml -o input
 ```
 
 After wheel installation the same dispatcher works without a checkout. Python uses
-`adapt_from_configuration(configuration_path, output_path, report_path=None)` from this package.
-Outputs and reports must be fresh paths. Use the output bundle in a format-1 input recipe; the single
+`adapt_from_configuration(configuration_path, output_directory)` from this package.
+The fresh directory publishes `bundle.h5` and `report.json` together. Use `background/bundle.h5` in a format-2 input recipe; the single
 publisher fills its canonical hash and calls public load/check. Import success alone is not model readiness or accuracy.
 
 ## Format 4 and CSV files

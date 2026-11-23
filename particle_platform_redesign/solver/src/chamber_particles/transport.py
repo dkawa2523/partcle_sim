@@ -22,7 +22,7 @@ from .boundaries import (
     PreparedBoundaryRules,
     resolve_boundary_responses_batch,
 )
-from .case import SimulationCase
+from .case import EventSpec, SolverSpec, TimeSpec
 from .coordinates import (
     canonicalize_rz_enclosure,
     canonicalize_rz_enclosure_into,
@@ -131,6 +131,7 @@ from .integrators import (
     restrict_cubic_hermite_proposal,
     rk4_step,
 )
+from .lifecycle import ACTIVE, ESCAPED, FAILED, HELD, PENDING, STUCK
 from .numerical_status import (
     FIELD_NUMERICAL_FAILURE,
     INTEGRATOR_ACCURACY_FAILURE,
@@ -206,22 +207,22 @@ from .topology import (
 _MAX_EVENT_ORDINAL = int(np.iinfo(np.uint32).max)
 
 
-_LIFECYCLE_PENDING = np.uint8(0)
+_LIFECYCLE_PENDING = np.uint8(PENDING)
 
 
-_LIFECYCLE_ACTIVE = np.uint8(1)
+_LIFECYCLE_ACTIVE = np.uint8(ACTIVE)
 
 
-_LIFECYCLE_STUCK = np.uint8(2)
+_LIFECYCLE_STUCK = np.uint8(STUCK)
 
 
-_LIFECYCLE_ESCAPED = np.uint8(3)
+_LIFECYCLE_ESCAPED = np.uint8(ESCAPED)
 
 
-_LIFECYCLE_FAILED = np.uint8(4)
+_LIFECYCLE_FAILED = np.uint8(FAILED)
 
 
-_LIFECYCLE_HELD = np.uint8(5)
+_LIFECYCLE_HELD = np.uint8(HELD)
 
 
 _FAILURE_NUMERICAL_EVENT_BUDGET = np.uint16(1)
@@ -413,8 +414,63 @@ def resolve_transport_capabilities(
 
 
 @dataclass(frozen=True, slots=True)
+class NumericalWorkPolicy:
+    """Resolved roles of existing bounded-work settings; no extra user knobs.
+
+    Equal requested budgets remain separate facts because a certificate split
+    restricts an immutable path, a proposal split can reintegrate it, and a
+    coefficient guard shortens a root before drawing noise.
+    """
+
+    proposal_split_max_depth: int
+    certificate_max_subdivisions: int
+    coefficient_guard_max_halvings: int
+    coefficient_guard_max_restarts: int
+    deterministic_interactions_per_interval: int
+    stochastic_restarts_per_macro: int
+
+    @classmethod
+    def resolve(cls, event: EventSpec) -> NumericalWorkPolicy:
+        return cls(
+            event.max_refinements,
+            event.max_refinements,
+            event.max_refinements,
+            event.max_refinements,
+            event.max_interactions_per_step,
+            event.max_interactions_per_step,
+        )
+
+    @property
+    def residual_stack_capacity(self) -> int:
+        return self.proposal_split_max_depth + 1
+
+    @property
+    def certificate_stack_capacity(self) -> int:
+        return self.certificate_max_subdivisions + 1
+
+    def as_manifest(self) -> dict[str, object]:
+        return {
+            "proposal_split_max_depth": self.proposal_split_max_depth,
+            "certificate_max_subdivisions": self.certificate_max_subdivisions,
+            "coefficient_guard_max_halvings": self.coefficient_guard_max_halvings,
+            "coefficient_guard_max_restarts": self.coefficient_guard_max_restarts,
+            "deterministic_interactions_per_interval": self.deterministic_interactions_per_interval,
+            "stochastic_restarts_per_macro": self.stochastic_restarts_per_macro,
+            "exhaustion": {
+                "proposal_split": "numerical_event_budget or owned indeterminate/failure reason",
+                "certificate": "indeterminate_applicability_certificate",
+                "coefficient_guard": "integrator_accuracy",
+                "stochastic_restart": "numerical_event_budget",
+            },
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class PreparedTransport:
-    case: SimulationCase
+    time: TimeSpec
+    solver: SolverSpec
+    coordinate_system: str
+    work_policy: NumericalWorkPolicy
     capabilities: TransportCapabilities
     schedule: ParticleSchedule
     frame_times_s: tuple[float, ...]
@@ -430,6 +486,7 @@ class PreparedTransport:
     field_time_split_s: tuple[float, ...]
     dynamics: _StageDynamics
     constant_acceleration_m_s2: np.ndarray | None
+    # Prepared full-domain safety bounds at requested dt, never observed step maxima.
     maximum_dt_over_tau: float
     maximum_dt_charge_lipschitz: float
     memory_plan: CpuMemoryPlan
@@ -465,7 +522,7 @@ class PreparedTransport:
                 (float(lower[0]), float(lower[1])),
                 (float(upper[0]), float(upper[1])),
                 covers_geometry,
-                self.case.data.coordinate_system == "axisymmetric_rz",
+                self.coordinate_system == "axisymmetric_rz",
             ),
         )
 
@@ -1236,19 +1293,21 @@ class TransportWorkspaceBudget:
     @classmethod
     def resolve(
         cls,
-        case: SimulationCase,
+        coordinate_system: str,
+        work_policy: NumericalWorkPolicy,
         schedule: ParticleSchedule,
         fields: PreparedFieldSet,
         physics: PhysicsPlan,
         capabilities: TransportCapabilities,
         *,
         observations: bool,
+        has_point_event_view: bool,
     ) -> TransportWorkspaceBudget:
-        stack = case.spec.solver.event.max_refinements + 1
+        stack = work_policy.residual_stack_capacity
         # The stage bank's fields/physics output arrays are charged separately
         # by the CPU scratch plan; this bank owns only composed coordinate and
         # certificate columns plus the chosen advance's concrete scratch.
-        stage = _stage_workspace_bytes(fields, capabilities, case.data.coordinate_system)
+        stage = _stage_workspace_bytes(fields, capabilities, coordinate_system)
         replay = (
             PROPOSAL_SAMPLE_WORK_BYTES_PER_PARTICLE
             + PROPOSAL_PREFIX_WORK_BYTES_PER_PARTICLE
@@ -1264,8 +1323,10 @@ class TransportWorkspaceBudget:
         stochastic = (
             128 * (physics.noise.adaptive_max_depth + 4) if physics.noise is not None else 0
         )
-        events = _event_workspace_bytes(case, capabilities, stack)
-        certificates = _certificate_workspace_bytes(capabilities, stack)
+        events = _event_workspace_bytes(capabilities, stack, has_point_event_view)
+        certificates = _certificate_workspace_bytes(
+            capabilities, work_policy.certificate_stack_capacity
+        )
         # Includes classifier output, response subsets, remap and CSR tail.
         release = (
             (272 if bool((schedule.source_facet_id >= 0).any()) else 64)
@@ -1307,13 +1368,10 @@ def _stage_workspace_bytes(
 
 
 def _event_workspace_bytes(
-    case: SimulationCase, capabilities: TransportCapabilities, stack: int
+    capabilities: TransportCapabilities, stack: int, has_point_view: bool
 ) -> int:
     if not capabilities.event_paths:
         return 0
-    has_point_view = case.spec.topology is not None or any(
-        rule.contact_geometry == "particle_center" for rule in case.spec.boundaries
-    )
     if capabilities.curved_events:
         # 209 B beyond the retained wavefront covers concurrent query/select/
         # gather/radius/result columns, including its optional 8 B OU restart.
@@ -2245,7 +2303,7 @@ def _guard_langevin_root_duration(
     predictor: ProposalSample | None = None
     admitted = np.zeros(particle_index.size, dtype=np.bool_)
     failure_reason = np.zeros(particle_index.size, dtype="<u2")
-    maximum_refinements = prepared.case.spec.solver.event.max_refinements
+    maximum_refinements = prepared.work_policy.coefficient_guard_max_halvings
     for refinement in range(maximum_refinements + 1):
         midpoint_time_s = start_time_s + 0.5 * duration_s
         predictor = exponential_frozen_start_predictor(
@@ -2296,7 +2354,7 @@ def _classify_langevin_midpoint(
     midpoint_position_m = predictor.position_m
     inside_volume = points_inside_volume(prepared.geometry, midpoint_position_m)
     across_axis = np.zeros(midpoint_time_s.size, dtype=np.bool_)
-    if prepared.case.data.coordinate_system == "axisymmetric_rz":
+    if prepared.coordinate_system == "axisymmetric_rz":
         across_axis = midpoint_position_m[:, 0] < 0.0
     failure_reason = np.zeros(midpoint_time_s.size, dtype="<u2")
     failure_reason[~representable] = _FAILURE_INTEGRATOR_ACCURACY
@@ -2501,10 +2559,10 @@ def _langevin_restart_failure_reasons(
 
     reasons = np.zeros(stochastic_event_restart_count.size, dtype="<u2")
     event_exhausted = (
-        stochastic_event_restart_count > prepared.case.spec.solver.event.max_interactions_per_step
+        stochastic_event_restart_count > prepared.work_policy.stochastic_restarts_per_macro
     )
     reasons[event_exhausted] = _FAILURE_NUMERICAL_EVENT_BUDGET
-    guard_exhausted = guard_restart_count > prepared.case.spec.solver.event.max_refinements
+    guard_exhausted = guard_restart_count > prepared.work_policy.coefficient_guard_max_restarts
     reasons[(reasons == 0) & guard_exhausted] = _FAILURE_INTEGRATOR_ACCURACY
     return reasons
 
@@ -2855,7 +2913,7 @@ def _prepare_brownian_root_wave(
     del source_rows
     particle_ids = prepared.schedule.particle_id[particles].astype(np.uint64, copy=False)
     increments = _brownian_leaf_increments(
-        seed=prepared.case.spec.solver.seed,
+        seed=prepared.solver.seed,
         particle_id=particle_ids,
         macro_interval=macro_interval,
         root_interval=root_intervals,
@@ -3034,7 +3092,7 @@ def _advance_brownian_tree_node(
             continue
         refined_roots, refined_increments = refined
         _push_brownian_adaptive_into(
-            np.uint64(runtime.prepared.case.spec.solver.seed),
+            np.uint64(runtime.prepared.solver.seed),
             np.uint64(runtime.macro_interval),
             runtime.particle_ids,
             runtime.root_interval,
@@ -4303,7 +4361,7 @@ def _advance_macro_proposal(
             event_buffer,
             failure_buffer,
         )
-    if prepared.geometry.facet_count or prepared.case.data.coordinate_system == "axisymmetric_rz":
+    if prepared.geometry.facet_count or prepared.coordinate_system == "axisymmetric_rz":
         _advance_exact_paths(
             prepared,
             proposal,
@@ -4365,7 +4423,7 @@ def _certify_curved_path(
         or prepared.constant_acceleration_m_s2 is not None
     ):
         return None
-    if prepared.case.spec.solver.integrator == "rk4_fixed":
+    if prepared.solver.integrator == "rk4_fixed":
         return enclose_rk4_path(
             particle_index,
             start_time_s,
@@ -4583,7 +4641,7 @@ def _exponential_predictor_box_inside_support(
         np.maximum(np.abs(center - lower), np.abs(upper - center)), np.inf
     )
     radius = np.nextafter(np.hypot(component_reach[:, 0], component_reach[:, 1]), np.inf)
-    event = prepared.case.spec.solver.event
+    event = prepared.solver.event
     budget = resolve_event_budget(
         facet_length_m=float(geometry.facet_length_m.max()),
         geometry_bbox_diagonal_m=geometry.bbox_diagonal_m,
@@ -4613,7 +4671,7 @@ def _build_step_proposal(
 
     constant_acceleration = prepared.constant_acceleration_m_s2
     use_exact_specialization = prepared.capabilities.exact_motion
-    if prepared.case.spec.solver.integrator == "rk4_fixed" or use_exact_specialization:
+    if prepared.solver.integrator == "rk4_fixed" or use_exact_specialization:
         return rk4_step(
             particle_index,
             start_time_s,
@@ -4628,7 +4686,7 @@ def _build_step_proposal(
             ),
             path_enclosure=path_enclosure,
         )
-    if prepared.case.spec.solver.integrator == "ou_langevin":
+    if prepared.solver.integrator == "ou_langevin":
         raise EngineError("OU Langevin proposals are built from conditioned increments")
     return exponential_midpoint_step(
         particle_index,
@@ -4949,7 +5007,7 @@ def _rk4_dense_certificate_failure_codes(
     workspace = prepared.certificate_workspace
     if count > workspace.stack_top.size:
         raise EngineError("applicability certificate exceeds its planned slab capacity")
-    budget = prepared.case.spec.solver.event.max_refinements
+    budget = prepared.work_policy.certificate_max_subdivisions
     stack_start = workspace.start_time_s[:count]
     stack_target = workspace.target_time_s[:count]
     stack_top = workspace.stack_top[:count]
@@ -5954,7 +6012,7 @@ def _locate_curved_proposal_batches(
     enclosure = proposal.path_enclosure
     if enclosure is None:
         raise EngineError("curved event path lost its continuous enclosure")
-    event = prepared.case.spec.solver.event
+    event = prepared.solver.event
     chord = _proposal_chord_deviation_bounds(
         proposal,
         proposal_rows,
@@ -6248,7 +6306,7 @@ def _consume_curved_wave(
     )
     wall = event.status == CURVED_STATUS_WALL
     wall &= state.interaction_count[wave_rows] >= (
-        prepared.case.spec.solver.event.max_interactions_per_step
+        prepared.work_policy.deterministic_interactions_per_interval
     )
     capped = np.flatnonzero(wall).astype("<i8", copy=False)
     _split_curved_wave_rows(
@@ -6846,7 +6904,7 @@ def _commit_curved_wall_wave(
         candidates,
     )
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
-        prepared.case.spec.solver.seed,
+        prepared.solver.seed,
         prepared.schedule.particle_id[particles],
         physical_boundary_event_ordinal[particles],
     )
@@ -6863,7 +6921,7 @@ def _commit_curved_wall_wave(
         diffuse_draws,
         thermal_normal_draws,
         thermal_tangent_draws,
-        roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        roundoff_ulps=prepared.solver.event.roundoff_ulps,
         result_buffer=prepared.boundary_response_buffer,
     )
     for response_row, event_value in enumerate(event_rows):
@@ -7246,7 +7304,7 @@ def _split_curved_wave_rows(
 
     if not rows.size:
         return
-    maximum = prepared.case.spec.solver.event.max_refinements
+    maximum = prepared.work_policy.proposal_split_max_depth
     reason = _FAILURE_NUMERICAL_EVENT_BUDGET if reset_interactions else _FAILURE_INDETERMINATE_EVENT
     row_reasons = None
     if exhaustion_reason_codes is not None:
@@ -7361,10 +7419,10 @@ def _initialize_surface_releases(
         prepared.schedule.contact_radius_m[particle_index],
         None if acceleration is None else acceleration[particle_index],
         time_s,
-        interval_s=prepared.case.spec.time.dt_s,
+        interval_s=prepared.time.dt_s,
         curved_event_path=prepared.capabilities.curved_events,
-        geometry_rtol=prepared.case.spec.solver.event.geometry_rtol,
-        roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        geometry_rtol=prepared.solver.event.geometry_rtol,
+        roundoff_ulps=prepared.solver.event.roundoff_ulps,
     )
     interactions = np.zeros(particle_index.size, dtype="<i8")
     invalid = np.flatnonzero(release.status != SURFACE_STATUS_OK).astype("<i8", copy=False)
@@ -7472,7 +7530,7 @@ def _commit_surface_release_responses(
     particle_ids = prepared.schedule.particle_id[particles].astype("<u8", copy=False)
     physical_ordinals = physical_boundary_event_ordinal[particles].astype("<u8", copy=False)
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
-        prepared.case.spec.solver.seed,
+        prepared.solver.seed,
         particle_ids,
         physical_ordinals,
     )
@@ -7497,7 +7555,7 @@ def _commit_surface_release_responses(
         diffuse_draws,
         thermal_normal_draws,
         thermal_tangent_draws,
-        roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        roundoff_ulps=prepared.solver.event.roundoff_ulps,
         result_buffer=prepared.boundary_response_buffer,
     )
     post_release: SurfaceReleaseBatch | None = None
@@ -7517,10 +7575,10 @@ def _commit_surface_release_responses(
                 prepared.schedule.contact_radius_m[particles[post_response_rows]],
                 None,
                 time_s[post_rows],
-                interval_s=prepared.case.spec.time.dt_s,
+                interval_s=prepared.time.dt_s,
                 curved_event_path=True,
-                geometry_rtol=prepared.case.spec.solver.event.geometry_rtol,
-                roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+                geometry_rtol=prepared.solver.event.geometry_rtol,
+                roundoff_ulps=prepared.solver.event.roundoff_ulps,
             )
             post_by_response[post_response_rows] = np.arange(
                 post_response_rows.size,
@@ -8290,7 +8348,7 @@ def _locate_exact_wave_batches(
     acceleration_m_s2: np.ndarray,
     departing_facet_id: np.ndarray,
 ) -> Iterator[tuple[np.ndarray, np.ndarray, ExactEventBatch]]:
-    event = prepared.case.spec.solver.event
+    event = prepared.solver.event
     try:
         path_kind = np.full(wave_rows.size, path_code, dtype="<u1")
         prepared_query = prepare_exact_event_batch(
@@ -8403,7 +8461,7 @@ def _consume_exact_wave(
         wave_rows,
         target_time_s,
         event.status,
-        prepared.case.spec.solver.event.max_interactions_per_step,
+        prepared.work_policy.deterministic_interactions_per_interval,
     )
     failed_rows = state.failed_rows[:failed_count]
     _fail_event_rows(
@@ -8910,7 +8968,7 @@ def _split_exact_wave_rows(
         stack_depth,
         stack_interactions,
         stack_top,
-        prepared.case.spec.solver.event.max_refinements,
+        prepared.work_policy.proposal_split_max_depth,
         exhausted_rows,
     )
     _fail_event_rows(
@@ -9363,7 +9421,7 @@ def _commit_exact_wall_rows(
         candidates,
     )
     law_draws, diffuse_draws, thermal_normal_draws, thermal_tangent_draws = _wall_response_draws(
-        prepared.case.spec.solver.seed,
+        prepared.solver.seed,
         prepared.schedule.particle_id[particles],
         physical_boundary_event_ordinal[particles],
     )
@@ -9380,7 +9438,7 @@ def _commit_exact_wall_rows(
         diffuse_draws,
         thermal_normal_draws,
         thermal_tangent_draws,
-        roundoff_ulps=prepared.case.spec.solver.event.roundoff_ulps,
+        roundoff_ulps=prepared.solver.event.roundoff_ulps,
         result_buffer=prepared.boundary_response_buffer,
     )
     for response_row, selected_value in enumerate(material_valid):
@@ -10250,7 +10308,7 @@ def _record_replay_rows(
             raise EngineError("accepted trajectory replay produced a numerical failure")
         if not bool(sample.support_inside.all() and sample.applicability_inside.all()):
             raise EngineError("trajectory frame is outside field or model support")
-        if prepared.case.data.coordinate_system == "axisymmetric_rz":
+        if prepared.coordinate_system == "axisymmetric_rz":
             rz_signed_stage_into(
                 sample.position_m,
                 sample.velocity_m_s,

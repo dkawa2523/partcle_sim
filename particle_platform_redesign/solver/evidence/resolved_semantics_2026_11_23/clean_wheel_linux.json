@@ -1,0 +1,115 @@
+{
+  "claim": "Installed-wheel and small analytic input smoke; no application accuracy or performance SLA",
+  "cli": {
+    "console_script": "complete",
+    "module_entry": "complete",
+    "public_error_exit": 2,
+    "serial_result_bytes_match": true,
+    "subprocess_timeout_s": 180,
+    "workers": 2
+  },
+  "contact_geometry": [
+    {
+      "hit_time_s": 1.4,
+      "mode": "particle_surface",
+      "radius_m": 0.05,
+      "status": "complete"
+    },
+    {
+      "hit_time_s": 1.5,
+      "mode": "particle_center",
+      "radius_m": 0.05,
+      "status": "complete"
+    }
+  ],
+  "package": "chamber-particles",
+  "process_execution": {
+    "input_sha256": {
+      "case.yaml": "47c1899248e540f2b89fb055aa5f22754399fd2428c2cd7c74328d17d953d3d7",
+      "parallel.h5": "4b3d5ac60ab69c4b9654a1bc0d2419c1f1741b4756912865ae2fc1f6e161e6c1"
+    },
+    "live_api_children_after_return": 0,
+    "particle_count": 32,
+    "serial_result_bytes_match": true,
+    "status": "complete",
+    "workers": 2
+  },
+  "public_operations": [
+    "load_case",
+    "check_case",
+    "simulate",
+    "open_result"
+  ],
+  "status": "complete",
+  "time_field": {
+    "snapshot_splits_s": [
+      0.15
+    ],
+    "status": "complete"
+  },
+  "wheel_identity": {
+    "all_python_bytes_match": true,
+    "client_package_path": "/tmp/ps49l.6lQKEV/venv/lib/python3.12/site-packages/chamber_particles_tools/__init__.py",
+    "installed_metadata_text_matches_wheel": true,
+    "long_description_matches_current_readme": true,
+    "package_path": "/tmp/ps49l.6lQKEV/venv/lib/python3.12/site-packages/chamber_particles/__init__.py",
+    "platform": "linux",
+    "production_python_sha256": {
+      "chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+      "chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+      "chamber_particles/api.py": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a",
+      "chamber_particles/boundaries.py": "bb1fa5283019a4f20ee790eb8d9e748f190778942bd6dbdb9e5a37aca85295c2",
+      "chamber_particles/case.py": "8c129705ae09e3a318f133663ac4e82165835d74a63cbcc843e448e7d1de09e4",
+      "chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+      "chamber_particles/coordinates.py": "2110bb166ebcf93aef1d67a7bc1d55f0eb4aa6e9634eb8fd16b0bc86540c70d1",
+      "chamber_particles/cpu.py": "82a73df79b8ed10463aa49db52c46c67f2ef96baea76b2fd4374d1663b3fb6ce",
+      "chamber_particles/engine.py": "78a39e8aeb03e8535aa2dfb5c35366d96f5bdf94f24fa54af5d7cc172b38e2bc",
+      "chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+      "chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+      "chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+      "chamber_particles/fields.py": "08f83de33fe45f7aef9426faf540631cc1b27eef80640baecc37382c1ae577f4",
+      "chamber_particles/geometry.py": "64dfa70bcfa71eaabd039c11f01b0efb40983a8546c6ed3aa5c4925138b8247b",
+      "chamber_particles/integrators.py": "d8c63f01cd427140128cdb52bc70ce6fae1fd3050ca40d19555b2b4baebf8954",
+      "chamber_particles/lifecycle.py": "f793a0b9875d94136eda1203441cd74973d9cf8abfab880bd6c3de03f96ce1bc",
+      "chamber_particles/numerical_status.py": "dbd88dba570796c08baa32d97653f18e32703423d6e9beeb05ea37278f4fa7bf",
+      "chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+      "chamber_particles/physics/__init__.py": "6005bc430ee193ca38cca3544ae8450c30a370bd135b7ea8e43ab066cf44c539",
+      "chamber_particles/physics/catalog.py": "76a30ce1a561c41a219513b7ed1f3cf51e2cbf3f50c1d13fe818b063eab2f70d",
+      "chamber_particles/physics/charge.py": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c",
+      "chamber_particles/physics/compiled.py": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d",
+      "chamber_particles/physics/forces.py": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7",
+      "chamber_particles/physics/runtime.py": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca",
+      "chamber_particles/rng.py": "8a23d62b65c0dae3651f3ff478d08d4305f73ed9e2580317df8f4122c1142920",
+      "chamber_particles/sources.py": "6c1e97f06714a658fb429f69aee513d9a57db8fa85be452da287abf1b34d3193",
+      "chamber_particles/stochastic.py": "2d819c16e38220f9c8f7eb44129ef8ebbb96863f6ad336a8390bf72aac960d10",
+      "chamber_particles/time_grid.py": "6cb8492c6c4d3629fde74df0e1b91ee998441b40ae2e1af86cff3983a6335bad",
+      "chamber_particles/topology.py": "ef08eebc7062547f80d735b97290bd78543b32fbd0ce86ee8d2b8e17b1ce9861",
+      "chamber_particles/transport.py": "67cfd8083603921116a05eab45d639982415660a6d32092d4dee9d5b89d623f7",
+      "chamber_particles/yaml_input.py": "5bcdf24d55a3ebab1037ae2ef6369d2a361ff0d2338808b78a546c314359db6b",
+      "chamber_particles_tools/__init__.py": "69538a6ffa93118465aa5395157c3b5b65102d794429a3f288a811ab7238db8a",
+      "chamber_particles_tools/analysis/__init__.py": "438026bc54ef9615a7db158ded6657e247c93ddf06f484ec61622205723c26fe",
+      "chamber_particles_tools/bundle_publication.py": "62777574bbeca86325a86a9791a5b04ccc75027b4abfc0ab5e94f05ec135190f",
+      "chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+      "chamber_particles_tools/csv_import/__init__.py": "6d2e5444af02a66c31a875d9b7f8a68c8363be34b0d512cc5d40a3b9af489b64",
+      "chamber_particles_tools/csv_import/workflow.py": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+      "chamber_particles_tools/electrostatic_builder/__init__.py": "4c1c899232d1b686d7b93da1ce993ded0bfd019488073e5ee85ea51ac5e5eb97",
+      "chamber_particles_tools/electrostatic_builder/numerics.py": "3be3ecc87661557d3ab66b4c8604c52e65739eb63929ffec887a56e8e7ec1846",
+      "chamber_particles_tools/electrostatic_builder/workflow.py": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8",
+      "chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+      "chamber_particles_tools/field_preprocessor/__init__.py": "523906002167d1e03a32290cef5b6a838167ee1d9866c64d7e06c05d93288590",
+      "chamber_particles_tools/field_preprocessor/numerics.py": "328eacec0067656227c75a8883156d7f2dfbb670715269a58bf18918acfe68d4",
+      "chamber_particles_tools/field_preprocessor/workflow.py": "5b1115ceb51b9024f2bd0ef42e348a8f02f6d0e8776b4e495eee0f7cac3c5dc1",
+      "chamber_particles_tools/inputs.py": "0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d",
+      "chamber_particles_tools/selection.py": "c166b7322d5855ef0de5c939385553f445af0112671117da2ef2c9d408fbeb01",
+      "chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+      "chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+      "chamber_particles_tools/visualization/__init__.py": "06975a1560d91c0770765dfedef8720438b35626b1223cbd726a5a72f42d86bc"
+    },
+    "python": "3.12.13 (main, Jun 23 2026, 15:18:55) [Clang 22.1.3 ]",
+    "readme_sha256": "4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5",
+    "uv_lock_sha256": "ac4a7f34936b36078bf79e871e05505eb8a0f88315152e0980aaa2b0153bba56",
+    "version": "0.4.0",
+    "wheel_metadata_sha256": "2c9543892818b2f8dd978e7538a046e8d712e58aac03a6848fae58a66e6c5d14",
+    "wheel_sha256": "f9276b999a6360d2bb73df4b64804130dfb3600ee9bfe4e53256094acf2b942c"
+  }
+}

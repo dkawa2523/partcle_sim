@@ -64,7 +64,7 @@ export function ReportContent() {
 
 **検査は実行と同じprepareを使う。** \`check_case\`はmodel、field support、source、境界、資源を解決するが、粒子更新やworker起動は行わない。準備完了は収束や物理妥当性の認定とは別である。
 
-**保存結果は元caseなしで説明できる。** result schema 4のimmutable contextにgeometryと意味を保持し、解析・export・表示は公開ResultViewだけを読む。背景場と完全な実現sourceは複製しない。
+**保存結果は元caseなしで説明できる。** result schema 4のimmutable contextにgeometryと意味を保持する。同じResultViewと選択済みResultCohortを解析・export・表示で再利用し、母集団と結果identityを保つ。
 
 **科学的な主張は証拠の範囲に留める。** COMSOLとの実用的な輸送対応、数値的な全方程式認定、実装置の予測妥当性を区別する。今回のsnapshotに実行receiptが未取込なら、件数や精度をゼロまたは成功と表示しない。`} />
 
@@ -80,7 +80,9 @@ export function ReportContent() {
 
 状態は位置x、速度v、平均電荷数Zである。選択したforce、drag、noiseと電荷rateを実際の積分stageで評価する。固定電荷と連続帯電を別engineへ分けない。
 
-質量、drag径、電気半径、接触半径、排除体積、model weightは別のauthorityである。runtimeで一つの粒径から勝手に再構成しない。下表は現在のcatalogから取得した選択肢で、実際のfield metadata、適用域、積分器の検査が必要となる。`} />
+質量、drag径、電気半径、接触半径、排除体積、model weightは別のauthorityである。runtimeで一つの粒径から勝手に再構成しない。下表は現在のcatalogから取得した選択肢で、実際のfield metadata、適用域、積分器の検査が必要となる。
+
+catalogは各primitiveのfinite・positive・nonnegative条件、選択model identity、path証明に使う入力roleを宣言する。stageで値を計算できることと、全pathのsupport・適用域・constant specializationを証明できることは別である。`} />
 
     {visible("physics-table") && <DataComponent id="physics-table" title="現在の物理catalogと適用条件"
       queryId="physics_scope" kind="table" sourceRows={physics}>
@@ -116,9 +118,9 @@ specular、uniform inward angleのisotropic、thermal wallは異なるlawであ�
 
 \`models → init / create → check → run → inspect → analyze / export / view\`
 
-Pythonでは通常clientの\`inputs.create_case\`または\`create_from_configuration\`で公開し、coreの\`load_case → check_case → simulate → open_result\`を使う。PreparedRunやwriterを利用者へ公開せず、coreがouter clientをimportする逆依存も作らない。
+Pythonでは通常clientの\`inputs.create_case(bundle, settings, output_directory)\`または\`create_from_configuration\`で公開し、coreの\`load_case → check_case → simulate → open_result\`を使う。source tableはbundleが、releaseの選択はsettingsが所有する。
 
-worker数は実行資源である。親がmacro時計・release・single writer・checkpointを持ち、workerは排他的粒子群を更新する。出力の要求時刻でproduction stepを切らず、同じaccepted pathから観測する。`} />
+worker数は実行資源である。親がmacro時計・release・provenance・single writer・checkpointを持ち、workerは必要なtyped numeric settingsと配列で排他的粒子群を更新する。毎macroの同期を保ち、出力の要求時刻でproduction stepを切らず、同じaccepted pathから観測する。`} />
 
     {visible("module-table") && <DataComponent id="module-table" title="責務の所有者"
       queryId="module_responsibilities" kind="table" sourceRows={modules}>
@@ -131,7 +133,9 @@ worker数は実行資源である。親がmacro時計・release・single writer�
         queryIds={["implementation_work_packages", "roadmap"]}
         value={`## 最初の自分のsourceを作る
 
-recipe format 1はcanonical input_bundle、CSV sources、通常のcase settingsを持つ。publisherがdata pathとlogical hashを埋め、load/checkが通ってから新しいdirectoryへ公開する。既存の粒子caseをtemplateとして用意する必要はない。
+recipe format 2はcanonical input_bundle、完成bundleに含めるsource tableの全量、通常のcase settingsを持つ。CSVから作るtableと\`existing_table\`で明示したtableだけを残し、未記載tableは除く。\`settings.sources\`はその中から実際に放出するtableを選ぶ。
+
+通常入力のbundle producerは\`bundle.h5\`と\`report.json\`を同じ新規directoryへ公開する。case publisherはdata pathとlogical hashを埋め、load/checkが通り、caseと渡された編集元が完成してから公開する。例題も全source・全rowから再作成用入力を一緒に作る。
 
 source format 2はinternal tableまたはsurface rowを受け取る。位置またはcanonical facet rowとstrict-interior parameter、速度、ID/release、全独立物性を明示する。物性の継承は\`inherit_from\`によるexact-ID joinを要求した場合だけ行い、整数IDの一致から同じ物理sourceを推測しない。
 
@@ -147,9 +151,11 @@ CSV mapping format 4のproviderはcaller-owned csvとcomsolを区別する。後
       queryIds={["result_layers"]}
       value={`## 保存結果を移動しても解釈を保つ
 
-入力case/dataはschema 3、結果はschema 4、checkpointはlayout 2である。immutable context.h5に元case/dataのhash、geometry、境界/sourceの意味、basis/unitを一度保存する。結果consumerは元caseやprivate属性を必要としない。
+入力case/dataはschema 3、結果はschema 4、checkpointはlayout 2である。immutable context.h5に元case/dataのhash、geometry、境界/sourceの意味、basis/unitを一度保存する。ResultViewのmanifestは入れ子まで不変で、JSONへ保存・編集する独立copyは\`manifest_document()\`、派生成果物の結果identityは\`source_identity()\`が所有する。
 
-final、反復interaction、first hit、terminal、保存active曲線は別量である。CSV exportと図は同じexact cohortを使う。表示のbounded sampleを統計の母集団へ置き換えない。旧結果の互換readerは作らず、当時の環境でexportするか明示して再実行する。`} />
+final、反復interaction、first hit、terminal、保存active曲線は別量である。開いたResultViewか\`select_result\`で束縛したResultCohortを解析・export・表示へ渡し、final/contextとexact selectionを再利用できる。lifecycleのcode/name/基本分類は一つのownerが持ち、数値的なstuckを物理付着と同一視しない。
+
+export/viewはreceiptを含む成果物を完成してからdirectory単位で公開する。表示のbounded sampleを統計の母集団へ置き換えない。旧結果の互換readerは作らず、当時の環境でexportするか明示して再実行する。`} />
 
     {visible("result-table") && <DataComponent id="result-table" title="結果から説明までの受渡し"
       queryId="result_layers" kind="table" sourceRows={results}>
@@ -158,10 +164,14 @@ final、反復interaction、first hit、terminal、保存active曲線は別量�
     </DataComponent>}
 
     <Narrative id="complexity" title="一つのownerと一つのengineを維持する"
-      queryIds={["design_decisions"]}
+      queryIds={["design_decisions", "numerical_contracts"]}
       value={`## 一つのownerと一つのengineを維持する
 
 canonical writer/parser、field support/sampler、physics catalog、event、wall lawをそれぞれのownerへ集約する。normal clientが数値validatorや第二solverを複製しない。一般plugin frameworkやDI containerは追加しない。
+
+固定macro gridとfield knotの併合・丸め・window照会は共通ownerが持つ。nominal dtや全区間のmacro件数だけで選択windowのrefinementを推定せず、その窓の実partitionを確認する。macroが細かくなっても、安全処理による実際の再積分区間が同じ場合がある。macro refinement、accepted numerical path、証明の細分と観測clockを区別し、数値pathの前提がない比較は自己解像度・次数・qualified認定へ進めない。
+
+この判定は外部evaluatorが所有する。reportはその結論とscopeを取り込む。qualifiedのNOT_TESTEDがあっても、生の観測差と実用的なpopulation比較は、それぞれ明示した目的・母集団・不確かさの範囲で使える。
 
 詳細な局所probeは原因調査の外部証拠として必要な範囲だけ保存する。quality gateの成功、用途別性能、COMSOLの観測量比較、物理妥当性を一つの「認証済み」へまとめない。`} />
 
@@ -174,7 +184,7 @@ model_datasetや原MPHは外部入力・V&Vの証拠であり、coreの物理定
 
 Brownianでは個々のpathの一致を要求せず、実現source、全母集団、保存window、停止先・時刻・速度・電荷と不確かさを評価する。native RK4/time-key noiseの5/9 weak-limit解釈は、同定した実行方式と独立microcaseに対する明示したcaseであり、有限step・壁eventでの厳密同値や一般defaultではない。
 
-実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。このreportにassessment/quality/performance入力がない項目はunavailableとして残し、古い12-caseの値を現行0.4の資格へ昇格しない。`} />
+実用的に合う観測量はそのように判断し、残る差を一律に乱数のせいにしない。保存参照の不明なdisappearanceをescapeと同一視しない。A/Pの過去40実現と今回の再実行はsource receiptで区別し、再利用したnative参照を新しい標本とは数えない。assessment/quality/performance入力がない項目はunavailableとして残し、過去のPASSを変更後の資格へ昇格しない。`} />
       {visible("quality-table") && <DataComponent id="quality-table" title="今回取込んだ品質証拠と未取得事項"
         queryId="quality_findings" kind="table" sourceRows={quality}>
         <DataTable rows={quality} searchable={false} compactNumbers={false} label="品質証拠"
@@ -196,10 +206,12 @@ Brownianでは個々のpathの一致を要求せず、実現source、全母集�
     </section>
 
     <Narrative id="start-gate" title="利用者が独立に確認すること"
-      queryIds={["physics_scope", "roadmap"]}
+      queryIds={["physics_scope", "numerical_contracts", "roadmap"]}
       value={`## 利用者が独立に確認すること
 
 自分のgeometry/field/CSV源のunit・basis・ID・supportと物性authorityを固定し、modelsで要求を調べ、create/checkで準備する。dt、field解像度、Brownian path深度、観測clockは別々に選ぶ。worker数を物理の調整ノブにしない。
+
+manifestの\`prepared_stability_upper_bounds\`は要求dtと全域boundから準備した上界であり、実stageの観測最大や誤差推定ではない。必要なwindowの数値refinementと観測量の変化を独立に調べる。
 
 結果をanalyze/export/viewで読み、失敗coverageと対象cohortを確認する。装置の付着fluxや汚染量を求める場合は、計算粒子数だけでなくsource rate/weight、surface capture physicsと実験比較を別途用意する。`} />
 

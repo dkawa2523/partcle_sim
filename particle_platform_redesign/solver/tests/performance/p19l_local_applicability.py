@@ -341,7 +341,7 @@ def _payload_digest(payload: dict[str, Any]) -> str:
 
 
 def _memory_accounting(results: dict[str, Any], particle_count: int) -> dict[str, object]:
-    plans = {name: result.manifest["memory_plan"] for name, result in results.items()}
+    plans = {name: result.manifest_document()["memory_plan"] for name, result in results.items()}
     if plans["global_fast"] != plans["local_fallback"]:
         raise RuntimeError("P19-L pair resolved different solver-owned memory plans")
     plan = plans["global_fast"]

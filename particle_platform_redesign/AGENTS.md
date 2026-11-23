@@ -94,6 +94,8 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 |---|---|---|
 | `case.py` | 設定、正規化、`SimulationCase` | 物理式、kernel |
 | `case_format.py` | canonical read/write/version/hash | producer固有名、軌道計算 |
+| `time_grid.py` | 固定macro grid・field knot併合・丸め規則と窓の照会 | 粒子別root、観測clock、精度認定 |
+| `lifecycle.py` | 保存code・名称・基本状態分類 | 表示色、付着の物理認定、failure原因 |
 | `coordinates.py` | XY/RZ/3D基底とaxis規則 | field locate、wall law |
 | `geometry.py` | containment、BVH、first-hit query | 付着、反射、field値 |
 | `topology.py` | XY periodic translation対応とtransfer | material wall law、一般periodic framework |
@@ -114,6 +116,11 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 
 `models.py`、`helpers.py`、`utils.py`、`contracts.py`のような一般置き場を作らない。型と関数は、その事実を
 所有するmoduleへ置く。fileは行数だけで分割せず、独立した変更理由が二つ現れた時に分ける。
+
+catalogがfieldのfinite/positive/nonnegative条件、選択model identity、証明に必要な入力roleを宣言する。
+runtimeは全域bound・局所適用域・連成を準備し、compiledは固定形の数値recordだけを消費する。
+stage値が計算可能であることをpathの証明やconstant specializationの成立へ読み替えない。
+親の入力/provenanceと解決済み実行事実をworkerへ渡さず、transportは必要なtyped settings/配列だけを持つ。
 
 依存方向：
 
@@ -152,6 +159,7 @@ importer向けcanonical writerは`case_format`が所有するが、package root�
 ## 8. state、event、RNG
 
 - physical state、lifecycle、support、accuracy、run integrityを一つのstatusへ畳み込まない。
+- 永続particle列はresident stateと同じ宣言からprojectionし、checkpointのcursor/index/hintは各ownerで検査する。
 - 粒子IDは固定し、compact配列のindexをidentityにしない。
 - output frameはaccepted `StepProposal.state_at()`から評価し、resident stateを出力時刻へcommitしたり
   production stepを分割したりしない。曲線pathの`state_at()`はproposal始点から同じintegrator規則で再評価する。
@@ -261,6 +269,7 @@ uv run --locked pyrefly check --summarize-errors
 ```
 
 公開API、dataclass、model境界、array ownerを型付けする。shape、unit、物理適用域を巨大な型体系へしない。
+現行の性能clientも同じPyrefly対象へ含め、数値ownerの変更でbenchmark入口が静かに陳腐化しないようにする。
 clean-room projectではbaselineを作らない。ignoreは最小行へerror codeと理由を書く。
 
 ### Radon
@@ -365,6 +374,10 @@ bug修正では症状ごとではなく、原因を表す最小回帰caseを一�
 
 full trace、stage値、局所probeは明示particle IDだけで有効化する。診断のために別engine、別state配列、
 別result形式を作らない。analysis、deposition、可視化、COMSOL差分はcore外でResultViewを読む。
+ResultViewのmetadataは入れ子まで不変とし、JSON用の独立documentと結果identityはoutputが所有する。
+通常clientは同じResultView/束縛cohortを再利用でき、ID選択・分母・coverageを勝手に再定義しない。
+caseと編集元、producer bundleとreceipt、export/viewは操作単位で完成してから公開する。
+macro設定・実partition・accepted path・安全証明細分・観測を区別し、全区間件数から選択窓の収束を推定しない。
 
 ## 16. 完了条件
 

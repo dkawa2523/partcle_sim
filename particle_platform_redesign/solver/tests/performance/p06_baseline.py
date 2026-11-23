@@ -382,12 +382,12 @@ def _measure(
             raise RuntimeError(f"{scenario.name}: unexpected frame count")
         if summary.boundary_event_count != scenario.expected_boundary_events:
             raise RuntimeError(f"{scenario.name}: unexpected boundary-event count")
-        manifest: Any = result.manifest
+        manifest: Any = result.manifest_document()
         path_kind = str(manifest["resolved"]["path_kind"])
         if path_kind != scenario.expected_path_kind:
             raise RuntimeError(f"{scenario.name}: unexpected path kind {path_kind!r}")
         boundary_events = result.read_boundary_events()
-        event_refinement = result.manifest["event_refinement"]
+        event_refinement = manifest["event_refinement"]
         if event_refinement is not None and not isinstance(event_refinement, dict):
             raise RuntimeError(f"{scenario.name}: invalid event_refinement manifest value")
         observation = _Observation(

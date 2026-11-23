@@ -95,8 +95,8 @@ def test_completed_result_combines_every_closed_epoch(tmp_path: Path) -> None:
         end = int(boundary.candidate_offset[index + 1])
         assert primary in boundary.candidate_facet_id[begin:end]
 
-    counts = result.manifest["counts"]
-    assert isinstance(counts, dict)
+    manifest = result.manifest_document()
+    counts = manifest["counts"]
     assert counts == {
         "particles": 3,
         "release_events": release.particle_id.size,
@@ -109,7 +109,7 @@ def test_completed_result_combines_every_closed_epoch(tmp_path: Path) -> None:
         "probe_rows": sum(probe.particle_id.size for probe in probes),
         "macro_steps": 130,
     }
-    cadence = result.manifest["durable_commit_cadence"]
+    cadence = manifest["durable_commit_cadence"]
     assert cadence == {
         "revision": "cumulative_solver_work_v1",
         "work_threshold": 128 * 3,
@@ -121,13 +121,11 @@ def test_completed_result_combines_every_closed_epoch(tmp_path: Path) -> None:
         ],
         "barrier": "accepted_macro_step",
     }
-    assert result.manifest["resume_identity"]["durable_commit_cadence"] == cadence
+    assert manifest["resume_identity"]["durable_commit_cadence"] == cadence
     assert "epoch_macro_steps" not in result.manifest
     assert _segment_macro_counts(result) == [124, 6]
-    memory_plan = result.manifest["memory_plan"]
-    assert isinstance(memory_plan, dict)
+    memory_plan = manifest["memory_plan"]
     components = memory_plan["components"]
-    assert isinstance(components, dict)
     assert components["slab_event_staging"] == (
         memory_plan["event_staging_fixed_bytes"]
         + memory_plan["slab_particles"] * memory_plan["event_staging_bytes_per_row"]
@@ -814,8 +812,7 @@ def _assert_public_result_identity(reference: Any, resumed: Any) -> None:
         "lifecycle_counts",
         "failure_reason_codes",
         "failure_reason_counts",
-        "maximum_dt_over_tau",
-        "maximum_dt_charge_lipschitz",
+        "prepared_stability_upper_bounds",
         "counts",
     )
     for name in science_manifest_keys:

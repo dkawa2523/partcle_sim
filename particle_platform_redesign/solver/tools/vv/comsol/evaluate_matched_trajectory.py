@@ -14,7 +14,7 @@ import hashlib
 import json
 import math
 from dataclasses import dataclass
-from itertools import chain
+from itertools import chain, pairwise
 from pathlib import Path
 from typing import Any, Final
 
@@ -22,12 +22,34 @@ import numpy as np
 import yaml
 
 from chamber_particles import load_case, open_result
+from chamber_particles.time_grid import MACRO_GRID_REVISION, MacroGrid
 from tools.vv.comsol.meaning_preflight import InventoryError, require_supported_comparison
 
-TOOL_REVISION: Final = "deterministic_pre_event_trajectory_v3"
+TOOL_REVISION: Final = "deterministic_pre_event_trajectory_v5"
 _MODES: Final = {"cartesian_xy": ("x", "y"), "axisymmetric_rz_meridional": ("r", "z")}
 _LEVELS: Final = ("coarse", "medium", "fine")
 _QUANTITIES: Final = {"position": (0, 2, "m"), "velocity": (2, 4, "m/s"), "charge": (4, 5, "e")}
+# Reviewed execution semantics, not an inference from whichever core is imported.
+_FIXED_ROOT_REVISIONS: Final = {
+    "engine_algorithm_revision": "particle_engine_v64",
+    "compiled_cpu_tile_revision": "compiled_cpu_tile_v31",
+    "step_proposal_revision": "coupled_fixed_step_proposal_v10",
+    "event_algorithm_revision": "line_quadratic_curved_capsule_periodic_first_hit_v23",
+}
+_FIXED_ROOT_PATHS: Final = {
+    ("rk4_fixed", "linear_exact"): {},
+    ("rk4_fixed", "quadratic_exact"): {},
+    ("exponential_midpoint", "linear_exact"): {},
+    ("exponential_midpoint", "quadratic_exact"): {},
+    ("rk4_fixed", "rk4_dense"): {
+        "rk4_enclosure_revision": "rk4_global_abs_enclosure_v2",
+        "rk4_dense_path_revision": "rk4_position_hermite_state_extension_v3",
+    },
+    ("exponential_midpoint", "exponential_midpoint_reintegrated"): {
+        "exponential_midpoint_revision": "charge_stable_exponential_midpoint_v3",
+        "exponential_midpoint_enclosure_revision": "exponential_midpoint_local_stage_enclosure_v4",
+    },
+}
 type Record = dict[str, Any]
 type StateArrays = tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]
 
@@ -203,7 +225,7 @@ def _support_value(value: str) -> bool | None:
 def _result_evidence(level: Record, base: Path, mode: str) -> tuple[Any, Record]:
     case = load_case(_path(base, level["case_path"]))
     result = open_result(_path(base, level["result_path"]))
-    manifest: Record = dict(result.manifest)
+    manifest: Record = result.manifest_document()
     if manifest["case_file_hash"] != case.case_file_hash:
         raise ValueError("result manifest is not bound to supplied case file")
     if manifest["data_content_hash"] != case.content_hash:
@@ -212,6 +234,8 @@ def _result_evidence(level: Record, base: Path, mode: str) -> tuple[Any, Record]
         raise ValueError("declared integration step differs from actual case/run manifest")
     if manifest["motion_mode"] != mode or case.spec.motion.mode != mode:
         raise ValueError("result coordinate mode differs from series")
+    if any(manifest["time"][key] != getattr(case.spec.time, key) for key in ("start_s", "end_s")):
+        raise ValueError("run time span differs from actual supplied case")
     document = yaml.safe_load(case.case_path.read_text(encoding="utf-8"))
     evidence = {
         "execution": "COMPLETED_PUBLIC_RESULT_BOUND_TO_CASE",
@@ -223,6 +247,13 @@ def _result_evidence(level: Record, base: Path, mode: str) -> tuple[Any, Record]
         "time": manifest["time"],
         "counts": manifest["counts"],
         "engine_algorithm_revision": manifest["engine_algorithm_revision"],
+        "macro_grid_revision": manifest.get("macro_grid_revision"),
+        "path_execution": {
+            "coordinate_system": case.data.coordinate_system,
+            "boundary_facets": int(case.data.geometry.boundary.line2.shape[0]),
+            "event_refinement": manifest.get("event_refinement"),
+            "boundary_interactions": manifest.get("boundary_interactions"),
+        },
         "physical_problem": {
             "data_content_hash": case.content_hash,
             "configuration": {
@@ -264,15 +295,22 @@ def _read_result(
                         raise ValueError("public frame/probe states disagree at a selected key")
                     continue
                 _store(arrays, key, state, active, True if active else None)
-    issues = _result_scope_issues(result, ids, times)
+    releases = result.read_release_events()
+    selected = np.isin(releases.particle_id, ids)
+    evidence["selected_release"] = {
+        "particle_ids": releases.particle_id[selected].tolist(),
+        "time_s": releases.time_s[selected].tolist(),
+    }
+    issues = _result_scope_issues(result, ids, times, releases)
     return _Trajectory(ids, times, *arrays, evidence, tuple(issues))
 
 
-def _result_scope_issues(result: Any, ids: np.ndarray, times: np.ndarray) -> list[str]:
+def _result_scope_issues(
+    result: Any, ids: np.ndarray, times: np.ndarray, releases: Any
+) -> list[str]:
     issues: list[str] = []
     if result.manifest.get("brownian_composition_revision") is not None:
         issues.append("stochastic runs are outside deterministic pre-event qualification")
-    releases = result.read_release_events()
     selected = np.isin(releases.particle_id, ids)
     if np.count_nonzero(selected) != ids.size or not bool(
         (releases.time_s[selected] == times[0]).all()
@@ -396,11 +434,26 @@ def _initial(trajectories: list[_Trajectory]) -> Record:
     }
 
 
-def _orders(first: Record, second: Record, steps: list[float]) -> Record:
+def _orders(
+    first: Record,
+    second: Record,
+    steps: list[float],
+    resolution: Record,
+    fixed_roots: Record,
+    issues: list[str],
+) -> Record:
     ratios = [steps[0] / steps[1], steps[1] / steps[2]]
+    supported = (
+        not issues
+        and resolution["status"] == "SUPPORTED"
+        and fixed_roots["status"] == "SUPPORTED"
+        and all(item["uniform_base_step"] for item in resolution["window_partitions"].values())
+        and math.isclose(*ratios, rel_tol=1e-12)
+    )
     result: Record = {
         "step_ratios": ratios,
-        "interpretation": "observed sensitivity order only; no accuracy certification or mandatory smooth order for nonsmooth fields",
+        "status": "SUPPORTED" if supported else "NOT_TESTED",
+        "interpretation": "Nominal step ratios support an observed sensitivity order only for bound, genuinely refined uniform macro grids and known no-reintegration execution. Nonuniform grids, unknown root partitions and unproven execution retain raw changes without an order estimate. No accuracy bound or strong stochastic order is certified.",
     }
     for quantity in _QUANTITIES:
         values: Record = {}
@@ -408,11 +461,7 @@ def _orders(first: Record, second: Record, steps: list[float]) -> Record:
             a, b = first[quantity][metric], second[quantity][metric]
             values[metric] = (
                 math.log(a / b) / math.log(ratios[0])
-                if a is not None
-                and b is not None
-                and a > 0
-                and b > 0
-                and math.isclose(*ratios, rel_tol=1e-12)
+                if supported and a is not None and b is not None and a > 0 and b > 0
                 else None
             )
         result[quantity] = values
@@ -467,6 +516,8 @@ def characterize(series_path: Path) -> Record:
     initial, coverage, issues = _series_qualification(trajectories)
     fine = trajectories["fine"]
     steps = [float(config["levels"][name]["step_s"]) for name in _LEVELS]
+    resolution = _macro_resolution(trajectories)
+    fixed_roots = _fixed_root_prerequisite(trajectories)
     return {
         "schema_version": 2,
         "tool_revision": TOOL_REVISION,
@@ -497,7 +548,11 @@ def characterize(series_path: Path) -> Record:
         "coverage": coverage,
         "coarse_medium": coarse_medium,
         "medium_fine": medium_fine,
-        "observed_order": _orders(coarse_medium, medium_fine, steps),
+        "macro_resolution": resolution,
+        "fixed_root_execution": fixed_roots,
+        "observed_order": _orders(
+            coarse_medium, medium_fine, steps, resolution, fixed_roots, issues
+        ),
         "accuracy_claim": "Step-pair changes are sensitivity observations, not certified error bounds or COMSOL precision targets.",
     }
 
@@ -640,28 +695,183 @@ def _registered_policy(budget: Record) -> Path:
     return path
 
 
+def _bound_macro_grid(trajectory: _Trajectory) -> MacroGrid:
+    """Recover only the known parent clock, bound to execution and actual release."""
+
+    evidence = trajectory.evidence
+    if evidence["execution"] != "COMPLETED_PUBLIC_RESULT_BOUND_TO_CASE":
+        raise ValueError("macro execution is not bound by a completed public result")
+    if evidence.get("macro_grid_revision") != MACRO_GRID_REVISION:
+        raise ValueError("macro grid revision is missing or unknown")
+    release = evidence["selected_release"]
+    if sorted(release["particle_ids"]) != trajectory.ids.tolist() or not all(
+        time_s == trajectory.times[0] for time_s in release["time_s"]
+    ):
+        raise ValueError("window does not start at every selected particle's actual release")
+    time = evidence["time"]
+    grid = MacroGrid(
+        time["start_s"], time["end_s"], time["dt_s"], tuple(time["field_snapshot_splits_s"])
+    )
+    if grid.interval_count != evidence["counts"]["macro_steps"]:
+        raise ValueError("completed macro count disagrees with the bound grid policy")
+    return grid
+
+
+def _window_partition(grid: MacroGrid, start_s: float, end_s: float) -> Record:
+    """Summarize the release-shortened macro intervals in bounded memory."""
+
+    count, maximum = 0, 0.0
+    uniform = True
+    digest = hashlib.sha256()
+    for left, right in grid.intervals(start_s, end_s):
+        left = max(left, start_s)
+        width = right - left
+        count += 1
+        maximum = max(maximum, width)
+        uniform &= grid.is_base_interval(left, right)
+        digest.update(f"{left.hex()}:{right.hex()};".encode("ascii"))
+    return {
+        "intervals": count,
+        "maximum_interval_s": maximum,
+        "uniform_base_step": bool(uniform),
+        "partition_sha256": digest.hexdigest(),
+    }
+
+
+def _nested_window_partitions(
+    coarse: MacroGrid, fine: MacroGrid, start_s: float, end_s: float
+) -> bool:
+    """Check interior coarse boundaries against the actual finer clock."""
+
+    finer = iter(fine.intervals(start_s, end_s))
+    fine_end = next(finer)[1]
+    for _, coarse_end in coarse.intervals(start_s, end_s):
+        if coarse_end >= end_s:
+            break
+        while fine_end < coarse_end:
+            fine_end = next(finer)[1]
+        if fine_end != coarse_end:
+            return False
+    return True
+
+
 def _macro_resolution(trajectories: dict[str, _Trajectory]) -> Record:
-    evidence = [trajectories[name].evidence for name in _LEVELS]
-    if any(item["execution"] != "COMPLETED_PUBLIC_RESULT_BOUND_TO_CASE" for item in evidence):
-        return {
-            "status": "NOT_TESTED",
-            "reason": "Actual accepted macro partitions are not bound by public result manifests",
+    """Establish a window-specific macro refinement, never an accepted-path claim."""
+
+    start_s, end_s = map(float, trajectories["fine"].times[[0, -1]])
+    result: Record = {
+        "status": "NOT_TESTED",
+        "time_window_s": [start_s, end_s],
+        "completed_macro_counts": [
+            trajectories[name].evidence.get("counts", {}).get("macro_steps") for name in _LEVELS
+        ],
+        "accepted_particle_path_resolution": "NOT_TESTED",
+        "definition": "Known macro-grid policy plus actual common release, selected window and completed-run count. This proves only parent-clock refinement; coefficient roots, safety/event reintegration, dense-path certificate subdivisions and stochastic strong convergence are not reconstructed.",
+    }
+    try:
+        grids = {name: _bound_macro_grid(trajectories[name]) for name in _LEVELS}
+        windows = {name: _window_partition(grid, start_s, end_s) for name, grid in grids.items()}
+    except (KeyError, TypeError, ValueError, OverflowError) as error:
+        return {**result, "reason": str(error)}
+    pairs = {}
+    for first, second in pairwise(_LEVELS):
+        pairs[f"{first}_to_{second}"] = {
+            "nested": _nested_window_partitions(grids[first], grids[second], start_s, end_s),
+            "more_intervals": windows[first]["intervals"] < windows[second]["intervals"],
+            "maximum_interval_reduced": (
+                windows[first]["maximum_interval_s"] > windows[second]["maximum_interval_s"]
+            ),
         }
-    clocks = [(item["time"]["start_s"], item["time"]["end_s"]) for item in evidence]
-    counts = [item["counts"]["macro_steps"] for item in evidence]
-    times = trajectories["fine"].times
-    fine_steps_per_window = float((times[-1] - times[0]) / evidence[-1]["time"]["dt_s"])
-    coarse_steps_per_window = float((times[-1] - times[0]) / evidence[0]["time"]["dt_s"])
+    clocks = {(grid.start_s, grid.end_s) for grid in grids.values()}
     supported = (
-        len(set(clocks)) == 1 and counts[0] < counts[1] < counts[2] and coarse_steps_per_window > 1
+        len(clocks) == 1
+        and windows["coarse"]["intervals"] > 1
+        and all(all(pair.values()) for pair in pairs.values())
     )
     return {
+        **result,
         "status": "SUPPORTED" if supported else "NOT_TESTED",
-        "accepted_macro_counts": counts,
-        "run_time_spans_s": clocks,
-        "fine_base_steps_per_observation_window": fine_steps_per_window,
-        "coarse_base_steps_per_observation_window": coarse_steps_per_window,
-        "definition": "Conservative empirical prerequisite: common run span, increasing actual accepted macro counts and more than one coarsest base step in the selected window. Distinct dt labels alone do not prove refined partitions; hidden event/safety history is not reconstructed.",
+        "macro_grid_revision": MACRO_GRID_REVISION,
+        "window_partitions": windows,
+        "refinement_pairs": pairs,
+        "reason": "Requires nested finer window partitions, more intervals and a reduced maximum interval at both levels; at least two coarse intervals and a common run span.",
+    }
+
+
+def _require_fixed_root_policy(evidence: Record) -> None:
+    """Limit the zero-counter inference to reviewed deterministic execution paths."""
+
+    if evidence["execution"] != "COMPLETED_PUBLIC_RESULT_BOUND_TO_CASE":
+        raise ValueError("fixed particle intervals are not bound to a completed public execution")
+    revisions = evidence["numerical_method"]["algorithm_revisions"]
+    if any(revisions.get(name) != value for name, value in _FIXED_ROOT_REVISIONS.items()):
+        raise ValueError("engine/proposal/event execution policy is missing or unknown")
+    path = evidence["resolved"]
+    required = _FIXED_ROOT_PATHS.get((path["integrator"], path["path_kind"]))
+    if required is None or any(revisions.get(name) != value for name, value in required.items()):
+        raise ValueError("method/path execution policy is missing or unknown")
+    if revisions.get("brownian_composition_revision") is not None:
+        raise ValueError("Brownian coefficient roots cannot be inferred from these counters")
+
+
+def _execution_change_counters(evidence: Record) -> Record:
+    """Bind existing global work facts; never assign a positive count to a window."""
+
+    execution = evidence["path_execution"]
+    interactions = execution["boundary_interactions"]
+    counters = {
+        "boundary_or_topology_events": evidence["counts"]["boundary_events"],
+        "failure_events": evidence["counts"]["failure_events"],
+        "axis_crossings": interactions["axis_crossings"],
+        "residual_splits": interactions["residual_splits"],
+        "wall_events": interactions["wall_events"],
+    }
+    refinement = execution["event_refinement"]
+    if refinement is None:
+        exact = evidence["resolved"]["path_kind"] in {"linear_exact", "quadratic_exact"}
+        no_event_path = (
+            execution["coordinate_system"] == "cartesian_xy" and execution["boundary_facets"] == 0
+        )
+        if not (exact or no_event_path):
+            raise ValueError("curved event-path refinement counters are missing")
+    else:
+        counters["proposal_refinements"] = refinement["refinements"]
+        counters["maximum_refinement_depth"] = refinement["maximum_refinement_depth"]
+    return counters
+
+
+def _fixed_root_level(trajectory: _Trajectory) -> Record:
+    """Establish the sufficient no-reintegration condition for one completed run."""
+
+    try:
+        _require_fixed_root_policy(trajectory.evidence)
+        counters = _execution_change_counters(trajectory.evidence)
+    except (KeyError, TypeError, ValueError) as error:
+        return {"status": "NOT_TESTED", "reason": str(error)}
+    unresolved = {
+        name: value for name, value in counters.items() if type(value) is not int or value != 0
+    }
+    return {
+        "status": "NOT_TESTED" if unresolved else "SUPPORTED",
+        "global_execution_counters": counters,
+        "reason": (
+            "Positive, missing or invalid global counters cannot locate accepted particle intervals in the selected cohort/window."
+            if unresolved
+            else "Known deterministic execution with no proposal refinement, axis crossing, residual split, boundary/topology event or failure anywhere in the run."
+        ),
+    }
+
+
+def _fixed_root_prerequisite(trajectories: dict[str, _Trajectory]) -> Record:
+    levels = {name: _fixed_root_level(trajectories[name]) for name in _LEVELS}
+    return {
+        "status": (
+            "SUPPORTED"
+            if all(item["status"] == "SUPPORTED" for item in levels.values())
+            else "NOT_TESTED"
+        ),
+        "levels": levels,
+        "definition": "A sufficient global-zero condition links the known parent clock to unreintegrated deterministic particle intervals, shortened only by release. Positive global work elsewhere is not attributed to a selected window. No accepted-path ledger, absolute error bound or stochastic strong-convergence claim follows.",
     }
 
 
@@ -684,13 +894,18 @@ def _self_resolution(budget: Record, participants: dict[str, dict[str, _Trajecto
             "gates": gates,
             "empirical_target_verdict": _budget_verdict(changes, gates),
             "macro_resolution": _macro_resolution(trajectories),
+            "fixed_root_execution": _fixed_root_prerequisite(trajectories),
         }
-    known = all(item["macro_resolution"]["status"] == "SUPPORTED" for item in sides.values())
+    known = all(
+        item["macro_resolution"]["status"] == "SUPPORTED"
+        and item["fixed_root_execution"]["status"] == "SUPPORTED"
+        for item in sides.values()
+    )
     met = all(item["empirical_target_verdict"] == "PASS" for item in sides.values())
     return {
         "status": ("PASS" if met else "FAIL") if known else "NOT_TESTED",
         "participants": sides,
-        "interpretation": "Empirical resolution prerequisite only. These independent absolute SI allowances and finest-pair observations are not rigorous error bounds or reference-precision parity targets.",
+        "interpretation": "Empirical resolution prerequisite requires both actual macro refinement and known no-reintegration execution. Raw medium/fine changes and their target verdict remain descriptive when particle-interval refinement is unqualified. These allowances are not rigorous error bounds or reference-precision parity targets.",
     }
 
 

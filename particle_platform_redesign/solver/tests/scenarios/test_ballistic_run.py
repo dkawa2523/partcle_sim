@@ -475,7 +475,7 @@ def test_ballistic_run_does_not_allocate_unused_force_stage_buffers(
 ) -> None:
     paths = materialize_microcase(case_id, tmp_path / case_id)
     case = load_case(paths.case_path)
-    prepared = engine_module._prepare(case)
+    prepared = engine_module._prepare(case).transport
     dynamics = prepared.dynamics
     stage = dynamics.native_workspace
     arrays = (

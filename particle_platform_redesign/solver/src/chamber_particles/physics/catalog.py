@@ -12,7 +12,7 @@ from .forces import (
     WALDMANN_GALLIS_MAX_SPEED_OVER_MEAN_THERMAL,
 )
 
-PHYSICS_CATALOG_REVISION = "inertial_langevin_2d_catalog_v24"
+PHYSICS_CATALOG_REVISION = "declared_primitive_physics_catalog_v25"
 
 BROWNIAN_MIDPOINT_2D_REVISION = "inertial_langevin_fdt_epstein_linear_midpoint_2d_v2"
 
@@ -28,6 +28,8 @@ _TALBOT_REVISION = "talbot_cross_regime_radius_knudsen_v1"
 _SAFFMAN_REVISION = "saffman_unbounded_creeping_shear_v1"
 _AGGREGATE_TWO_CURRENT_REVISION = "aggregate_relative_drift_regularized_two_current_v1"
 _AGGREGATE_THREE_CURRENT_REVISION = "aggregate_relative_drift_regularized_three_current_v1"
+
+type ValueConstraint = Literal["finite", "positive", "nonnegative"]
 
 type CoordinateSystem = Literal["cartesian_xy", "axisymmetric_rz"]
 
@@ -50,8 +52,21 @@ class ModelFieldDescriptor:
     unit: str
     components: tuple[str, ...]
     stored_basis: str
-    positive: bool
+    value_constraint: ValueConstraint
     zero_on_rz_axis: bool
+
+
+@dataclass(frozen=True, slots=True)
+class ModelCertificateRoles:
+    """Inputs used by each path proof, distinct from stage inputs.
+
+    Constant acceleration declares family support only. Preparation still
+    proves constant fields and includes every selected force contribution.
+    """
+
+    local_applicability_fields: tuple[str, ...]
+    local_additive_fields: tuple[str, ...]
+    constant_acceleration: bool
 
 
 @dataclass(frozen=True, slots=True)
@@ -72,6 +87,7 @@ class ModelDescriptor:
     optional_parameters: tuple[str, ...]
     field_parameters: tuple[str, ...]
     notes: tuple[str, ...]
+    certificates: ModelCertificateRoles
     fields: tuple[ModelFieldDescriptor, ...] = ()
 
 
@@ -81,6 +97,7 @@ def _descriptor(
     revision: str,
     parameters: tuple[str, ...] = (),
     *,
+    certificates: ModelCertificateRoles,
     optional: tuple[str, ...] = (),
     coordinates: tuple[CoordinateSystem, ...] = _COORDINATE_SYSTEMS,
     integrators: tuple[str, ...] = SUPPORTED_INTEGRATORS,
@@ -98,6 +115,7 @@ def _descriptor(
         tuple(sorted(optional)),
         tuple(name for name in required if name.endswith("_field")),
         notes,
+        certificates,
     )
 
 
@@ -148,6 +166,7 @@ _MODEL_DESCRIPTORS = (
         "fixed",
         "fixed_charge_v1",
         notes=("Source charge_number is constant; omit revision in the input selector.",),
+        certificates=ModelCertificateRoles((), (), True),
     ),
     _descriptor(
         "charge",
@@ -155,6 +174,17 @@ _MODEL_DESCRIPTORS = (
         "oml_stationary_maxwellian_debye_huckel_v1",
         _OML_COLLECTION_PARAMETERS,
         notes=("Electron and ion temperature fields use K; applicability must be error.",),
+        certificates=ModelCertificateRoles(
+            (
+                "positive_ion_velocity_field",
+                "electron_number_density_field",
+                "positive_ion_number_density_field",
+                "electron_temperature_field",
+                "positive_ion_temperature_field",
+            ),
+            (),
+            False,
+        ),
     ),
     _descriptor(
         "charge",
@@ -162,6 +192,17 @@ _MODEL_DESCRIPTORS = (
         "oml_shifted_maxwellian_single_ion_negative_debye_huckel_v1",
         (*_OML_COLLECTION_PARAMETERS, "maximum_ion_drift_ratio"),
         notes=("Electron and ion temperature fields use K; applicability must be error.",),
+        certificates=ModelCertificateRoles(
+            (
+                "positive_ion_velocity_field",
+                "electron_number_density_field",
+                "positive_ion_number_density_field",
+                "electron_temperature_field",
+                "positive_ion_temperature_field",
+            ),
+            (),
+            False,
+        ),
     ),
     _descriptor(
         "charge",
@@ -169,6 +210,7 @@ _MODEL_DESCRIPTORS = (
         _AGGREGATE_TWO_CURRENT_REVISION,
         _AGGREGATE_COLLECTION_PARAMETERS,
         notes=("Aggregate thermal voltage fields use V; applicability must be error.",),
+        certificates=ModelCertificateRoles(("positive_ion_velocity_field",), (), False),
     ),
     _descriptor(
         "charge",
@@ -182,6 +224,9 @@ _MODEL_DESCRIPTORS = (
             "effective_negative_ion_mass_field",
         ),
         notes=("Aggregate thermal voltage fields use V; applicability must be error.",),
+        certificates=ModelCertificateRoles(
+            ("positive_ion_velocity_field", "negative_ion_velocity_field"), (), False
+        ),
     ),
     _descriptor(
         "charge",
@@ -196,9 +241,16 @@ _MODEL_DESCRIPTORS = (
             "particle_properties",
         ),
         notes=_REFERENCE_NOTE,
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
-        "drag", "epstein_linear", _EPSTEIN_LINEAR_REVISION, (*_EPSTEIN_PARAMETERS, "delta")
+        "drag",
+        "epstein_linear",
+        _EPSTEIN_LINEAR_REVISION,
+        (*_EPSTEIN_PARAMETERS, "delta"),
+        certificates=ModelCertificateRoles(
+            ("gas_velocity_field", "gas_mean_free_path_field", "gas_temperature_field"), (), False
+        ),
     ),
     _descriptor(
         "drag",
@@ -208,6 +260,9 @@ _MODEL_DESCRIPTORS = (
         notes=(
             "Producer-owned effective-gas sensitivity; no implicit single-species equivalence.",
         ),
+        certificates=ModelCertificateRoles(
+            ("gas_velocity_field", "gas_mean_free_path_field", "gas_temperature_field"), (), False
+        ),
     ),
     _descriptor(
         "drag",
@@ -216,6 +271,9 @@ _MODEL_DESCRIPTORS = (
         (*_EPSTEIN_PARAMETERS, "diffuse_reflection_fraction", "maximum_speed_ratio"),
         integrators=_DETERMINISTIC_INTEGRATORS,
         notes=("Nonlinear finite-speed drag cannot be paired with the current OU noise models.",),
+        certificates=ModelCertificateRoles(
+            ("gas_velocity_field", "gas_mean_free_path_field", "gas_temperature_field"), (), False
+        ),
     ),
     _descriptor(
         "drag",
@@ -230,6 +288,16 @@ _MODEL_DESCRIPTORS = (
         ),
         integrators=_DETERMINISTIC_INTEGRATORS,
         notes=("Air-slip validity gates are unchanged; no fallback to a rarefied-gas model.",),
+        certificates=ModelCertificateRoles(
+            (
+                "gas_velocity_field",
+                "gas_mean_free_path_field",
+                "gas_density_field",
+                "gas_dynamic_viscosity_field",
+            ),
+            (),
+            False,
+        ),
     ),
     _descriptor(
         "drag",
@@ -237,6 +305,7 @@ _MODEL_DESCRIPTORS = (
         "prescribed_linear_friction_v1",
         ("gas_velocity_field", "friction_coefficient_field", "particle_properties"),
         notes=_REFERENCE_NOTE,
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
         "noise",
@@ -249,6 +318,7 @@ _MODEL_DESCRIPTORS = (
             "Requires a supported linear Epstein drag revision, not finite-speed or Stokes drag.",
             "Uses same-stage gas temperature and the existing joint position/velocity OU path.",
         ),
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
         "noise",
@@ -261,12 +331,16 @@ _MODEL_DESCRIPTORS = (
             *_REFERENCE_NOTE,
             "Requires prescribed_linear_friction; diffusion is independent of FDT temperature.",
         ),
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
         "thermophoresis",
         "waldmann_gallis",
         _WALDMANN_GALLIS_SINGLE_SPECIES_REVISION,
         _WALDMANN_PARAMETERS,
+        certificates=ModelCertificateRoles(
+            ("gas_velocity_field", "gas_temperature_field", "gas_mean_free_path_field"), (), False
+        ),
     ),
     _descriptor(
         "thermophoresis",
@@ -274,6 +348,9 @@ _MODEL_DESCRIPTORS = (
         _WALDMANN_GALLIS_EFFECTIVE_GAS_REVISION,
         (*_WALDMANN_PARAMETERS, "maximum_speed_ratio"),
         notes=("Producer-owned effective-gas sensitivity; applicability must be error.",),
+        certificates=ModelCertificateRoles(
+            ("gas_velocity_field", "gas_temperature_field", "gas_mean_free_path_field"), (), False
+        ),
     ),
     _descriptor(
         "thermophoresis",
@@ -295,6 +372,18 @@ _MODEL_DESCRIPTORS = (
         notes=(
             "Uses radius-based Knudsen number; coefficients are explicit, not universal defaults.",
         ),
+        certificates=ModelCertificateRoles(
+            (
+                "gas_temperature_field",
+                "gas_density_field",
+                "gas_dynamic_viscosity_field",
+                "gas_thermal_conductivity_field",
+                "gas_mean_free_path_field",
+                "gas_temperature_gradient_field",
+            ),
+            (),
+            False,
+        ),
     ),
     _descriptor(
         "ion_drag",
@@ -304,6 +393,18 @@ _MODEL_DESCRIPTORS = (
             *_OML_COLLECTION_PARAMETERS,
             "ion_neutral_mean_free_path_field",
             "maximum_ion_drift_ratio",
+        ),
+        certificates=ModelCertificateRoles(
+            (
+                "positive_ion_velocity_field",
+                "electron_number_density_field",
+                "positive_ion_number_density_field",
+                "electron_temperature_field",
+                "positive_ion_temperature_field",
+                "ion_neutral_mean_free_path_field",
+            ),
+            (),
+            False,
         ),
     ),
     _descriptor(
@@ -319,6 +420,18 @@ _MODEL_DESCRIPTORS = (
             "ion_neutral_mean_free_path_field",
             "maximum_relative_ion_speed_m_s",
             "applicability",
+        ),
+        certificates=ModelCertificateRoles(
+            ("positive_ion_velocity_field",),
+            (
+                "positive_ion_number_density_field",
+                "positive_ion_thermal_voltage_field",
+                "positive_ion_velocity_field",
+                "effective_positive_ion_mass_field",
+                "screening_length_field",
+                "ion_neutral_mean_free_path_field",
+            ),
+            False,
         ),
     ),
     _descriptor(
@@ -336,6 +449,7 @@ _MODEL_DESCRIPTORS = (
             "applicability",
         ),
         notes=("Sensitivity model; its E binding must agree with any selected Coulomb model.",),
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
         "ion_drag",
@@ -348,6 +462,7 @@ _MODEL_DESCRIPTORS = (
             "particle_properties",
         ),
         notes=_REFERENCE_NOTE,
+        certificates=ModelCertificateRoles((), (), False),
     ),
     _descriptor(
         "dielectrophoresis",
@@ -360,6 +475,7 @@ _MODEL_DESCRIPTORS = (
             "maximum_point_dipole_radius_m",
         ),
         notes=("Consumes grad(|E|^2), not E itself; the point-dipole radius bound is explicit.",),
+        certificates=ModelCertificateRoles((), (), True),
     ),
     _descriptor(
         "lift",
@@ -375,6 +491,7 @@ _MODEL_DESCRIPTORS = (
         ),
         coordinates=("axisymmetric_rz",),
         notes=("Rarefied-gas sensitivity; signed azimuthal vorticity is an explicit primitive.",),
+        certificates=ModelCertificateRoles(("gas_mean_free_path_field",), (), False),
     ),
     _descriptor(
         "lift",
@@ -389,6 +506,17 @@ _MODEL_DESCRIPTORS = (
             "applicability",
         ),
         notes=("Creeping/shear/slip validity gates must overlap all co-selected models.",),
+        certificates=ModelCertificateRoles(
+            (
+                "gas_mean_free_path_field",
+                "gas_velocity_field",
+                "gas_density_field",
+                "gas_dynamic_viscosity_field",
+                "out_of_plane_gas_vorticity_field",
+            ),
+            (),
+            False,
+        ),
     ),
     _descriptor(
         "lift",
@@ -396,8 +524,15 @@ _MODEL_DESCRIPTORS = (
         "prescribed_rotational_lift_v1",
         ("gas_velocity_field", "rotation_coefficient_field", "particle_properties"),
         notes=_REFERENCE_NOTE,
+        certificates=ModelCertificateRoles((), (), False),
     ),
-    _descriptor("electric", "coulomb", "electric_coulomb_v1", ("electric_field",)),
+    _descriptor(
+        "electric",
+        "coulomb",
+        "electric_coulomb_v1",
+        ("electric_field",),
+        certificates=ModelCertificateRoles((), ("electric_field",), True),
+    ),
     _descriptor(
         "electric",
         "coulomb",
@@ -406,6 +541,7 @@ _MODEL_DESCRIPTORS = (
         notes=(
             "Caps Coulomb force only; continuous charge and ion drag keep the uncapped stage charge.",
         ),
+        certificates=ModelCertificateRoles((), ("electric_field",), True),
     ),
     _descriptor(
         "gravity_buoyancy",
@@ -415,6 +551,7 @@ _MODEL_DESCRIPTORS = (
         notes=(
             "RZ requires zero radial gravity; displaced volume is an independent particle authority.",
         ),
+        certificates=ModelCertificateRoles((), (), True),
     ),
 )
 SUPPORTED_PHYSICS_CATEGORIES = frozenset(model.category for model in _MODEL_DESCRIPTORS)
@@ -488,7 +625,7 @@ class RequiredField:
     unit: str
     components: tuple[str, ...]
     stored_basis: str
-    positive: bool = False
+    value_constraint: ValueConstraint = "finite"
     zero_on_rz_axis: bool = False
 
 
@@ -788,6 +925,14 @@ type LiftPlan = RarefiedVorticityLiftPlan | SaffmanLiftPlan | PrescribedRotation
 
 
 @dataclass(frozen=True, slots=True)
+class SelectedModel:
+    """Keep the selected descriptor and caller field names instead of re-inferring identity."""
+
+    descriptor: ModelDescriptor
+    field_names: tuple[tuple[str, str], ...]
+
+
+@dataclass(frozen=True, slots=True)
 class PhysicsPlan:
     """One model per category, in the fixed contribution order."""
 
@@ -801,22 +946,14 @@ class PhysicsPlan:
     electric: ElectricPlan | None
     gravity_buoyancy: GravityBuoyancyPlan | None
     required_fields: tuple[RequiredField, ...]
+    selected_models: tuple[SelectedModel, ...]
 
     @property
     def has_force(self) -> bool:
         """Whether velocity has a nonzero configured derivative contribution."""
 
         return any(
-            model is not None
-            for model in (
-                self.drag,
-                self.thermophoresis,
-                self.ion_drag,
-                self.dielectrophoresis,
-                self.lift,
-                self.electric,
-                self.gravity_buoyancy,
-            )
+            model.descriptor.category not in ("charge", "noise") for model in self.selected_models
         )
 
     @property
@@ -832,63 +969,28 @@ class PhysicsPlan:
         return self.has_force or self.evolves_continuous_state
 
     def resolved_models(self) -> dict[str, dict[str, str | float]]:
-        """Return the small manifest representation in deterministic category order."""
-
-        result: dict[str, dict[str, str | float]]
-        if self.charge is None:
-            result = {"charge": {"model": "fixed", "revision": "fixed_charge_v1"}}
-        else:
-            result = {
-                "charge": {
-                    "model": (
-                        "prescribed_exponential_linear"
-                        if isinstance(self.charge, PrescribedExponentialLinearChargePlan)
-                        else "plasma_continuous"
-                    ),
-                    "revision": self.charge.revision,
-                }
+        """Project the actual selected descriptors and resolved scientific parameters."""
+        result: dict[str, dict[str, str | float]] = {
+            item.descriptor.category: {
+                "model": item.descriptor.model,
+                "revision": item.descriptor.revision,
             }
-        drag_model = _resolved_drag_model(self.drag)
-        if drag_model is not None:
-            result["drag"] = drag_model
-        if self.noise is not None:
-            result["noise"] = {
-                "model": (
-                    "prescribed_force_diffusion"
-                    if isinstance(self.noise, PrescribedForceDiffusionNoisePlan)
-                    else "inertial_langevin_fdt"
-                ),
-                "revision": self.noise.revision,
-            }
-        thermophoresis_model = _resolved_thermophoresis_model(self.thermophoresis)
-        if thermophoresis_model is not None:
-            result["thermophoresis"] = thermophoresis_model
-        ion_drag_model = _resolved_ion_drag_model(self.ion_drag)
-        if ion_drag_model is not None:
-            result["ion_drag"] = ion_drag_model
-        if self.dielectrophoresis is not None:
-            result["dielectrophoresis"] = {
-                "model": "quasistatic_spherical",
-                "revision": "quasistatic_spherical_gradient_e2_v1",
-            }
-        lift_model = _resolved_lift_model(self.lift)
-        if lift_model is not None:
-            result["lift"] = lift_model
-        if self.electric is not None:
-            electric_model: dict[str, str | float] = {
-                "model": "coulomb",
-                "revision": self.electric.revision,
-            }
-            if self.electric.maximum_abs_charge_number is not None:
-                electric_model["maximum_abs_charge_number"] = (
-                    self.electric.maximum_abs_charge_number
-                )
-            result["electric"] = electric_model
-        if self.gravity_buoyancy is not None:
-            result["gravity_buoyancy"] = {
-                "model": "standard",
-                "revision": "gravity_buoyancy_standard_v1",
-            }
+            for item in self.selected_models
+        }
+        if isinstance(self.thermophoresis, TalbotThermophoresisPlan):
+            model = self.thermophoresis
+            result["thermophoresis"].update(
+                particle_thermal_conductivity_W_m_K=model.particle_thermal_conductivity_W_m_K,
+                thermal_slip_coefficient=model.thermal_slip_coefficient,
+                momentum_exchange_coefficient=model.momentum_exchange_coefficient,
+                thermal_exchange_coefficient=model.thermal_exchange_coefficient,
+            )
+        if isinstance(self.lift, RarefiedVorticityLiftPlan):
+            result["lift"]["lift_coefficient"] = self.lift.lift_coefficient
+        if self.electric is not None and self.electric.maximum_abs_charge_number is not None:
+            result["electric"]["maximum_abs_charge_number"] = (
+                self.electric.maximum_abs_charge_number
+            )
         return result
 
 
@@ -900,81 +1002,9 @@ def compatible_integrators(plan: PhysicsPlan) -> tuple[str, ...]:
     """
 
     allowed = set(("ou_langevin",) if plan.noise is not None else _DETERMINISTIC_INTEGRATORS)
-    for category, model in plan.resolved_models().items():
-        descriptor = _model_descriptor(category, str(model["model"]), str(model["revision"]))
-        if descriptor is None:
-            raise PhysicsConfigurationError("resolved physics model is absent from the catalog")
-        allowed.intersection_update(descriptor.integrators)
+    for model in plan.selected_models:
+        allowed.intersection_update(model.descriptor.integrators)
     return tuple(method for method in SUPPORTED_INTEGRATORS if method in allowed)
-
-
-def _resolved_drag_model(plan: DragPlan | None) -> dict[str, str | float] | None:
-    if isinstance(plan, EpsteinDragPlan):
-        return {"model": "epstein_linear", "revision": plan.revision}
-    elif isinstance(plan, FiniteSpeedEpsteinDragPlan):
-        return {
-            "model": "epstein_finite_speed",
-            "revision": "epstein_finite_speed_maxwell_mixed_equal_temperature_v1",
-        }
-    elif isinstance(plan, StokesCunninghamDragPlan):
-        return {"model": "stokes_cunningham", "revision": "stokes_cunningham_allen_raabe_air_v1"}
-    elif isinstance(plan, PrescribedLinearFrictionPlan):
-        return {"model": "prescribed_linear_friction", "revision": plan.revision}
-    return None
-
-
-def _resolved_ion_drag_model(plan: IonDragPlan | None) -> dict[str, str | float] | None:
-    if isinstance(plan, BarnesCollisionlessIonDragPlan):
-        return {
-            "model": "barnes_collisionless",
-            "revision": "barnes_collisionless_effective_speed_single_positive_ion_negative_debye_huckel_v1",
-        }
-    elif isinstance(plan, RelativeFlowScreenedIonDragPlan):
-        return {
-            "model": "screened_collection_orbital",
-            "revision": "relative_flow_screened_collection_orbital_aggregate_ion_v1",
-        }
-    elif isinstance(plan, ElectricFieldDirectedImageIonDragPlan):
-        return {
-            "model": "image_orbital_sensitivity",
-            "revision": "electric_field_directed_image_orbital_sensitivity_v1",
-        }
-    elif isinstance(plan, PrescribedChargePolynomialIonDragPlan):
-        return {"model": "prescribed_charge_polynomial", "revision": plan.revision}
-    return None
-
-
-def _resolved_thermophoresis_model(
-    plan: ThermophoresisPlan | None,
-) -> dict[str, str | float] | None:
-    """Serialize the selected thermophoresis revision for the run manifest."""
-    if isinstance(plan, WaldmannGallisThermophoresisPlan):
-        return {"model": "waldmann_gallis", "revision": plan.revision}
-    if isinstance(plan, TalbotThermophoresisPlan):
-        return {
-            "model": "talbot",
-            "revision": _TALBOT_REVISION,
-            "particle_thermal_conductivity_W_m_K": plan.particle_thermal_conductivity_W_m_K,
-            "thermal_slip_coefficient": plan.thermal_slip_coefficient,
-            "momentum_exchange_coefficient": plan.momentum_exchange_coefficient,
-            "thermal_exchange_coefficient": plan.thermal_exchange_coefficient,
-        }
-    return None
-
-
-def _resolved_lift_model(plan: LiftPlan | None) -> dict[str, str | float] | None:
-    """Serialize the selected lift revision for the run manifest."""
-    if isinstance(plan, RarefiedVorticityLiftPlan):
-        return {
-            "model": "rarefied_vorticity_sensitivity",
-            "revision": "rarefied_vorticity_sensitivity_rz_v1",
-            "lift_coefficient": plan.lift_coefficient,
-        }
-    if isinstance(plan, SaffmanLiftPlan):
-        return {"model": "saffman", "revision": _SAFFMAN_REVISION}
-    if isinstance(plan, PrescribedRotationalLiftPlan):
-        return {"model": "prescribed_rotational_lift", "revision": plan.revision}
-    return None
 
 
 def resolve_physics_plan(
@@ -992,6 +1022,31 @@ def resolve_physics_plan(
         for category, model in models.items()
     }
 
+    if "charge" not in descriptors:
+        descriptors["charge"] = _validate_model_structure(
+            "charge", {"model": "fixed"}, coordinate_system
+        )
+    selected_models = tuple(
+        SelectedModel(
+            descriptors[category],
+            tuple(
+                (parameter, cast(str, models[category][parameter]))
+                for parameter in descriptors[category].field_parameters
+            ),
+        )
+        for category in (
+            "charge",
+            "drag",
+            "noise",
+            "thermophoresis",
+            "ion_drag",
+            "dielectrophoresis",
+            "lift",
+            "electric",
+            "gravity_buoyancy",
+        )
+        if category in descriptors
+    )
     charge = _resolve_charge(models.get("charge"))
     drag = _resolve_drag(models.get("drag"))
     noise = _resolve_noise(models.get("noise"))
@@ -1012,7 +1067,7 @@ def resolve_physics_plan(
             role.unit,
             role.components,
             role.stored_basis,
-            role.positive,
+            role.value_constraint,
             role.zero_on_rz_axis,
         )
         for category, descriptor in descriptors.items()
@@ -1029,6 +1084,7 @@ def resolve_physics_plan(
         electric,
         gravity,
         _deduplicate_requirements(requirements),
+        selected_models,
     )
 
 
@@ -1044,7 +1100,7 @@ def _model_field_roles(
             field.unit,
             field.components,
             field.stored_basis,
-            field.positive,
+            field.value_constraint,
             field.zero_on_rz_axis,
         )
         for field in requirements
@@ -1075,9 +1131,9 @@ def _model_field_requirements(
     if descriptor.category == "electric":
         return [_vector_field("electric_field", "V/m", vector_components, vector_basis)]
     if descriptor.category == "gravity_buoyancy":
-        return [_scalar_field("gas_density_field", "kg/m^3", positive=True)]
+        return [_scalar_field("gas_density_field", "kg/m^3", value_constraint="positive")]
     if descriptor.model == "prescribed_force_diffusion":
-        return [_scalar_field("force_spectral_density_field", "N^2*s", positive=True)]
+        return [_scalar_field("force_spectral_density_field", "N^2*s", value_constraint="positive")]
     return []
 
 
@@ -1099,7 +1155,7 @@ def _thermophoresis_requirements(
                 _scalar_field(
                     "gas_temperature_field",
                     "K",
-                    positive=True,
+                    value_constraint="positive",
                 ),
                 _vector_field(
                     "gas_translational_heat_flux_field",
@@ -1110,35 +1166,35 @@ def _thermophoresis_requirements(
                 _scalar_field(
                     "gas_mean_free_path_field",
                     "m",
-                    positive=True,
+                    value_constraint="positive",
                 ),
             )
         )
     elif descriptor.model == "talbot":
         requirements.extend(
             (
-                _scalar_field("gas_temperature_field", "K", positive=True),
+                _scalar_field("gas_temperature_field", "K", value_constraint="positive"),
                 _vector_field(
                     "gas_temperature_gradient_field",
                     "K/m",
                     vector_components,
                     vector_basis,
                 ),
-                _scalar_field("gas_density_field", "kg/m^3", positive=True),
+                _scalar_field("gas_density_field", "kg/m^3", value_constraint="positive"),
                 _scalar_field(
                     "gas_dynamic_viscosity_field",
                     "Pa*s",
-                    positive=True,
+                    value_constraint="positive",
                 ),
                 _scalar_field(
                     "gas_thermal_conductivity_field",
                     "W/(m*K)",
-                    positive=True,
+                    value_constraint="positive",
                 ),
                 _scalar_field(
                     "gas_mean_free_path_field",
                     "m",
-                    positive=True,
+                    value_constraint="positive",
                 ),
             )
         )
@@ -1155,7 +1211,7 @@ def _drag_requirements(
         requirements.extend(
             (
                 _vector_field("gas_velocity_field", "m/s", vector_components, vector_basis),
-                _scalar_field("friction_coefficient_field", "kg/s", positive=True),
+                _scalar_field("friction_coefficient_field", "kg/s", value_constraint="positive"),
             )
         )
     elif descriptor.model in ("epstein_linear", "epstein_finite_speed"):
@@ -1167,9 +1223,9 @@ def _drag_requirements(
                     vector_components,
                     vector_basis,
                 ),
-                _scalar_field("gas_density_field", "kg/m^3", positive=True),
-                _scalar_field("gas_temperature_field", "K", positive=True),
-                _scalar_field("gas_mean_free_path_field", "m", positive=True),
+                _scalar_field("gas_density_field", "kg/m^3", value_constraint="positive"),
+                _scalar_field("gas_temperature_field", "K", value_constraint="positive"),
+                _scalar_field("gas_mean_free_path_field", "m", value_constraint="positive"),
             )
         )
     elif descriptor.model == "stokes_cunningham":
@@ -1181,13 +1237,13 @@ def _drag_requirements(
                     vector_components,
                     vector_basis,
                 ),
-                _scalar_field("gas_density_field", "kg/m^3", positive=True),
+                _scalar_field("gas_density_field", "kg/m^3", value_constraint="positive"),
                 _scalar_field(
                     "gas_dynamic_viscosity_field",
                     "Pa*s",
-                    positive=True,
+                    value_constraint="positive",
                 ),
-                _scalar_field("gas_mean_free_path_field", "m", positive=True),
+                _scalar_field("gas_mean_free_path_field", "m", value_constraint="positive"),
             )
         )
     return requirements
@@ -1215,22 +1271,22 @@ def _ion_drag_requirements(
                     _scalar_field(
                         "electron_number_density_field",
                         "1/m^3",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _scalar_field(
                         "positive_ion_number_density_field",
                         "1/m^3",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _scalar_field(
                         "electron_temperature_field",
                         "K",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _scalar_field(
                         "positive_ion_temperature_field",
                         "K",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _vector_field(
                         "positive_ion_velocity_field",
@@ -1241,7 +1297,7 @@ def _ion_drag_requirements(
                     _scalar_field(
                         "ion_neutral_mean_free_path_field",
                         "m",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                 )
             )
@@ -1251,12 +1307,12 @@ def _ion_drag_requirements(
                     _scalar_field(
                         "positive_ion_number_density_field",
                         "1/m^3",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _scalar_field(
                         "positive_ion_thermal_voltage_field",
                         "V",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _vector_field(
                         "positive_ion_velocity_field",
@@ -1267,7 +1323,7 @@ def _ion_drag_requirements(
                     _scalar_field(
                         "effective_positive_ion_mass_field",
                         "kg",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                 )
             )
@@ -1277,12 +1333,12 @@ def _ion_drag_requirements(
                         _scalar_field(
                             "screening_length_field",
                             "m",
-                            positive=True,
+                            value_constraint="positive",
                         ),
                         _scalar_field(
                             "ion_neutral_mean_free_path_field",
                             "m",
-                            positive=True,
+                            value_constraint="positive",
                         ),
                     )
                 )
@@ -1292,12 +1348,12 @@ def _ion_drag_requirements(
                         _scalar_field(
                             "electron_thermal_voltage_field",
                             "V",
-                            positive=True,
+                            value_constraint="positive",
                         ),
                         _scalar_field(
                             "screening_length_field",
                             "m",
-                            positive=True,
+                            value_constraint="positive",
                         ),
                         _vector_field(
                             "electric_field",
@@ -1323,7 +1379,7 @@ def _lift_requirements(
                 _scalar_field(
                     "rotation_coefficient_field",
                     "kg/s",
-                    positive=False,
+                    value_constraint="finite",
                     zero_on_rz_axis=vector_basis == "axisymmetric_rz",
                 ),
             )
@@ -1337,12 +1393,12 @@ def _lift_requirements(
                     vector_components,
                     vector_basis,
                 ),
-                _scalar_field("gas_density_field", "kg/m^3", positive=True),
-                _scalar_field("gas_mean_free_path_field", "m", positive=True),
+                _scalar_field("gas_density_field", "kg/m^3", value_constraint="positive"),
+                _scalar_field("gas_mean_free_path_field", "m", value_constraint="positive"),
                 _scalar_field(
                     "azimuthal_gas_vorticity_field",
                     "1/s",
-                    positive=False,
+                    value_constraint="finite",
                     zero_on_rz_axis=True,
                 ),
             )
@@ -1356,17 +1412,17 @@ def _lift_requirements(
                     vector_components,
                     vector_basis,
                 ),
-                _scalar_field("gas_density_field", "kg/m^3", positive=True),
+                _scalar_field("gas_density_field", "kg/m^3", value_constraint="positive"),
                 _scalar_field(
                     "gas_dynamic_viscosity_field",
                     "Pa*s",
-                    positive=True,
+                    value_constraint="positive",
                 ),
-                _scalar_field("gas_mean_free_path_field", "m", positive=True),
+                _scalar_field("gas_mean_free_path_field", "m", value_constraint="positive"),
                 _scalar_field(
                     "out_of_plane_gas_vorticity_field",
                     "1/s",
-                    positive=False,
+                    value_constraint="finite",
                     zero_on_rz_axis=vector_basis == "axisymmetric_rz",
                 ),
             )
@@ -1383,25 +1439,27 @@ def _charge_requirements(
 
     if descriptor.model == "prescribed_exponential_linear":
         return [
-            _scalar_field("electron_exponent_offset_field", "1", positive=False),
-            _scalar_field("electron_charge_slope_field", "1", positive=False),
-            _scalar_field("ion_rate_field", "1/s", positive=False),
-            _scalar_field("ion_charge_slope_field", "1", positive=False),
+            _scalar_field("electron_exponent_offset_field", "1", value_constraint="finite"),
+            _scalar_field("electron_charge_slope_field", "1", value_constraint="nonnegative"),
+            _scalar_field("ion_rate_field", "1/s", value_constraint="nonnegative"),
+            _scalar_field("ion_charge_slope_field", "1", value_constraint="nonnegative"),
         ]
     if descriptor.revision in (_AGGREGATE_TWO_CURRENT_REVISION, _AGGREGATE_THREE_CURRENT_REVISION):
         requirements = [
-            _scalar_field("electron_number_density_field", "1/m^3", positive=True),
-            _scalar_field("positive_ion_number_density_field", "1/m^3", positive=True),
-            _scalar_field("electron_thermal_voltage_field", "V", positive=True),
-            _scalar_field("positive_ion_thermal_voltage_field", "V", positive=True),
+            _scalar_field("electron_number_density_field", "1/m^3", value_constraint="positive"),
+            _scalar_field(
+                "positive_ion_number_density_field", "1/m^3", value_constraint="positive"
+            ),
+            _scalar_field("electron_thermal_voltage_field", "V", value_constraint="positive"),
+            _scalar_field("positive_ion_thermal_voltage_field", "V", value_constraint="positive"),
             _vector_field(
                 "positive_ion_velocity_field",
                 "m/s",
                 vector_components,
                 vector_basis,
             ),
-            _scalar_field("effective_positive_ion_mass_field", "kg", positive=True),
-            _scalar_field("screening_length_field", "m", positive=True),
+            _scalar_field("effective_positive_ion_mass_field", "kg", value_constraint="positive"),
+            _scalar_field("screening_length_field", "m", value_constraint="positive"),
         ]
         if descriptor.revision == _AGGREGATE_THREE_CURRENT_REVISION:
             requirements.extend(
@@ -1409,12 +1467,12 @@ def _charge_requirements(
                     _scalar_field(
                         "negative_ion_number_density_field",
                         "1/m^3",
-                        positive=False,
+                        value_constraint="nonnegative",
                     ),
                     _scalar_field(
                         "negative_ion_thermal_voltage_field",
                         "V",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                     _vector_field(
                         "negative_ion_velocity_field",
@@ -1425,7 +1483,7 @@ def _charge_requirements(
                     _scalar_field(
                         "effective_negative_ion_mass_field",
                         "kg",
-                        positive=True,
+                        value_constraint="positive",
                     ),
                 )
             )
@@ -1433,10 +1491,10 @@ def _charge_requirements(
     if descriptor.model == "fixed":
         return []
     return [
-        _scalar_field("electron_number_density_field", "1/m^3", positive=True),
-        _scalar_field("positive_ion_number_density_field", "1/m^3", positive=True),
-        _scalar_field("electron_temperature_field", "K", positive=True),
-        _scalar_field("positive_ion_temperature_field", "K", positive=True),
+        _scalar_field("electron_number_density_field", "1/m^3", value_constraint="positive"),
+        _scalar_field("positive_ion_number_density_field", "1/m^3", value_constraint="positive"),
+        _scalar_field("electron_temperature_field", "K", value_constraint="positive"),
+        _scalar_field("positive_ion_temperature_field", "K", value_constraint="positive"),
         _vector_field(
             "positive_ion_velocity_field",
             "m/s",
@@ -2358,7 +2416,7 @@ def _scalar_field(
     name: str,
     unit: str,
     *,
-    positive: bool,
+    value_constraint: ValueConstraint,
     zero_on_rz_axis: bool = False,
 ) -> RequiredField:
     return RequiredField(
@@ -2366,7 +2424,7 @@ def _scalar_field(
         unit,
         ("value",),
         "scalar",
-        positive,
+        value_constraint,
         zero_on_rz_axis,
     )
 

@@ -39,7 +39,7 @@ zero-miss probabilityは保証に含めません。
 ## 公開する実行境界
 
 計算coreのPython APIは`load_case(path)`、`check_case(case, *, workers=1)`、`simulate(case, output, *, workers=1)`、`open_result(path)`です。通常の入力作成・解析・表示は同じwheelの`chamber_particles_tools`が公開します。CLIの
-`check`、`run`、`inspect`も同じ経路を使います。最初の実行方法は[Quick Start](../README.md#quick-start)を参照してください。
+`check`、`run`、`inspect`も同じ経路を使います。最初の実行方法は[例題を実行する](../README.md#例題を実行する)を参照してください。
 
 `load_case`はYAML/HDF5・hash・静的参照を検査します。`check`は`check_case`を呼び、`run`と同じprepareでmodelの組合せ、field support、geometry/topology、数値条件、指定workersのmemory planまで解決します。worker・writer・粒子更新は開始せず、小さいimmutable reportを返します。成功は準備完了であり、用途精度やOS資源の予約を意味しません。
 

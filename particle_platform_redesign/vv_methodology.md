@@ -105,6 +105,15 @@ Freezeは数値terminal outcomeであり、実機adhesionの証拠ではない�
 `compare-pair`は実在する二つの保存結果で記述的に比較でき、架空の第三resolutionを要求しない。
 資格付き比較はgenuine coarse/medium/fine、別々のself-sensitivity budgetとcross budgetを使う。
 細かい二解の差だけで絶対誤差を保証しない。
+親macro解像度はknown `macro_grid_revision`、actual releaseと対象時間窓をbindし、
+`time_grid.MacroGrid`が復元する実分割で確認する。全区間のstep件数増加やnominal dt比だけでは確認しない。
+field knot等で非一様になる分割では、nominal dt比をobserved orderの根拠にしない。
+macro分割だけではevent/safety再積分後の粒子区間を認定しない。現行比較器はreview済みengine/path policyと、
+既存の全run refinement/depth・axis・residual split・wall/periodic event・failure件数が全0という十分条件を
+別の`fixed_root_execution`前提へ用いる。全runの正の件数を対象cohort/windowへ帰属させず、前提を未確認にする。
+同じ受理区間へ飽和した複数macro設定の微小差を独立resolutionと読まない。自己差の資格と次数解釈には両前提が
+必要であり、不足時もraw差・empirical target verdict・実用比較は保持する。一般のaccepted pathや確率strong収束の
+認定、絶対誤差保証を追加するものではない。
 
 ### 5.2 確率輸送と停止
 

@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from typing import Literal
+from typing import Literal, cast
 
 import numpy as np
 from numba import njit
+from numba.core.registry import CPUDispatcher
 from numpy.typing import NDArray
 
 from ..numerical_status import NUMERICAL_STATUS_OK, PHYSICS_NUMERICAL_FAILURE
@@ -1237,6 +1238,22 @@ def epstein_finite_speed_relaxation(
     return LinearRelaxation(rate_s_inv, gas_velocity_m_s, applicable)
 
 
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def epstein_finite_speed_factor_row(speed_ratio: float) -> float:
+    if speed_ratio <= EPSTEIN_FINITE_SPEED_SERIES_LIMIT:
+        square = speed_ratio * speed_ratio
+        return 1.0 + square * (
+            1.0 / 5.0 + square * (-1.0 / 70.0 + square * (1.0 / 630.0 - square / 5544.0))
+        )
+    inverse = 1.0 / speed_ratio
+    inverse_square = inverse * inverse
+    return 3.0 / 16.0 * (2.0 + inverse_square) * math.exp(
+        -speed_ratio * speed_ratio
+    ) + 3.0 * math.sqrt(math.pi) / 32.0 * speed_ratio * (
+        4.0 + 4.0 * inverse_square - inverse_square * inverse_square
+    ) * math.erf(speed_ratio)
+
+
 def epstein_finite_speed_factors(speed_ratio: FloatArray) -> tuple[FloatArray, FloatArray]:
     """Return the specular rate factor and radial velocity-Jacobian factor."""
 
@@ -1246,12 +1263,12 @@ def epstein_finite_speed_factors(speed_ratio: FloatArray) -> tuple[FloatArray, F
             "finite-speed Epstein speed ratio must be finite and nonnegative"
         )
     rate_factor = np.empty_like(ratio)
+    scalar_factor = cast(CPUDispatcher, epstein_finite_speed_factor_row).py_func
+    for index, value in enumerate(ratio):
+        rate_factor[index] = scalar_factor(float(value))
     radial_factor = np.empty_like(ratio)
     small = ratio <= EPSTEIN_FINITE_SPEED_SERIES_LIMIT
     square = ratio[small] * ratio[small]
-    rate_factor[small] = 1.0 + square * (
-        1.0 / 5.0 + square * (-1.0 / 70.0 + square * (1.0 / 630.0 - square / 5544.0))
-    )
     radial_factor[small] = 1.0 + square * (
         3.0 / 5.0 + square * (-1.0 / 14.0 + square * (1.0 / 90.0 - square / 616.0))
     )
@@ -1263,15 +1280,6 @@ def epstein_finite_speed_factors(speed_ratio: FloatArray) -> tuple[FloatArray, F
         inverse_square = inverse * inverse
         exponential = np.exp(-(value * value))
         error_function = np.asarray([math.erf(float(item)) for item in value], dtype=np.float64)
-        rate_factor[large] = (
-            3.0 / 16.0 * (2.0 + inverse_square) * exponential
-            + 3.0
-            * math.sqrt(math.pi)
-            / 32.0
-            * value
-            * (4.0 + 4.0 * inverse_square - inverse_square * inverse_square)
-            * error_function
-        )
         radial_factor[large] = (
             3.0
             / 16.0
@@ -2935,6 +2943,39 @@ def epstein_continuous_applicability(
     return applicable
 
 
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def electric_coulomb_acceleration_component(
+    charge_number: float, mass_kg: float, electric_field_V_m: float
+) -> float:
+    """Shared point law; callers own the optional Coulomb charge cap."""
+    return charge_number * ELEMENTARY_CHARGE_C * electric_field_V_m / mass_kg
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def gravity_buoyancy_factor(
+    mass_kg: float, displaced_volume_m3: float, gas_density_kg_m3: float
+) -> float:
+    return 1.0 - gas_density_kg_m3 * displaced_volume_m3 / mass_kg
+
+
+@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
+def quasistatic_spherical_dep_factor(
+    mass_kg: float,
+    electrostatic_radius_m: float,
+    medium_relative_permittivity: float,
+    real_clausius_mossotti_factor: float,
+) -> float:
+    return (
+        2.0
+        * math.pi
+        * VACUUM_PERMITTIVITY_F_M
+        * medium_relative_permittivity
+        * electrostatic_radius_m**3
+        * real_clausius_mossotti_factor
+        / mass_kg
+    )
+
+
 def add_electric_coulomb_acceleration(
     acceleration_m_s2: FloatArray,
     *,
@@ -2951,9 +2992,8 @@ def add_electric_coulomb_acceleration(
     _require_finite(charge_number, "charge_number")
     _require_finite(electric_field_V_m, "electric_field")
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        acceleration_m_s2 += (
-            charge_number[:, None] * ELEMENTARY_CHARGE_C * electric_field_V_m / mass_kg[:, None]
-        )
+        point_law = cast(CPUDispatcher, electric_coulomb_acceleration_component).py_func
+        acceleration_m_s2 += point_law(charge_number[:, None], mass_kg[:, None], electric_field_V_m)
     _require_finite(acceleration_m_s2, "combined acceleration")
 
 
@@ -2982,14 +3022,9 @@ def quasistatic_spherical_dep_acceleration(
     ):
         raise PhysicsEvaluationError("real_clausius_mossotti_factor must be in [-0.5, 1]")
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        factor = (
-            2.0
-            * math.pi
-            * VACUUM_PERMITTIVITY_F_M
-            * relative_permittivity
-            * electrostatic_radius_m**3
-            * real_clausius_mossotti_factor
-            / mass_kg
+        point_factor = cast(CPUDispatcher, quasistatic_spherical_dep_factor).py_func
+        factor = point_factor(
+            mass_kg, electrostatic_radius_m, relative_permittivity, real_clausius_mossotti_factor
         )
         result = factor[:, None] * gradient_mean_e_squared_V2_m3
     _require_finite(result, "quasistatic spherical DEP acceleration")
@@ -3039,7 +3074,8 @@ def add_gravity_buoyancy_acceleration(
     if gravity.shape != (2,) or not bool(np.isfinite(gravity).all()):
         raise PhysicsEvaluationError("gravity_m_s2 must be a finite two-vector")
     with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
-        factor = 1.0 - gas_density_kg_m3 * displaced_volume_m3 / mass_kg
+        point_factor = cast(CPUDispatcher, gravity_buoyancy_factor).py_func
+        factor = point_factor(mass_kg, displaced_volume_m3, gas_density_kg_m3)
         acceleration_m_s2 += factor[:, None] * gravity
     _require_finite(acceleration_m_s2, "combined acceleration")
 

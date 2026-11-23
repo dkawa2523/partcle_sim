@@ -141,8 +141,8 @@ def _own_fields(root: Path) -> Path:
 def _first_source_case(root: Path) -> tuple[Path, dict[str, Any]]:
     seed = init_example("xy-ballistic", root / "editable")
     configuration = _own_fields(root)
-    background = root / "background.h5"
-    adapt_from_configuration(configuration, background)
+    adapt_from_configuration(configuration, root / "background")
+    background = root / "background" / "bundle.h5"
     assert not read(background).sources
     recipe = yaml.safe_load((seed.case_path.parent / "recipe.yaml").read_text(encoding="utf-8"))
     with (seed.case_path.parent / "particles.csv").open(encoding="utf-8", newline="") as stream:
@@ -187,7 +187,7 @@ def _first_source_case(root: Path) -> tuple[Path, dict[str, Any]]:
 def _cache_and_surface(root: Path, recipe: dict[str, Any]) -> None:
     config = {
         "format_version": 2,
-        "input": {"data_path": "background.h5"},
+        "input": {"data_path": "background/bundle.h5"},
         "validation": {"memory_limit_mb": 128, "workspace_rows": 32, "max_patch_work": 1000000},
         "target": {
             "kind": "regular",
@@ -209,9 +209,9 @@ def _cache_and_surface(root: Path, recipe: dict[str, Any]) -> None:
     }
     path = root / "cache.yaml"
     path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
-    preprocess_from_configuration(path, root / "cache.h5")
+    preprocess_from_configuration(path, root / "cache")
     cached = dict(recipe)
-    cached["input_bundle"] = str(root / "cache.h5")
+    cached["input_bundle"] = str(root / "cache" / "bundle.h5")
     cached["settings"] = {
         **recipe["settings"],
         "physics": {
@@ -230,7 +230,7 @@ def _cache_and_surface(root: Path, recipe: dict[str, Any]) -> None:
     left = open_result(root / "own-result").read_boundary_events()
     right = open_result(root / "cached-result").read_boundary_events()
     assert abs(float(left.time_s[0] - right.time_s[0])) < 3e-11
-    bundle = replace(read(root / "background.h5"), sources=())
+    bundle = replace(read(root / "background" / "bundle.h5"), sources=())
     config = dict(recipe["sources"][0]["configuration"])
     config["columns"] = dict(config["columns"])
     config["units"] = dict(config["units"])
@@ -248,7 +248,7 @@ def _cache_and_surface(root: Path, recipe: dict[str, Any]) -> None:
         **recipe["settings"],
         "sources": [{"name": "release", "type": "surface", "table": "particles"}],
     }
-    case = create_case(bundle, settings, (source,), root / "surface-case")
+    case = create_case(replace(bundle, sources=(source,)), settings, root / "surface-case")
     simulate(case, root / "surface-result")
     assert open_result(root / "surface-result").read_failure_events().particle_id.size == 0
 

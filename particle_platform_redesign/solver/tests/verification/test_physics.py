@@ -118,7 +118,11 @@ def test_stokes_cunningham_catalog_declares_exact_primitives(
     assert requirements["gas_velocity"].components == components
     assert requirements["gas_velocity"].stored_basis == stored_basis
     assert requirements["gas_dynamic_viscosity"].unit == "Pa*s"
-    assert all(item.positive for name, item in requirements.items() if name != "gas_velocity")
+    assert all(
+        item.value_constraint == "positive"
+        for name, item in requirements.items()
+        if name != "gas_velocity"
+    )
     assert plan.resolved_models()["drag"] == {
         "model": "stokes_cunningham",
         "revision": "stokes_cunningham_allen_raabe_air_v1",
@@ -159,17 +163,17 @@ def test_continuous_charge_catalog_declares_exact_primitives_and_capabilities(
         assert requirements[name].unit == "1/m^3"
         assert requirements[name].components == ("value",)
         assert requirements[name].stored_basis == "scalar"
-        assert requirements[name].positive
+        assert requirements[name].value_constraint == "positive"
     for name in ("electron_temperature", "positive_ion_temperature"):
         assert requirements[name].unit == "K"
         assert requirements[name].components == ("value",)
         assert requirements[name].stored_basis == "scalar"
-        assert requirements[name].positive
+        assert requirements[name].value_constraint == "positive"
     velocity = requirements["positive_ion_velocity"]
     assert velocity.unit == "m/s"
     assert velocity.components == components
     assert velocity.stored_basis == stored_basis
-    assert not velocity.positive
+    assert velocity.value_constraint == "finite"
     assert plan.resolved_models() == {
         "charge": {
             "model": "plasma_continuous",

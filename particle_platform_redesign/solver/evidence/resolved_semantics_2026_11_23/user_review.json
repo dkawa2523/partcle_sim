@@ -1,0 +1,69 @@
+{
+  "status": "passed",
+  "ordinary_first_run": "CLI init/check/run passed",
+  "csv_producer_pair": [
+    "bundle.h5",
+    "report.json"
+  ],
+  "two_source_ids": [
+    101,
+    202
+  ],
+  "source_reduction_ids": [
+    202
+  ],
+  "regeneration_beta_hit_s": 0.007,
+  "cohort_count": 1,
+  "cohort_weight": 2,
+  "export_rows": {
+    "release_events": 1,
+    "failure_events": 0,
+    "final": 1,
+    "frames": 5,
+    "probes": 0,
+    "boundary_interactions": 1
+  },
+  "view_complete_and_existing_output_rejected": true,
+  "source_version": "current dirty worktree, review-only",
+  "inspected": [
+    "root/redesign AGENTS and current solver README",
+    "installed CLI/Python input creation and producer publication",
+    "complete-source recipe2 and selection/reuse API",
+    "CSV/cache/electrostatic public usage documentation"
+  ],
+  "executed": [
+    "CLI init/check/run for xy-ballistic",
+    "own CSV mesh plus constant-E import",
+    "two-source recipe2 create/check/run with analytic first-hit references",
+    "complete source removal and regenerated CSV check/run",
+    "single ResultCohort reused for analysis/export/view",
+    "existing completed view output rejected",
+    "P1-to-regular cache",
+    "reduced-electrostatic init/check/build"
+  ],
+  "producer_completion": {
+    "background": {
+      "completed_pair": true,
+      "logical_hash_verified": true,
+      "final_output_path_verified": true
+    },
+    "cached": {
+      "completed_pair": true,
+      "logical_hash_verified": true,
+      "final_output_path_verified": true
+    },
+    "electric-built": {
+      "completed_pair": true,
+      "logical_hash_verified": true,
+      "final_output_path_verified": true
+    }
+  },
+  "not_verified": [
+    "full suite, CI, release/install distribution matrix",
+    "COMSOL comparison or general scientific qualification",
+    "nonlinear/material electrostatic accuracy beyond the public small example",
+    "browser visual appearance or million-particle performance"
+  ],
+  "mandatory_findings": [],
+  "minor_readme_sources_parameter_sentence": "removed by root after reviewer notice"
+}

@@ -1,0 +1,96 @@
+{
+  "scope": "completed external producer publication; existing installed owners",
+  "changed": [
+    "prepare_vigus_transport.py",
+    "prepare_f02_fixed_electric_case.py",
+    "prepare_comsol_p1_tables.py"
+  ],
+  "vigus_coefficients_and_model_function_AST_unchanged": [
+    "_parameters",
+    "_brownian_mapping",
+    "_particle_properties",
+    "_primitives",
+    "_primitive_values",
+    "_full_force_fields",
+    "_reference_models"
+  ],
+  "public_cli_commands": [
+    {
+      "argv": [
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Scripts\\python.exe",
+        "-m",
+        "tools.vv.comsol.prepare_vigus_transport",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\initial\\case.yaml",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\vigus",
+        "--parameters",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\parameters.yaml",
+        "--interval-tree-depth",
+        "1",
+        "--adaptive-max-depth",
+        "2"
+      ],
+      "exit_code": 0,
+      "stdout": ""
+    },
+    {
+      "argv": [
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Scripts\\python.exe",
+        "-m",
+        "tools.vv.comsol.prepare_f02_fixed_electric_case",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\fields.h5",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\f02"
+      ],
+      "exit_code": 0,
+      "stdout": "{\n  \"fixture_revision\": \"f02_realized_wafer_schedule_v1\",\n  \"input_content_hash\": \"sha256:6112da09dd98cc33998a9e4c2a0d7004e0f013c0aafe5efadbd270ce8c71d261\",\n  \"input_path\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\producer_publication_20261123\\\\fields.h5\",\n  \"input_provenance_sha256\": \"sha256:8a7350a83b250fd7bbff0168564617d3db3492d4ed9ee256142d413adc896f58\",\n  \"output_content_hash\": \"sha256:307ce6c02923a3983d0791e327f5434e52d213aae23c1cf0b975e4f38e1d08e7\",\n  \"output_path\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\producer_publication_20261123\\\\f02\\\\bundle.h5\",\n  \"particle_count\": 32,\n  \"source_name\": \"wafer_surface_particles\",\n  \"status\": \"complete\",\n  \"wafer_facet_count\": 4,\n  \"wafer_revolved_area_m2\": 37.69911184307752\n}"
+    },
+    {
+      "argv": [
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.venv\\Scripts\\python.exe",
+        "-m",
+        "tools.vv.comsol.prepare_comsol_p1_tables",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\p1.h5",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\producer_publication_20261123\\tables"
+      ],
+      "exit_code": 0,
+      "stdout": ""
+    }
+  ],
+  "vigus_public_run": {
+    "particles": 1,
+    "failures": 0
+  },
+  "removed_f02_report_option_exit_code": 2,
+  "output_unit": {
+    "vigus": [
+      "case.h5",
+      "case.yaml",
+      "build_manifest.json"
+    ],
+    "f02": [
+      "bundle.h5",
+      "report.json"
+    ],
+    "p1": "all native tables, probes and table_receipt.json"
+  },
+  "failure_injection": "current tests cover manifest/report/table receipt write failure, no published partial directory, input unchanged and retry successful",
+  "quality": {
+    "ruff_format": "passed",
+    "ruff_lint": "passed",
+    "configured_pyrefly_errors": 0,
+    "complexity": "passed"
+  },
+  "limits": [
+    "No coefficient formula, physical input selection, particle properties or numerical engine change.",
+    "No new native model or full COMSOL particle solve was needed for publication changes."
+  ],
+  "executed_tests": {
+    "command": "uv run --locked python -m pytest tools/vv/comsol/tests -q",
+    "passed": 135,
+    "seconds": 26.41
+  },
+  "explicit_preparation_checks": {
+    "vigus": "Existing independent coefficient/charge/ion/noise identities and original/prepared public runs remain tested; supporting manifest write failure leaves no case and retry succeeds.",
+    "f02": "Exact source rows/provenance and required bundle+report; injected report write failure rollback and public create/check/simulate/open of the published bundle (32 particles, zero failure).",
+    "p1": "Exact nodal/sectionwise connectivity plus independent affine values at all 287 probes; receipt write failure leaves no public table set and retry succeeds."
+  }
+}

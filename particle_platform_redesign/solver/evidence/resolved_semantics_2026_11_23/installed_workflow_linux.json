@@ -1,0 +1,83 @@
+{
+  "status": "complete",
+  "package_paths": [
+    "/tmp/ps49l.6lQKEV/venv/lib/python3.12/site-packages/chamber_particles/__init__.py",
+    "/tmp/ps49l.6lQKEV/venv/lib/python3.12/site-packages/chamber_particles_tools/__init__.py"
+  ],
+  "cwd_uses_checkout": false,
+  "fixture_imports": [],
+  "entrypoints": {
+    "module": "passed",
+    "commands": [
+      "models",
+      "init",
+      "inputs import-csv",
+      "inputs cache",
+      "create",
+      "check",
+      "run",
+      "inspect",
+      "analyze",
+      "export",
+      "view",
+      "inputs electrostatic check",
+      "inputs electrostatic build"
+    ],
+    "console": "passed"
+  },
+  "own_csv_first_source": "analytic field trajectory and hit verified",
+  "cache_and_surface": "passed",
+  "examples": "five passed",
+  "summary": {
+    "selected_particles": 1,
+    "model_weight": 2.5,
+    "count_unit": "computational_particles",
+    "weight_meaning": "input model_weight; no inferred physical rate"
+  },
+  "view": {
+    "visualization_revision": "result_context_population_svg_v4",
+    "parameters": {
+      "event_batch_rows": 4096,
+      "max_event_points": 5000,
+      "requested_particle_id": 1,
+      "particle_ids": null,
+      "source_ids": null,
+      "max_particle_points": 5000,
+      "max_trajectory_points": 5000,
+      "detail": true
+    },
+    "source_manifest_sha256": "sha256:9b0ce8d8c71486cf18aeb8e13c04964092be6cb7611fcb6ee607717e4e506e7c",
+    "context": {
+      "content_hash": "sha256:9d2ecc8744cde750d356e66eace6fff35ad6787dfb36f54abdaf177b286cd4f4",
+      "file_sha256": "sha256:3d58fe501f73fcc9b894c51c9ca115a0cd7d0cc0b842b6c38bd392882efd610f",
+      "path": "context.h5"
+    },
+    "particle_id": 1,
+    "trajectory_source": "frames",
+    "trajectory_points": 4,
+    "trajectory_truncated": false,
+    "boundary_events": 1,
+    "rendered_boundary_points": 1,
+    "population": {
+      "selected_particles": 1,
+      "finite_valid_positions": 1,
+      "omitted_nonspatial_or_pending": 0,
+      "binned_positions": 1,
+      "outside_geometry_bounds": 0,
+      "rendered_cells": 1,
+      "cells_per_axis": 70,
+      "meaning": "all finite active/stuck/held final positions binned; dominant lifecycle color; computational counts, not concentration"
+    },
+    "event_selection": {
+      "boundary_map": "smallest BLAKE2b-128 ranks of time_s/particle_id/event_ordinal",
+      "trajectory": "first physical events by time_s/particle_id/event_ordinal",
+      "display_order": "time_s/particle_id/event_ordinal",
+      "max_points_per_view": 5000
+    },
+    "trajectory_meaning": "saved positions only; gaps and recorded interactions break chords; no reconstructed Brownian path",
+    "population_svg": "/tmp/installed-particle-workflow-r637qd4z/view/population.svg",
+    "trajectory_svg": "/tmp/installed-particle-workflow-r637qd4z/view/trajectory.svg",
+    "boundary_events_svg": "/tmp/installed-particle-workflow-r637qd4z/view/boundary_events.svg",
+    "metadata_json": "/tmp/installed-particle-workflow-r637qd4z/view/visualization.json"
+  }
+}

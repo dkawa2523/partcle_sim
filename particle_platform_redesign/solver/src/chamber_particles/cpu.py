@@ -512,24 +512,66 @@ def _require_nonnegative(*values: int) -> None:
 
 
 @dataclass(slots=True)
-class ParticleState:
-    """The sole typed resident particle columns shared by serial and workers."""
+class PersistentParticleState:
+    """Particle columns required to resume the same accepted numerical path.
 
-    position_m: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 2})
-    velocity_m_s: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 2})
-    charge_number: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 1})
-    active: np.ndarray = dataclass_field(metadata={"dtype": "?", "width": 1})
+    This declaration owns their storage layout as well as allocation metadata.
+    The active mask is reconstructed from the checkpoint's sorted active index.
+    """
+
+    position_m: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 2, "finite": True})
+    velocity_m_s: np.ndarray = dataclass_field(
+        metadata={"dtype": "<f8", "width": 2, "finite": True}
+    )
+    charge_number: np.ndarray = dataclass_field(
+        metadata={"dtype": "<f8", "width": 1, "finite": True}
+    )
     lifecycle: np.ndarray = dataclass_field(metadata={"dtype": "<u1", "width": 1})
     terminal_time_s: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 1})
     event_ordinal: np.ndarray = dataclass_field(metadata={"dtype": "<u4", "width": 1})
     physical_boundary_event_ordinal: np.ndarray = dataclass_field(
         metadata={"dtype": "<u4", "width": 1}
     )
-    exact_origin_time_s: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 1})
-    exact_origin_position_m: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 2})
-    exact_origin_velocity_m_s: np.ndarray = dataclass_field(metadata={"dtype": "<f8", "width": 2})
+    exact_origin_time_s: np.ndarray = dataclass_field(
+        metadata={"dtype": "<f8", "width": 1, "finite": True}
+    )
+    exact_origin_position_m: np.ndarray = dataclass_field(
+        metadata={"dtype": "<f8", "width": 2, "finite": True}
+    )
+    exact_origin_velocity_m_s: np.ndarray = dataclass_field(
+        metadata={"dtype": "<f8", "width": 2, "finite": True}
+    )
     start_contact_state: np.ndarray = dataclass_field(metadata={"dtype": "<u1", "width": 1})
     failure_reason_code: np.ndarray = dataclass_field(metadata={"dtype": "<u2", "width": 1})
+
+    def columns(self) -> dict[str, np.ndarray]:
+        """Borrow exactly the persistent columns, without copying numeric arrays."""
+        return {
+            item.name: getattr(self, item.name)
+            for item in dataclass_fields(PersistentParticleState)
+        }
+
+    def validate(self, count: int) -> None:
+        """Require the declared checkpoint layouts and finite numerical state."""
+        for item in dataclass_fields(PersistentParticleState):
+            array = getattr(self, item.name)
+            width = item.metadata["width"]
+            shape = (count,) if width == 1 else (count, width)
+            if array.shape != shape or array.dtype != np.dtype(item.metadata["dtype"]):
+                raise ValueError(f"checkpoint particle column {item.name} has an invalid layout")
+            if item.metadata.get("finite") and not bool(np.isfinite(array).all()):
+                raise ValueError(f"checkpoint particle column {item.name} must be finite")
+
+
+@dataclass(slots=True)
+class ParticleState(PersistentParticleState):
+    """The sole resident particle columns shared by serial execution and workers."""
+
+    active: np.ndarray = dataclass_field(metadata={"dtype": "?", "width": 1})
+
+    def persistent(self) -> PersistentParticleState:
+        """Borrow an accepted-barrier snapshot for the synchronous checkpoint writer."""
+        return PersistentParticleState(**PersistentParticleState.columns(self))
 
     @staticmethod
     def allocate(count: int) -> ParticleState:

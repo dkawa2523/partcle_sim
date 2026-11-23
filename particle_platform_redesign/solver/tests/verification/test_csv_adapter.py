@@ -207,10 +207,10 @@ def _assert_fields(bundle: DataBundle) -> None:
 def test_adapter_builds_deterministic_p1_bundle_and_projects_axis(tmp_path: Path) -> None:
     configuration = _fixture(tmp_path)
     output = tmp_path / "case.h5"
-    report_path = tmp_path / "report.json"
+    report_path = output / "report.json"
 
-    report = adapt_from_configuration(configuration, output, report_path=report_path)
-    bundle = read(output)
+    report = adapt_from_configuration(configuration, output)
+    bundle = read(output / "bundle.h5")
 
     assert report["adapter_revision"] == ADAPTER_REVISION
     assert report["node_count"] == 4
@@ -239,6 +239,30 @@ def test_adapter_rejects_axis_projection_above_explicit_limit(tmp_path: Path) ->
         adapt_from_configuration(configuration, tmp_path / "case.h5")
 
 
+def test_receipt_write_failure_never_publishes_an_incomplete_input(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    configuration = _fixture(tmp_path)
+    output = tmp_path / "complete-input"
+    original = Path.write_text
+
+    def unavailable(path: Path, *args: object, **kwargs: object):
+        if path.name == "report.json":
+            raise OSError("receipt unavailable")
+        return original(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "write_text", unavailable)
+        with pytest.raises(OSError, match="receipt unavailable"):
+            adapt_from_configuration(configuration, output)
+    assert not output.exists()
+    assert not list(tmp_path.glob(".bundle-publication-*"))
+    report = adapt_from_configuration(configuration, output)
+    assert report["output_path"] == str(output / "bundle.h5")
+    assert json.loads((output / "report.json").read_text()) == report
+    _assert_geometry(read(output / "bundle.h5"))
+
+
 def test_csv_provider_requires_no_native_solution_identity(tmp_path: Path) -> None:
     configuration = _fixture(tmp_path)
     document = yaml.safe_load(configuration.read_text(encoding="utf-8"))
@@ -264,7 +288,7 @@ def test_csv_provider_requires_no_native_solution_identity(tmp_path: Path) -> No
         ],
     )
     adapt_from_configuration(configuration, tmp_path / "csv.h5")
-    bundle = read(tmp_path / "csv.h5")
+    bundle = read(tmp_path / "csv.h5" / "bundle.h5")
     _assert_geometry(bundle)
     _assert_fields(bundle)
     metadata = json.loads(bundle.provenance_json)["producer_metadata"]
@@ -409,7 +433,7 @@ def test_generic_xy_fields_preserve_affine_values_units_and_lineage(tmp_path: Pa
             ]
         )
     report = adapt_from_configuration(configuration, tmp_path / "case.h5")
-    bundle = read(tmp_path / "case.h5")
+    bundle = read(tmp_path / "case.h5" / "bundle.h5")
     location = locate_field_cell(bundle.layouts[0], np.asarray([0.25, 0.4]))
     by_name = {item.name: item for item in bundle.fields}
     np.testing.assert_allclose(
@@ -447,7 +471,7 @@ def test_scoped_node_id_join_uses_identity_and_verifies_coordinates(tmp_path: Pa
     _add_node_ids(configuration, tmp_path)
     report = adapt_from_configuration(configuration, tmp_path / "case.h5")
     assert report["field_join_method"] == "scoped_node_id"
-    _assert_fields(read(tmp_path / "case.h5"))
+    _assert_fields(read(tmp_path / "case.h5" / "bundle.h5"))
     path = tmp_path / "fields.csv"
     path.write_text(
         path.read_text(encoding="utf-8").replace("1.0,1.0,1,0.4", "0.5,1.0,1,0.4"), encoding="utf-8"
@@ -494,7 +518,7 @@ def test_selected_field_gaps_and_unacknowledged_axis_values_are_not_filled(tmp_p
     document["fields"]["mappings"][0]["axis_transform"] = None
     _replace_document(configuration, document)
     report = adapt_from_configuration(configuration, tmp_path / "raw.h5")
-    by_name = {item.name: item for item in read(tmp_path / "raw.h5").fields}
+    by_name = {item.name: item for item in read(tmp_path / "raw.h5" / "bundle.h5").fields}
     assert by_name["gas_velocity"].values[0, 0] == 1.0e-5
     assert report["axis_transformations"] == []
     field_path = tmp_path / "fields.csv"
@@ -515,8 +539,10 @@ def test_domain_mesh_owns_selection_not_finite_primitives_outside_it(tmp_path: P
     assert report["provider_field_row_count"] == 5
     assert report["selected_field_row_count"] == 4
     assert report["unselected_provider_row_count"] == 1
-    _assert_fields(read(tmp_path / "outside.h5"))
-    metadata = json.loads(read(tmp_path / "outside.h5").provenance_json)["producer_metadata"]
+    _assert_fields(read(tmp_path / "outside.h5" / "bundle.h5"))
+    metadata = json.loads(read(tmp_path / "outside.h5" / "bundle.h5").provenance_json)[
+        "producer_metadata"
+    ]
     assert metadata["source_file_hashes"]["field_values"].startswith("sha256:")
     path.write_text(text.replace("340.0", "NaN"), encoding="utf-8")
     with pytest.raises(ValueError, match="selected domain nodes"):
@@ -540,7 +566,7 @@ def test_explicit_domain_scope_resolves_provider_sides_without_ambiguous_join(
     )
     path.write_text(text, encoding="utf-8")
     adapt_from_configuration(configuration, tmp_path / "scoped.h5")
-    _assert_fields(read(tmp_path / "scoped.h5"))
+    _assert_fields(read(tmp_path / "scoped.h5" / "bundle.h5"))
     path.write_text(
         text.replace("0.0,0.0,1,NaN,NaN,NaN,2.0,NaN,NaN", "0.0,0.0,1,NaN,NaN,315.0,2.0,NaN,NaN"),
         encoding="utf-8",
@@ -573,4 +599,4 @@ def test_explicit_domain_id_column_selects_same_coordinate_owner(tmp_path: Path)
     )
     path.write_text(text, encoding="utf-8")
     adapt_from_configuration(configuration, tmp_path / "scoped_ids.h5")
-    _assert_fields(read(tmp_path / "scoped_ids.h5"))
+    _assert_fields(read(tmp_path / "scoped_ids.h5" / "bundle.h5"))

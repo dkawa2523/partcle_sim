@@ -104,8 +104,7 @@ def _run(
         dict[str, Any],
         preprocess_from_configuration(
             configuration,
-            tmp_path / "cache.h5",
-            report_path=tmp_path / "cache.json",
+            tmp_path / "cache",
             source_time_diagnostic_requested=source_time_diagnostic,
         ),
     )
@@ -116,21 +115,21 @@ def _metrics(summary: dict[str, Any]) -> dict[str, Any]:
 
 
 def _assert_no_publication(tmp_path: Path) -> None:
-    assert not (tmp_path / "cache.h5").exists()
-    assert not (tmp_path / "cache.json").exists()
+    assert not (tmp_path / "cache").exists()
+    assert not (tmp_path / "cache" / "report.json").exists()
 
 
 def test_static_p1_regular_publication_preserves_source_and_uses_true_norms(tmp_path: Path) -> None:
     bundle = _p1_bundle([0.0, 0.2, 1.0])
     summary = _run(tmp_path, bundle)
-    cached = read(tmp_path / "cache.h5")
+    cached = read(tmp_path / "cache" / "bundle.h5")
     np.testing.assert_array_equal(cached.fields[0].values, bundle.fields[0].values)
     np.testing.assert_array_equal(cached.geometry.nodes_m, bundle.geometry.nodes_m)
     np.testing.assert_array_equal(cached.sources[0].particle_id, bundle.sources[0].particle_id)
     assert cached.fields[1].time_s is None
     assert cached.fields[1].components == bundle.fields[0].components
     assert cached.fields[1].stored_basis == bundle.fields[0].stored_basis
-    assert json.loads((tmp_path / "cache.json").read_text()) == summary
+    assert json.loads((tmp_path / "cache" / "report.json").read_text()) == summary
     assert summary["validation_resources"]["workspace_rows"] == 32
     for name in ("value", "gradient", "boundary_value"):
         assert _metrics(summary)[name]["relative_l2"] < 2e-14
@@ -385,7 +384,7 @@ def test_unselected_time_field_is_preserved_without_claiming_its_cache_certifica
         time_s=np.asarray([0.0, 1.0], dtype="<f8"),
     )
     _run(tmp_path, replace(bundle, fields=(field, time)))
-    cached = read(tmp_path / "cache.h5")
+    cached = read(tmp_path / "cache" / "bundle.h5")
     preserved = next(item for item in cached.fields if item.name == time.name)
     np.testing.assert_array_equal(preserved.time_s, time.time_s)
     np.testing.assert_array_equal(preserved.values, time.values)
@@ -494,7 +493,7 @@ def test_linear_time_cache_keeps_knots_and_weights_nonuniform_intervals(
         values=np.stack((field.values, 2 * field.values, 4 * field.values)),
     )
     summary = _run(tmp_path, replace(bundle, fields=(timed,)))
-    cache = read(tmp_path / "cache.h5").fields[1]
+    cache = read(tmp_path / "cache" / "bundle.h5").fields[1]
     np.testing.assert_array_equal(cache.time_s, timed.time_s)
     assert cache.values.shape == (3, 4, 1)
     metrics = _metrics(summary)
@@ -607,7 +606,9 @@ def test_saved_time_pulse_is_reported_even_when_spatial_cache_is_exact(
     assert value["squared_reference_integral"] == pytest.approx(141 * math.pi if rz else 120)
     gradient = omission["metrics"]["gradient"]
     assert gradient["squared_error_integral"] == pytest.approx(52 * (math.pi if rz else 1))
-    np.testing.assert_array_equal(read(tmp_path / "cache.h5").fields[1].time_s, timed.time_s)
+    np.testing.assert_array_equal(
+        read(tmp_path / "cache" / "bundle.h5").fields[1].time_s, timed.time_s
+    )
 
 
 def test_nonuniform_time_affine_vector_uses_physical_time_weights(tmp_path: Path) -> None:
@@ -682,7 +683,8 @@ def test_source_time_diagnostic_resource_limit_does_not_veto_valid_cache(tmp_pat
     assert after["resampled_fields"][0]["metrics"] == before["resampled_fields"][0]["metrics"]
     assert after["resampled_fields"][0]["source_time_diagnostic"]["status"] == "RESOURCE_LIMITED"
     np.testing.assert_array_equal(
-        read(requested / "cache.h5").fields[1].values, read(baseline / "cache.h5").fields[1].values
+        read(requested / "cache" / "bundle.h5").fields[1].values,
+        read(baseline / "cache" / "bundle.h5").fields[1].values,
     )
 
 

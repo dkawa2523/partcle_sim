@@ -27,7 +27,6 @@ from .forces import (
     AGGREGATE_ION_DRAG_RELATIVE_SPEED_REGULARIZATION_M_S,
     BOLTZMANN_J_K,
     ELEMENTARY_CHARGE_C,
-    EPSTEIN_FINITE_SPEED_SERIES_LIMIT,
     EPSTEIN_MIN_LAMBDA_OVER_RADIUS,
     IMAGE_ION_DRAG_ELECTRIC_FIELD_SQUARE_FLOOR_V2_M2,
     IMAGE_ION_DRAG_LOG_ARGUMENT_OFFSET,
@@ -44,9 +43,14 @@ from .forces import (
     STOKES_CUNNINGHAM_MIN_KNUDSEN_RADIUS,
     VACUUM_PERMITTIVITY_F_M,
     WALDMANN_GALLIS_MIN_MEAN_FREE_PATH_OVER_RADIUS,
+    electric_coulomb_acceleration_component,
+    epstein_finite_speed_factor_row,
+    gravity_buoyancy_factor,
+    quasistatic_spherical_dep_factor,
 )
 
 type FloatArray = NDArray[np.float64]
+type BoolArray = NDArray[np.bool_]
 type Int64Array = NDArray[np.int64]
 type UInt8Array = NDArray[np.uint8]
 
@@ -102,104 +106,333 @@ class PrescribedPhysicsBindings(NamedTuple):
     rotation: int
 
 
+class _ChargeStageBindings(NamedTuple):
+    """Resolved sampled inputs for one compiled continuous-charge pass."""
+
+    code: int
+    electron_density_m3: int
+    positive_ion_density_m3: int
+    electron_temperature_K: int
+    positive_ion_temperature_K: int
+    positive_ion_velocity_m_s: int
+    positive_ion_mass_kg: float
+    maximum_ion_drift_ratio: float
+    aggregate_electron_thermal_voltage_V: int
+    aggregate_positive_ion_thermal_voltage_V: int
+    aggregate_effective_positive_ion_mass_kg: int
+    aggregate_negative_ion_number_density_m3: int
+    aggregate_negative_ion_thermal_voltage_V: int
+    aggregate_negative_ion_velocity_m_s: int
+    aggregate_effective_negative_ion_mass_kg: int
+    aggregate_screening_length_m: int
+    aggregate_maximum_relative_ion_speed_m_s: float
+    charge_number_lower: float
+    charge_number_upper: float
+
+
+class _ThermophoresisStageBindings(NamedTuple):
+    """Sampled neutral-gas inputs for the selected thermophoresis revision."""
+
+    code: int
+    gas_velocity_m_s: int
+    gas_temperature_K: int
+    gas_translational_heat_flux_W_m2: int
+    gas_mean_free_path_m: int
+    gas_molecular_mass_kg: float
+    maximum_speed_ratio: float
+    gas_temperature_gradient_K_m: int
+    gas_density_kg_m3: int
+    gas_dynamic_viscosity_Pa_s: int
+    gas_thermal_conductivity_W_m_K: int
+    particle_thermal_conductivity_W_m_K: float
+    thermal_slip_coefficient: float
+    momentum_exchange_coefficient: float
+    thermal_exchange_coefficient: float
+
+
+class _LiftStageBindings(NamedTuple):
+    """Sampled neutral-gas inputs for the selected lift revision."""
+
+    code: int
+    gas_velocity_m_s: int
+    gas_density_kg_m3: int
+    gas_mean_free_path_m: int
+    gas_dynamic_viscosity_Pa_s: int
+    azimuthal_gas_vorticity_s_inv: int
+    lift_coefficient: float
+
+
+class _IonDragStageBindings(NamedTuple):
+    """Sampled inputs for one selected ion-drag revision."""
+
+    code: int
+    electron_density_m3: int
+    positive_ion_density_m3: int
+    electron_temperature_K: int
+    positive_ion_temperature_K: int
+    positive_ion_velocity_m_s: int
+    ion_neutral_mean_free_path_m: int
+    positive_ion_mass_kg: float
+    maximum_ion_drift_ratio: float
+    electron_thermal_voltage_V: int
+    positive_ion_thermal_voltage_V: int
+    effective_positive_ion_mass_kg: int
+    screening_length_m: int
+    electric_field_V_m: int
+    maximum_relative_ion_speed_m_s: float
+
+
+class PhysicsStageBindings(NamedTuple):
+    """Closed numeric projection of the resolved catalog; primitive offsets are prepare-only."""
+
+    charge_inputs: _ChargeStageBindings
+    drag_code: int
+    gas_velocity: int
+    gas_density: int
+    gas_temperature: int
+    gas_viscosity: int
+    gas_mean_free_path: int
+    gas_molecular_mass_kg: float
+    epstein_delta: float
+    epstein_diffuse_reflection_fraction: float
+    epstein_maximum_speed_ratio: float
+    thermophoresis_inputs: _ThermophoresisStageBindings
+    electric_enabled: bool
+    electric_field: int
+    ion_drag_inputs: _IonDragStageBindings
+    dep_enabled: bool
+    dep_gradient_mean_e_squared: int
+    dep_medium_relative_permittivity: float
+    dep_real_clausius_mossotti_factor: float
+    lift_inputs: _LiftStageBindings
+    gravity_enabled: bool
+    gravity_density: int
+    gravity_vector: tuple[float, float]
+    primitive_rules: NDArray[np.int8]
+    prescribed: PrescribedPhysicsBindings
+    electric_maximum_abs_charge: float
+
+
+class PhysicsNumericContext(NamedTuple):
+    """Read-only resident model arrays and one closed stage binding table."""
+
+    mass_kg: FloatArray
+    drag_diameter_m: FloatArray
+    electrostatic_radius_m: FloatArray
+    displaced_volume_m3: FloatArray
+    bindings: PhysicsStageBindings
+
+
+class PhysicsNumericOutputs(NamedTuple):
+    """Slot-owned outputs passed across the native stage boundary."""
+
+    acceleration_m_s2: FloatArray
+    charge_rate_number_s: FloatArray
+    charge_rate_derivative_s_inv: FloatArray
+    applicable: BoolArray
+    linear_drag_rate_s_inv: FloatArray
+    target_velocity_m_s: FloatArray
+    additive_acceleration_m_s2: FloatArray
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _primitive_scalar(values: FloatArray, offset: int) -> FloatArray:
+    return values.reshape(values.size)[:0] if offset < 0 else values[:, offset]
+
+
+@njit(cache=True, fastmath=False, nogil=True, error_model="numpy")
+def _primitive_vector(values: FloatArray, offset: int) -> FloatArray:
+    return values[:0, :2] if offset < 0 else values[:, offset : offset + 2]
+
+
 @njit(cache=True, fastmath=False, parallel=False, nogil=True, error_model="numpy")
 def evaluate_physics_tile_into(
+    context: PhysicsNumericContext,
     particle_index: Int64Array,
     velocity_m_s: FloatArray,
     charge_number: FloatArray,
-    mass_kg: FloatArray,
-    drag_diameter_m: FloatArray,
-    electrostatic_radius_m: FloatArray,
-    displaced_volume_m3: FloatArray,
-    charge_code: int,
-    electron_number_density_m3: FloatArray,
-    positive_ion_number_density_m3: FloatArray,
-    electron_temperature_K: FloatArray,
-    positive_ion_temperature_K: FloatArray,
-    positive_ion_velocity_m_s: FloatArray,
-    positive_ion_mass_kg: float,
-    maximum_ion_drift_ratio: float,
-    aggregate_electron_thermal_voltage_V: FloatArray,
-    aggregate_positive_ion_thermal_voltage_V: FloatArray,
-    aggregate_effective_positive_ion_mass_kg: FloatArray,
-    aggregate_negative_ion_number_density_m3: FloatArray,
-    aggregate_negative_ion_thermal_voltage_V: FloatArray,
-    aggregate_negative_ion_velocity_m_s: FloatArray,
-    aggregate_effective_negative_ion_mass_kg: FloatArray,
-    aggregate_screening_length_m: FloatArray,
-    aggregate_maximum_relative_ion_speed_m_s: float,
-    charge_number_lower: float,
-    charge_number_upper: float,
-    drag_code: int,
-    gas_velocity_m_s: FloatArray,
-    gas_density_kg_m3: FloatArray,
-    gas_temperature_K: FloatArray,
-    gas_dynamic_viscosity_Pa_s: FloatArray,
-    gas_mean_free_path_m: FloatArray,
-    gas_molecular_mass_kg: float,
-    epstein_delta: float,
-    epstein_diffuse_reflection_fraction: float,
-    epstein_maximum_speed_ratio: float,
-    thermophoresis_code: int,
-    thermophoresis_gas_velocity_m_s: FloatArray,
-    thermophoresis_gas_temperature_K: FloatArray,
-    thermophoresis_gas_translational_heat_flux_W_m2: FloatArray,
-    thermophoresis_gas_mean_free_path_m: FloatArray,
-    thermophoresis_gas_molecular_mass_kg: float,
-    thermophoresis_maximum_speed_ratio: float,
-    thermophoresis_gas_temperature_gradient_K_m: FloatArray,
-    thermophoresis_gas_density_kg_m3: FloatArray,
-    thermophoresis_gas_dynamic_viscosity_Pa_s: FloatArray,
-    thermophoresis_gas_thermal_conductivity_W_m_K: FloatArray,
-    thermophoresis_particle_thermal_conductivity_W_m_K: float,
-    thermophoresis_thermal_slip_coefficient: float,
-    thermophoresis_momentum_exchange_coefficient: float,
-    thermophoresis_thermal_exchange_coefficient: float,
-    ion_drag_code: int,
-    ion_drag_electron_number_density_m3: FloatArray,
-    ion_drag_positive_ion_number_density_m3: FloatArray,
-    ion_drag_electron_temperature_K: FloatArray,
-    ion_drag_positive_ion_temperature_K: FloatArray,
-    ion_drag_positive_ion_velocity_m_s: FloatArray,
-    ion_neutral_mean_free_path_m: FloatArray,
-    ion_drag_positive_ion_mass_kg: float,
-    ion_drag_maximum_ion_drift_ratio: float,
-    ion_drag_electron_thermal_voltage_V: FloatArray,
-    ion_drag_positive_ion_thermal_voltage_V: FloatArray,
-    ion_drag_effective_positive_ion_mass_kg: FloatArray,
-    ion_drag_screening_length_m: FloatArray,
-    ion_drag_electric_field_V_m: FloatArray,
-    ion_drag_maximum_relative_ion_speed_m_s: float,
-    dielectrophoresis_enabled: bool,
-    gradient_mean_e_squared_V2_m3: FloatArray,
-    dep_medium_relative_permittivity: float,
-    dep_real_clausius_mossotti_factor: float,
-    lift_code: int,
-    lift_gas_velocity_m_s: FloatArray,
-    lift_gas_density_kg_m3: FloatArray,
-    lift_gas_mean_free_path_m: FloatArray,
-    lift_gas_dynamic_viscosity_Pa_s: FloatArray,
-    lift_azimuthal_gas_vorticity_s_inv: FloatArray,
-    lift_coefficient: float,
-    electric_enabled: bool,
-    electric_field_V_m: FloatArray,
-    gravity_enabled: bool,
-    gravity_density_kg_m3: FloatArray,
-    gravity_x_m_s2: float,
-    gravity_y_m_s2: float,
-    acceleration: FloatArray,
-    charge_rate: FloatArray,
-    charge_rate_derivative: FloatArray,
-    applicable: NDArray[np.bool_],
-    linear_drag_rate: FloatArray,
-    target_velocity: FloatArray,
-    additive_acceleration: FloatArray,
+    sampled_values: FloatArray,
+    outputs: PhysicsNumericOutputs,
     error_code: UInt8Array,
-    prescribed: PrescribedPhysicsBindings,
-    prescribed_values: FloatArray,
-    electric_maximum_abs_charge: float,
 ) -> None:
-    """Evaluate physics into caller-owned, disjoint row buffers."""
+    """Evaluate the fixed record into disjoint row buffers in the existing contribution order."""
+    bindings = context.bindings
+    mass_kg = context.mass_kg
+    drag_diameter_m = context.drag_diameter_m
+    electrostatic_radius_m = context.electrostatic_radius_m
+    displaced_volume_m3 = context.displaced_volume_m3
+    charge_code = bindings.charge_inputs.code
+    electron_number_density_m3 = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.electron_density_m3
+    )
+    positive_ion_number_density_m3 = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.positive_ion_density_m3
+    )
+    electron_temperature_K = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.electron_temperature_K
+    )
+    positive_ion_temperature_K = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.positive_ion_temperature_K
+    )
+    positive_ion_velocity_m_s = _primitive_vector(
+        sampled_values, bindings.charge_inputs.positive_ion_velocity_m_s
+    )
+    positive_ion_mass_kg = bindings.charge_inputs.positive_ion_mass_kg
+    maximum_ion_drift_ratio = bindings.charge_inputs.maximum_ion_drift_ratio
+    aggregate_electron_thermal_voltage_V = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_electron_thermal_voltage_V
+    )
+    aggregate_positive_ion_thermal_voltage_V = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_positive_ion_thermal_voltage_V
+    )
+    aggregate_effective_positive_ion_mass_kg = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_effective_positive_ion_mass_kg
+    )
+    aggregate_negative_ion_number_density_m3 = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_negative_ion_number_density_m3
+    )
+    aggregate_negative_ion_thermal_voltage_V = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_negative_ion_thermal_voltage_V
+    )
+    aggregate_negative_ion_velocity_m_s = _primitive_vector(
+        sampled_values, bindings.charge_inputs.aggregate_negative_ion_velocity_m_s
+    )
+    aggregate_effective_negative_ion_mass_kg = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_effective_negative_ion_mass_kg
+    )
+    aggregate_screening_length_m = _primitive_scalar(
+        sampled_values, bindings.charge_inputs.aggregate_screening_length_m
+    )
+    aggregate_maximum_relative_ion_speed_m_s = (
+        bindings.charge_inputs.aggregate_maximum_relative_ion_speed_m_s
+    )
+    charge_number_lower = bindings.charge_inputs.charge_number_lower
+    charge_number_upper = bindings.charge_inputs.charge_number_upper
+    drag_code = bindings.drag_code
+    gas_velocity_m_s = _primitive_vector(sampled_values, bindings.gas_velocity)
+    gas_density_kg_m3 = _primitive_scalar(sampled_values, bindings.gas_density)
+    gas_temperature_K = _primitive_scalar(sampled_values, bindings.gas_temperature)
+    gas_dynamic_viscosity_Pa_s = _primitive_scalar(sampled_values, bindings.gas_viscosity)
+    gas_mean_free_path_m = _primitive_scalar(sampled_values, bindings.gas_mean_free_path)
+    gas_molecular_mass_kg = bindings.gas_molecular_mass_kg
+    epstein_delta = bindings.epstein_delta
+    epstein_diffuse_reflection_fraction = bindings.epstein_diffuse_reflection_fraction
+    epstein_maximum_speed_ratio = bindings.epstein_maximum_speed_ratio
+    thermophoresis_code = bindings.thermophoresis_inputs.code
+    thermophoresis_gas_velocity_m_s = _primitive_vector(
+        sampled_values, bindings.thermophoresis_inputs.gas_velocity_m_s
+    )
+    thermophoresis_gas_temperature_K = _primitive_scalar(
+        sampled_values, bindings.thermophoresis_inputs.gas_temperature_K
+    )
+    thermophoresis_gas_translational_heat_flux_W_m2 = _primitive_vector(
+        sampled_values, bindings.thermophoresis_inputs.gas_translational_heat_flux_W_m2
+    )
+    thermophoresis_gas_mean_free_path_m = _primitive_scalar(
+        sampled_values, bindings.thermophoresis_inputs.gas_mean_free_path_m
+    )
+    thermophoresis_gas_molecular_mass_kg = bindings.thermophoresis_inputs.gas_molecular_mass_kg
+    thermophoresis_maximum_speed_ratio = bindings.thermophoresis_inputs.maximum_speed_ratio
+    thermophoresis_gas_temperature_gradient_K_m = _primitive_vector(
+        sampled_values, bindings.thermophoresis_inputs.gas_temperature_gradient_K_m
+    )
+    thermophoresis_gas_density_kg_m3 = _primitive_scalar(
+        sampled_values, bindings.thermophoresis_inputs.gas_density_kg_m3
+    )
+    thermophoresis_gas_dynamic_viscosity_Pa_s = _primitive_scalar(
+        sampled_values, bindings.thermophoresis_inputs.gas_dynamic_viscosity_Pa_s
+    )
+    thermophoresis_gas_thermal_conductivity_W_m_K = _primitive_scalar(
+        sampled_values, bindings.thermophoresis_inputs.gas_thermal_conductivity_W_m_K
+    )
+    thermophoresis_particle_thermal_conductivity_W_m_K = (
+        bindings.thermophoresis_inputs.particle_thermal_conductivity_W_m_K
+    )
+    thermophoresis_thermal_slip_coefficient = (
+        bindings.thermophoresis_inputs.thermal_slip_coefficient
+    )
+    thermophoresis_momentum_exchange_coefficient = (
+        bindings.thermophoresis_inputs.momentum_exchange_coefficient
+    )
+    thermophoresis_thermal_exchange_coefficient = (
+        bindings.thermophoresis_inputs.thermal_exchange_coefficient
+    )
+    ion_drag_code = bindings.ion_drag_inputs.code
+    ion_drag_electron_number_density_m3 = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.electron_density_m3
+    )
+    ion_drag_positive_ion_number_density_m3 = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.positive_ion_density_m3
+    )
+    ion_drag_electron_temperature_K = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.electron_temperature_K
+    )
+    ion_drag_positive_ion_temperature_K = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.positive_ion_temperature_K
+    )
+    ion_drag_positive_ion_velocity_m_s = _primitive_vector(
+        sampled_values, bindings.ion_drag_inputs.positive_ion_velocity_m_s
+    )
+    ion_neutral_mean_free_path_m = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.ion_neutral_mean_free_path_m
+    )
+    ion_drag_positive_ion_mass_kg = bindings.ion_drag_inputs.positive_ion_mass_kg
+    ion_drag_maximum_ion_drift_ratio = bindings.ion_drag_inputs.maximum_ion_drift_ratio
+    ion_drag_electron_thermal_voltage_V = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.electron_thermal_voltage_V
+    )
+    ion_drag_positive_ion_thermal_voltage_V = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.positive_ion_thermal_voltage_V
+    )
+    ion_drag_effective_positive_ion_mass_kg = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.effective_positive_ion_mass_kg
+    )
+    ion_drag_screening_length_m = _primitive_scalar(
+        sampled_values, bindings.ion_drag_inputs.screening_length_m
+    )
+    ion_drag_electric_field_V_m = _primitive_vector(
+        sampled_values, bindings.ion_drag_inputs.electric_field_V_m
+    )
+    ion_drag_maximum_relative_ion_speed_m_s = (
+        bindings.ion_drag_inputs.maximum_relative_ion_speed_m_s
+    )
+    dielectrophoresis_enabled = bindings.dep_enabled
+    gradient_mean_e_squared_V2_m3 = _primitive_vector(
+        sampled_values, bindings.dep_gradient_mean_e_squared
+    )
+    dep_medium_relative_permittivity = bindings.dep_medium_relative_permittivity
+    dep_real_clausius_mossotti_factor = bindings.dep_real_clausius_mossotti_factor
+    lift_code = bindings.lift_inputs.code
+    lift_gas_velocity_m_s = _primitive_vector(sampled_values, bindings.lift_inputs.gas_velocity_m_s)
+    lift_gas_density_kg_m3 = _primitive_scalar(
+        sampled_values, bindings.lift_inputs.gas_density_kg_m3
+    )
+    lift_gas_mean_free_path_m = _primitive_scalar(
+        sampled_values, bindings.lift_inputs.gas_mean_free_path_m
+    )
+    lift_gas_dynamic_viscosity_Pa_s = _primitive_scalar(
+        sampled_values, bindings.lift_inputs.gas_dynamic_viscosity_Pa_s
+    )
+    lift_azimuthal_gas_vorticity_s_inv = _primitive_scalar(
+        sampled_values, bindings.lift_inputs.azimuthal_gas_vorticity_s_inv
+    )
+    lift_coefficient = bindings.lift_inputs.lift_coefficient
+    electric_enabled = bindings.electric_enabled
+    electric_field_V_m = _primitive_vector(sampled_values, bindings.electric_field)
+    gravity_enabled = bindings.gravity_enabled
+    gravity_density_kg_m3 = _primitive_scalar(sampled_values, bindings.gravity_density)
+    gravity_x_m_s2 = bindings.gravity_vector[0]
+    gravity_y_m_s2 = bindings.gravity_vector[1]
+    acceleration = outputs.acceleration_m_s2
+    charge_rate = outputs.charge_rate_number_s
+    charge_rate_derivative = outputs.charge_rate_derivative_s_inv
+    applicable = outputs.applicable
+    linear_drag_rate = outputs.linear_drag_rate_s_inv
+    target_velocity = outputs.target_velocity_m_s
+    additive_acceleration = outputs.additive_acceleration_m_s2
+    prescribed = bindings.prescribed
+    prescribed_values = sampled_values
+    electric_maximum_abs_charge = bindings.electric_maximum_abs_charge
 
     for row in range(particle_index.size):
         prior_error = error_code[row]
@@ -774,14 +1007,11 @@ def _dielectrophoresis_row(
 
     if not enabled:
         return 0.0, 0.0
-    factor = (
-        2.0
-        * math.pi
-        * VACUUM_PERMITTIVITY_F_M
-        * medium_relative_permittivity
-        * particle_radius_m**3
-        * real_clausius_mossotti_factor
-        / particle_mass_kg
+    factor = quasistatic_spherical_dep_factor(
+        particle_mass_kg,
+        particle_radius_m,
+        medium_relative_permittivity,
+        real_clausius_mossotti_factor,
     )
     return (
         factor * gradient_mean_e_squared_V2_m3[row, 0],
@@ -934,12 +1164,14 @@ def _electric_row(
 
     if not enabled:
         return 0.0, 0.0
-    charge_coulomb = (
-        min(max(charge_number, -maximum_abs_charge), maximum_abs_charge) * ELEMENTARY_CHARGE_C
-    )
+    capped_charge = min(max(charge_number, -maximum_abs_charge), maximum_abs_charge)
     return (
-        charge_coulomb * electric_field_V_m[row, 0] / particle_mass_kg,
-        charge_coulomb * electric_field_V_m[row, 1] / particle_mass_kg,
+        electric_coulomb_acceleration_component(
+            capped_charge, particle_mass_kg, electric_field_V_m[row, 0]
+        ),
+        electric_coulomb_acceleration_component(
+            capped_charge, particle_mass_kg, electric_field_V_m[row, 1]
+        ),
     )
 
 
@@ -957,7 +1189,9 @@ def _gravity_buoyancy_row(
 
     if not enabled:
         return 0.0, 0.0
-    buoyancy_factor = 1.0 - gas_density_kg_m3[row] * displaced_volume_m3 / particle_mass_kg
+    buoyancy_factor = gravity_buoyancy_factor(
+        particle_mass_kg, displaced_volume_m3, gas_density_kg_m3[row]
+    )
     return buoyancy_factor * gravity_x_m_s2, buoyancy_factor * gravity_y_m_s2
 
 
@@ -1986,7 +2220,7 @@ def _epstein_finite_speed_drag_row(
     relative_speed = math.hypot(relative_x, relative_y)
     most_probable_speed = math.sqrt(2.0 * BOLTZMANN_J_K * gas_temperature_K / gas_molecular_mass_kg)
     speed_ratio = relative_speed / most_probable_speed
-    specular_factor = _epstein_finite_speed_factor_row(speed_ratio)
+    specular_factor = epstein_finite_speed_factor_row(speed_ratio)
     rate = base_rate * (specular_factor + diffuse_reflection_fraction * math.pi / 8.0)
     lambda_over_radius = gas_mean_free_path_m / radius
     if not (
@@ -2003,22 +2237,6 @@ def _epstein_finite_speed_drag_row(
         lambda_over_radius >= EPSTEIN_MIN_LAMBDA_OVER_RADIUS and speed_ratio <= maximum_speed_ratio
     )
     return relative_x * rate, relative_y * rate, rate, applicable, ERROR_NONE
-
-
-@njit(inline="always", fastmath=False, parallel=False, error_model="numpy")
-def _epstein_finite_speed_factor_row(speed_ratio: float) -> float:
-    if speed_ratio <= EPSTEIN_FINITE_SPEED_SERIES_LIMIT:
-        square = speed_ratio * speed_ratio
-        return 1.0 + square * (
-            1.0 / 5.0 + square * (-1.0 / 70.0 + square * (1.0 / 630.0 - square / 5544.0))
-        )
-    inverse = 1.0 / speed_ratio
-    inverse_square = inverse * inverse
-    return 3.0 / 16.0 * (2.0 + inverse_square) * math.exp(
-        -speed_ratio * speed_ratio
-    ) + 3.0 * math.sqrt(math.pi) / 32.0 * speed_ratio * (
-        4.0 + 4.0 * inverse_square - inverse_square * inverse_square
-    ) * math.erf(speed_ratio)
 
 
 @njit(inline="always", fastmath=False, parallel=False, error_model="numpy")

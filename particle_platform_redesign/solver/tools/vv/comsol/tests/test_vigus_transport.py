@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import math
+from collections.abc import Mapping
 from dataclasses import replace
 from pathlib import Path
 
@@ -175,7 +176,7 @@ def test_transport_producer_runs_both_original_and_reference_public_cases(tmp_pa
     simulate(load_case(prepared / "case.yaml"), tmp_path / "reference_result")
     result = open_result(tmp_path / "reference_result")
     failures = result.manifest["failure_reason_counts"]
-    assert isinstance(failures, dict)
+    assert isinstance(failures, Mapping)
     assert not any(failures.values())
     assert list(result.iter_frames())[-1].time_s == 1e-5
     assert (
@@ -264,3 +265,28 @@ def test_brownian_interpretation_is_explicit_and_rejects_unmatched_steps(
     with pytest.raises(ValueError, match=r"brownian|fixed_rk4_white_limit"):
         prepare_transport(initial, parameters, tmp_path / "rejected", interval_tree_depth=1)
     assert not (tmp_path / "rejected").exists()
+
+
+def test_transport_manifest_failure_leaves_no_case_and_can_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    initial, parameters = _input(tmp_path)
+    original = initial.read_bytes()
+    output = tmp_path / "prepared"
+    open_file = Path.open
+
+    def fail_manifest(path: Path, *args, **kwargs):
+        if path.name == "build_manifest.json" and args and args[0] == "xb":
+            raise OSError("injected manifest write failure")
+        return open_file(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "open", fail_manifest)
+        with pytest.raises(OSError, match="injected manifest"):
+            prepare_transport(initial, parameters, output, interval_tree_depth=1)
+    assert not output.exists()
+    assert initial.read_bytes() == original
+    receipt = prepare_transport(initial, parameters, output, interval_tree_depth=1)
+    case = load_case(output / "case.yaml")
+    assert case.content_hash == receipt["content_hash"]
+    assert json.loads((output / "build_manifest.json").read_text()) == receipt

@@ -88,14 +88,15 @@ def check_case(case: SimulationCase, *, workers: int = 1) -> CaseCheckReport:
     It does not qualify physical accuracy or reserve operating-system resources.
     """
     try:
-        prepared = _prepare(case, workers=workers)
+        run = _prepare(case, workers=workers)
     except (EngineError, OSError, ValueError) as exc:
         raise CaseError(f"cannot prepare case {case.spec.name}: {exc}") from exc
     spec = case.spec
+    prepared = run.transport
     memory = prepared.memory_plan
     models = tuple(
         CheckedModel(category, str(model["model"]), str(model["revision"]))
-        for category, model in prepared.physics.resolved_models().items()
+        for category, model in run.facts.model_document().items()
     )
     return CaseCheckReport(
         spec.name,

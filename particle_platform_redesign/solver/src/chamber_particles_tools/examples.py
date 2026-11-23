@@ -4,11 +4,12 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
-from dataclasses import replace
+from dataclasses import dataclass, replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
-from typing import Any
+from typing import Any, Literal
 
 import numpy as np
 import yaml
@@ -20,6 +21,8 @@ from chamber_particles.case_format import (
     FieldData,
     GeometryData,
     P1TriLayout,
+    RealizedSource,
+    RealizedSurfaceSource,
     RealizedTableSource,
     read,
     write,
@@ -27,32 +30,46 @@ from chamber_particles.case_format import (
 
 from .inputs import create_case
 
-EXAMPLE_NAMES = (
-    "xy-ballistic",
-    "rz-charged",
-    "xy-time-field",
-    "brownian-wall",
-    "reduced-electrostatic",
-)
+EXAMPLE_REVISION = "analytic_editable_examples_v2"
+
+
+@dataclass(frozen=True, slots=True)
+class _Example:
+    rz: bool = False
+    electric: Literal["none", "constant", "linear_time", "reduced"] = "none"
+    brownian: bool = False
+
+
+_EXAMPLES = {
+    "xy-ballistic": _Example(),
+    "rz-charged": _Example(rz=True, electric="constant"),
+    "xy-time-field": _Example(electric="linear_time"),
+    "brownian-wall": _Example(brownian=True),
+    "reduced-electrostatic": _Example(rz=True, electric="reduced"),
+}
+EXAMPLE_NAMES = tuple(_EXAMPLES)
 
 
 def initialize(name: str, output_directory: str | Path) -> SimulationCase:
     """Create a checked case and its editable source CSV/recipe."""
     if name not in EXAMPLE_NAMES:
         raise ValueError(f"unknown example {name!r}; choose one of {', '.join(EXAMPLE_NAMES)}")
-    bundle = _bundle(name)
+    definition = _EXAMPLES[name]
+    bundle = _bundle(name, definition)
     thermal = bundle
-    settings = _settings(name)
-    if name == "reduced-electrostatic":
+    settings = _settings(name, definition)
+    if definition.electric == "reduced":
         bundle = _build_electrostatic(bundle)
-    case = create_case(bundle, settings, bundle.sources, output_directory)
-    _editable_sources(case, settings)
-    if name == "reduced-electrostatic":
-        write(case.case_path.parent / "thermal.h5", thermal)
-        (case.case_path.parent / "builder.yaml").write_text(
-            yaml.safe_dump(_electrostatic_configuration(), sort_keys=False), encoding="utf-8"
-        )
-    return case
+    supporting_files = _editable_sources(bundle, settings)
+    if definition.electric == "reduced":
+        with TemporaryDirectory(prefix="chamber-thermal-input-") as temporary:
+            path = Path(temporary) / "thermal.h5"
+            write(path, thermal)
+            supporting_files["thermal.h5"] = path.read_bytes()
+        supporting_files["builder.yaml"] = yaml.safe_dump(
+            _electrostatic_configuration(), sort_keys=False
+        ).encode("utf-8")
+    return create_case(bundle, settings, output_directory, supporting_files=supporting_files)
 
 
 def _geometry(rz: bool) -> GeometryData:
@@ -94,16 +111,16 @@ def _source(rz: bool, brownian: bool) -> RealizedTableSource:
     )
 
 
-def _bundle(name: str) -> DataBundle:
-    rz = name in ("rz-charged", "reduced-electrostatic")
+def _bundle(name: str, definition: _Example) -> DataBundle:
+    rz = definition.rz
     geometry = _geometry(rz)
     assert geometry.tri3 is not None
     layout = P1TriLayout("background", geometry.nodes_m, geometry.tri3, np.ones(2, dtype="u1"))
     coordinates = "axisymmetric_rz" if rz else "cartesian_xy"
     fields: tuple[FieldData, ...] = ()
-    if name == "rz-charged":
+    if definition.electric == "constant":
         fields = (_field("electric_field", [0.0, 1000.0], "V/m", coordinates),)
-    elif name == "xy-time-field":
+    elif definition.electric == "linear_time":
         values = np.zeros((3, 4, 2))
         values[:, :, 0] = np.asarray([0.0, 5000.0, 10000.0])[:, None]
         fields = (
@@ -118,26 +135,38 @@ def _bundle(name: str) -> DataBundle:
                 np.asarray([0.0, 0.01, 0.02]),
             ),
         )
-    elif name in ("brownian-wall", "reduced-electrostatic"):
+    elif definition.brownian or definition.electric == "reduced":
         fields = (
             _field("gas_velocity", [0.0, 0.0], "m/s", coordinates),
             _field("gas_temperature", [300.0], "K"),
         )
-        if name == "brownian-wall":
+        if definition.brownian:
             fields += (
                 _field("gas_density", [1e-3], "kg/m^3"),
                 _field("gas_mean_free_path", [1e-3], "m"),
             )
-    source = _source(rz, name == "brownian-wall")
-    if name == "xy-time-field":
+    source = _source(rz, definition.brownian)
+    if definition.electric == "linear_time":
         source = replace(source, charge_number=np.asarray([3.0]))
+    generator_input = {
+        "example": name,
+        "generator_revision": EXAMPLE_REVISION,
+        "rz": definition.rz,
+        "electric": definition.electric,
+        "brownian": definition.brownian,
+    }
+    encoded = json.dumps(generator_input, sort_keys=True, separators=(",", ":")).encode()
     provenance = json.dumps(
         {
             "producer": "chamber_particles_tools.examples",
-            "producer_version": "1",
-            "source_sha256": "sha256:" + hashlib.sha256(name.encode()).hexdigest(),
-            "field_semantics_revision": "analytic_editable_examples_v1",
-            "producer_metadata": {"example": name, "purpose": "educational analytic input"},
+            "producer_version": EXAMPLE_REVISION,
+            "source_sha256": "sha256:" + hashlib.sha256(encoded).hexdigest(),
+            "field_semantics_revision": EXAMPLE_REVISION,
+            "producer_metadata": {
+                **generator_input,
+                "purpose": "educational analytic input",
+                "source_identity": "generator input and revision; not a source-code file hash",
+            },
         }
     )
     return DataBundle(
@@ -162,11 +191,11 @@ def _field(name: str, values: list[float], unit: str, basis: str = "scalar") -> 
     )
 
 
-def _settings(name: str) -> dict[str, Any]:
-    rz = name in ("rz-charged", "reduced-electrostatic")
-    brownian = name == "brownian-wall"
+def _settings(name: str, definition: _Example) -> dict[str, Any]:
+    rz = definition.rz
+    brownian = definition.brownian
     physics: dict[str, Any] = {"charge": {"model": "fixed"}}
-    if name in ("rz-charged", "xy-time-field", "reduced-electrostatic"):
+    if definition.electric != "none":
         physics["electric"] = {
             "model": "coulomb",
             "revision": "electric_coulomb_v1",
@@ -234,8 +263,8 @@ def _build_electrostatic(bundle: DataBundle) -> DataBundle:
         configuration = _electrostatic_configuration()
         config_path = directory / "builder.yaml"
         config_path.write_text(yaml.safe_dump(configuration), encoding="utf-8")
-        build_from_configuration(config_path, directory / "electric.h5")
-        return read(directory / "electric.h5")
+        build_from_configuration(config_path, directory / "electric")
+        return read(directory / "electric" / "bundle.h5")
 
 
 def _electrostatic_configuration() -> dict[str, Any]:
@@ -280,14 +309,34 @@ def _electrostatic_configuration() -> dict[str, Any]:
     }
 
 
-def _editable_sources(case: SimulationCase, settings: dict[str, Any]) -> None:
-    source = case.data.sources[0]
-    assert isinstance(source, RealizedTableSource)
-    columns = {
+def _editable_sources(bundle: DataBundle, settings: dict[str, Any]) -> dict[str, bytes]:
+    files: dict[str, bytes] = {}
+    sources = []
+    for index, source in enumerate(bundle.sources):
+        name = "particles.csv" if index == 0 else f"particles_{index + 1}.csv"
+        content, configuration = _editable_source(source, bundle.coordinate_system)
+        files[name] = content
+        sources.append({"csv": name, "configuration": configuration})
+    recipe = {
+        "format_version": 2,
+        "input_bundle": "case.h5",
+        "sources": sources,
+        "settings": settings,
+    }
+    files["recipe.yaml"] = yaml.safe_dump(recipe, sort_keys=False).encode("utf-8")
+    return files
+
+
+def _editable_source(source: RealizedSource, coordinates: str) -> tuple[bytes, dict[str, Any]]:
+    columns: dict[str, Any] = {
         "particle_id": "particle_id",
         "release_time_s": "release_time_s",
-        "position_m": ["x0_m", "x1_m"],
     }
+    surface = isinstance(source, RealizedSurfaceSource)
+    if surface:
+        columns.update(facet_id="facet_id", facet_parameter="facet_parameter")
+    else:
+        columns["position_m"] = ["x0_m", "x1_m"]
     properties = (
         "charge_number",
         "mass_kg",
@@ -301,7 +350,6 @@ def _editable_sources(case: SimulationCase, settings: dict[str, Any]) -> None:
     columns.update({name: name for name in properties})
     units = {
         "release_time_s": "s",
-        "position_m": "m",
         "charge_number": "1",
         "mass_kg": "kg",
         "drag_diameter_m": "m",
@@ -311,43 +359,43 @@ def _editable_sources(case: SimulationCase, settings: dict[str, Any]) -> None:
         "model_weight": "1",
         "material_id": "1",
     }
+    if not surface:
+        units["position_m"] = "m"
     configuration = {
         "format_version": 2,
-        "kind": "table",
+        "kind": "surface" if surface else "table",
         "table": source.name,
         "columns": columns,
         "units": units,
         "velocity_mode": "vector",
         "velocity_columns": ["v0_m_s", "v1_m_s"],
         "velocity_unit": "m/s",
-        "components": ["r", "z"]
-        if case.data.coordinate_system == "axisymmetric_rz"
-        else ["x", "y"],
+        "components": ["r", "z"] if coordinates == "axisymmetric_rz" else ["x", "y"],
         "basis_to_case": [[1, 0], [0, 1]],
         "frame": "inertial",
         "metadata": {"scope": "editable analytic example", "unresolved": []},
     }
-    row = {
-        "particle_id": int(source.particle_id[0]),
-        "release_time_s": float(source.release_time_s[0]),
-        "x0_m": float(source.position_m[0, 0]),
-        "x1_m": float(source.position_m[0, 1]),
-        "v0_m_s": float(source.velocity_m_s[0, 0]),
-        "v1_m_s": float(source.velocity_m_s[0, 1]),
-    }
-    row.update({name: getattr(source, name)[0].item() for name in properties})
-    with (case.case_path.parent / "particles.csv").open(
-        "x", newline="", encoding="utf-8"
-    ) as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(row))
-        writer.writeheader()
+    stream = io.StringIO(newline="")
+    writer = None
+    for index in range(source.particle_id.size):
+        row = {
+            "particle_id": int(source.particle_id[index]),
+            "release_time_s": float(source.release_time_s[index]),
+            "v0_m_s": float(source.velocity_m_s[index, 0]),
+            "v1_m_s": float(source.velocity_m_s[index, 1]),
+        }
+        if isinstance(source, RealizedSurfaceSource):
+            row.update(
+                facet_id=int(source.facet_id[index]),
+                facet_parameter=float(source.facet_parameter[index]),
+            )
+        else:
+            row.update(
+                x0_m=float(source.position_m[index, 0]), x1_m=float(source.position_m[index, 1])
+            )
+        row.update({name: getattr(source, name)[index].item() for name in properties})
+        if writer is None:
+            writer = csv.DictWriter(stream, fieldnames=list(row))
+            writer.writeheader()
         writer.writerow(row)
-    recipe = {
-        "format_version": 1,
-        "input_bundle": "case.h5",
-        "sources": [{"csv": "particles.csv", "configuration": configuration}],
-        "settings": settings,
-    }
-    (case.case_path.parent / "recipe.yaml").write_text(
-        yaml.safe_dump(recipe, sort_keys=False), encoding="utf-8"
-    )
+    return stream.getvalue().encode("utf-8"), configuration

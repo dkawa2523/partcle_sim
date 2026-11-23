@@ -164,6 +164,10 @@ evidence; rebuild current inputs with an explicit v2 interpretation.
 
 `build_manifest.json` binds source/parameter bytes, primitive provenance,
 particle properties, coefficient inventory and canonical logical hash.
+The installed `create_case` owner checks the full runnable case and publishes
+`case.yaml`, `case.h5` and this manifest in the same directory commit.
+A preparation or manifest-write failure exposes no incomplete case; retry
+uses the same unused destination.
 The reference models check their particle-property bindings during run
 preparation. A descriptive native comparison and physically validated
 transport remain separate claims.
@@ -246,20 +250,53 @@ differences. Do not derive these allowances from observed changes or aim to
 match reference precision. Meeting them is empirical resolution evidence,
 never a guaranteed absolute error bound.
 
-For public results, the prerequisite also checks actual accepted macro counts,
-common run start/end, and more than one coarsest base step in the selected
-observation window. Three dt labels with the same single macro partition do
-not establish refinement. Missing partition evidence (including CSV-only
-metadata) remains `NOT_TESTED`; no production step history is added for this
-check. Regenerate comparison reports when the evaluator or policy changes;
-completed historical reports do not qualify a changed implementation.
+For public results, the prerequisite consumes a known `macro_grid_revision`,
+the actual selected release rows and the shared `time_grid.MacroGrid` policy.
+It verifies the completed run count, then reconstructs only the macro intervals
+intersecting the selected window. The first interval is shortened to release;
+the last retains its actual target even when the last observation is earlier.
+Both refinement pairs must have nested interior boundaries, more intervals and
+a smaller maximum interval, with at least two coarse intervals and a common
+run span. This is a conservative macro prerequisite, not a universal convergence
+criterion. A field-knot-dominated window with identical partitions cannot pass
+because extra steps elsewhere increase global counts. Reports retain bounded
+partition summaries and hashes, not a full particle step ledger.
+
+Missing/unknown clock policy (including CSV-only metadata) leaves macro
+qualification `NOT_TESTED` while raw differences remain available. A supported
+macro refinement alone does not establish the particle integration intervals.
+`fixed_root_execution` therefore adds a separate prerequisite: a reviewed
+engine/proposal/event and deterministic method/path policy, with existing
+run-wide refinement/depth, residual split, axis crossing, wall interaction,
+boundary/topology event and failure counters all zero. The known exact paths
+and Cartesian paths without boundary facets need no curved-refinement table;
+their other counters must still be present and zero. Domain/support geometry
+may exist in a Cartesian case without boundary facets.
+
+This global-zero condition is sufficient to link macro intervals, shortened
+by actual release, to particle integration intervals. Positive global work
+does not locate it within the selected cohort/window, so even work after the
+last observation leaves this prerequisite `NOT_TESTED`. General refined paths
+require additional evidence; a dense RK4 path can still be physically
+reintegrated by the outer transport loop. A small medium/fine change from the
+same accepted partition is repeatability, not independent resolution. Both
+macro and fixed-root prerequisites are needed before self-resolution receives
+`PASS` or `FAIL`; raw changes, per-side empirical target verdicts and descriptive
+cross-budget results remain available. No production step history is added,
+and `accepted_particle_path_resolution` still does not certify a general
+accepted-path ledger or stochastic strong convergence.
+Regenerate comparison reports when the
+evaluator or policy changes; completed historical reports do not qualify a
+changed implementation.
 
 Reports include component and Euclidean-vector x/v differences, scalar charge
 differences, per-ID/per-time coverage and statistics, exact initial-state
 checks and explicit coarse/medium/fine step ratios. RMS uses equal retained
 particle-observation rows, not time weighting. Observed order is reported only
-for equal refinement ratios and nonzero changes; it is not a smooth-order gate
-for nonsmooth transferred fields. Neither finest-pair difference nor a
+for bound genuine uniform macro refinements, known fixed-root execution, equal
+step ratios, complete pre-event meaning/coverage and nonzero changes. Nonuniform macro grids retain
+their measured changes without assigning an order from nominal step labels.
+It is not a smooth-order gate for nonsmooth transferred fields. Neither finest-pair difference nor a
 comparison PASS is a rigorous error bound, physical validation, universal
 COMSOL accuracy or a reason to match COMSOL integration steps. Source hashes
 are refreshed at consumption, output reports are created without overwriting,
@@ -310,6 +347,34 @@ speed/charge with uncertainty. Same IDs or seeds do not pair the random
 histories. Describe missing rows and survivor conditioning. Practical agreement
 does not certify continuous SDE bias, local deposition, adhesion or physical flux.
 Normal result-only reuse uses the installed `analyze/export/view` clients.
+
+## Producer outputs are completed inputs
+
+F02 schedule preparation publishes one new directory containing `bundle.h5`
+and its required `report.json`; the separate report path is not an option:
+
+```console
+uv run --locked python -m tools.vv.comsol.prepare_f02_fixed_electric_case FIELD_BUNDLE NEW_SCHEDULE_DIRECTORY
+```
+
+The installed `create_case(bundle, settings, output_directory)` consumes that
+bundle with explicit source/wall/physics settings. The F02 example's
+`data_path` points to `case_a_fields_with_source/bundle.h5` under its bound
+acceptance output; model-specific numbers and fields remain explicit.
+
+Exact-P1 table export publishes the complete CSV, nodal/sectionwise tables,
+release probes and `table_receipt.json` only after all validation and writes
+succeed:
+
+```console
+uv run --locked python -m tools.vv.comsol.prepare_comsol_p1_tables CANDIDATE_H5 NEW_TABLE_DIRECTORY
+```
+
+Its current native companion scope requires one static RZ triangular P1
+layout, the five named primitive fields, and one realized internal table of
+287 probes. It is not a generic unpaired CSV exporter. A validation/table/
+receipt error leaves the public table destination absent and retryable.
+These publishers do not overwrite completed input directories.
 
 ## Independent native/analytic benchmarks
 

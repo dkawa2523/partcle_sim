@@ -22,6 +22,7 @@ uv run --locked python -m chamber_particles view .artifacts/quickstart/result -o
 
 このXY例は1粒子、境界イベント1件、failure 0件、最終`stuck`です。
 `case.yaml`に設定、`case.h5`にcanonical入力、`particles.csv`に実現source、`recipe.yaml`に再作成手順が入ります。
+これらは全て作成・検査できてから一つのdirectoryとして公開されます。
 CSVやrecipeを編集したら別directoryへ作り直します。
 
 ```console
@@ -30,6 +31,8 @@ uv run --locked python -m chamber_particles create .artifacts/quickstart/input/r
 
 `chamber-particles` console commandも同じdispatcherです。通常出力は整形JSON、`--json`でcompact JSONです。
 各command/subcommandで`--help`を使えます。
+`models --json`は必須fieldのunit/basisと`value_constraint`（finite／positive／nonnegative）を示します。
+これらは入力の必要条件であり、modelの連成・適用域・charge invariantを含む実行対応は`check`で調べます。
 
 配布wheelが手元にある場合、空の作業directoryでも次のように使えます。wheel pathは実ファイルへ置き換えます。
 
@@ -59,19 +62,20 @@ geometry・fieldのcanonical bundleをPythonで作るか、CSVを明示mapping�
 field欠損をゼロや最近傍で埋めません。
 
 ```console
-uv run --locked python -m chamber_particles inputs import-csv mapping.yaml background.h5 --report import.json
+uv run --locked python -m chamber_particles inputs import-csv mapping.yaml background
 uv run --locked python -m chamber_particles create recipe.yaml -o input
 uv run --locked python -m chamber_particles check input/case.yaml --workers 1
 ```
 
-recipeはformat 1で、`input_bundle`、`sources`、`settings`を持ちます。pathはrecipeからの相対pathです。
+producerは新しいdirectoryへ`bundle.h5`と`report.json`を一緒に公開します。
+recipeはformat 2で、`input_bundle`、`sources`、`settings`を持ちます。pathはrecipeからの相対pathです。
 `settings`は通常のcase YAML documentで、`case`にはnameだけを指定できます。
 publisherがcanonical writerのhashとdata pathを埋め、公開`load_case`と`check_case`を通してから公開します。
 利用者がhashを手計算したり、既存ケースをtemplateとして用意したりする必要はありません。
 
 ```yaml
-format_version: 1
-input_bundle: background.h5
+format_version: 2
+input_bundle: background/bundle.h5
 sources:
   - csv: particles.csv
     configuration: source.yaml
@@ -81,6 +85,10 @@ settings:
   # motion/time/solver/resources/physics/sources/boundaries/outputを明記する。
   # 完全な編集例はinitで生成したrecipe.yamlを参照。
 ```
+
+`sources`は完成bundleへ含めるtableの全量です。CSVで作るtable、または
+`- existing_table: table_name`で明示した既存tableだけを保持し、未記載tableは除きます。
+`settings.sources`は、その中から実際に放出するtableを選びます。format 1の暗黙overlayは受理しません。
 
 source configurationはformat 2、`kind: table`または`kind: surface`です。
 ID、release time、位置またはcanonical facet row/strict-interior parameter、速度、電荷、質量、drag/contact/electric寸法、
@@ -93,9 +101,9 @@ ID、release time、位置またはcanonical facet row/strict-interior parameter
 場の生成・変換も同じCLIにあります。出力bundleをrecipeの`input_bundle`へ指定してrunnable caseを作ります。
 
 ```console
-uv run --locked python -m chamber_particles inputs cache cache.yaml cached.h5 --report cache.json
+uv run --locked python -m chamber_particles inputs cache cache.yaml cached
 uv run --locked python -m chamber_particles inputs electrostatic check builder.yaml
-uv run --locked python -m chamber_particles inputs electrostatic build builder.yaml electric.h5 --report electric.json
+uv run --locked python -m chamber_particles inputs electrostatic build builder.yaml electric
 ```
 
 cacheは明示した誤差・support・資源条件を満たす変換だけを公開します。
@@ -131,8 +139,9 @@ if __name__ == "__main__":
     main()
 ```
 
-自分の`DataBundle`には`inputs.create_case(bundle, settings, sources, output_directory)`を使います。
-`sources`は意図したcomplete source tupleです。`create_from_configuration(recipe_path, output_directory)`はCLI `create`と同じです。
+自分の`DataBundle`には`inputs.create_case(bundle, settings, output_directory)`を使います。
+source tableはbundleに、実行するreleaseはsettingsに持たせます。
+`create_from_configuration(recipe_path, output_directory)`はCLI `create`と同じです。
 canonical writer/parserは`chamber_particles.case_format`が所有し、clientは物理validatorや数値engineを複製しません。
 
 `workers`の既定は1。複数processのPython scriptにはmain guardを付けます。
@@ -153,6 +162,28 @@ worker数は実行資源で、caseの数値設定に含めません。親が時�
 `export`はfinal、保存frames/probes、boundary interactionsとidentity receiptを出力します。
 `view`はgeometryと全選択人口の最終占有、実eventを表示し、`--detail`か`--particle-id`で保存軌道を追加します。
 表示点数の上限はreceiptへ記録し、統計の母集団を表示sampleへ置き換えません。
+
+Pythonではpathに加えて、開いた`ResultView`または一度選択した`ResultCohort`をそのまま渡せます。
+同じ母集団の解析・export・表示を連続実行する場合は、次のようにfinal/contextの読込みとID選択を共用します。
+
+```python
+from chamber_particles import open_result
+from chamber_particles_tools.analysis import export_result, summarize_result
+from chamber_particles_tools.selection import select_result
+from chamber_particles_tools.visualization import render_result
+
+cohort = select_result(open_result("result"))  # 全粒子。必要ならsource_ids/particle_idsを指定。
+summary = summarize_result(cohort)
+export_result(cohort, "selected-export")
+render_result(cohort, "selected-view")
+```
+
+cohortの選択は確定済みです。別の選択は`select_result(cohort.result, ...)`で作ります。
+独立したCLI/path呼出しは、その都度通常の結果整合検査を通ります。
+`ResultView.manifest`は入れ子まで読み取り専用で、JSON保存や編集には独立copyの`manifest_document()`を使います。
+派生成果物のidentityは`source_identity()`が所有し、consumerが異なるhash規則を定義しません。
+exportは新規directory、viewは新規または空directoryへ、receiptを含む全成果物を完成させてから公開します。
+途中失敗では不完全な成果物を公開せず、完成済みdirectoryへの再出力は拒否します。
 
 stuck/heldは数値的な境界結果です。adhesion、deposit mass、濃度・fluxには適切なsource weight/rateと物理モデルが必要です。
 反射を含む全interaction数、初回到達、終端capture数は別量です。保存点の線分は未保存bounceやBrownian軌道を再構成しません。
@@ -185,5 +216,5 @@ uv run --locked pytest tests/verification tests/scenarios -q
 ```
 
 責務と変更規則は[AGENTS.md](../AGENTS.md)、実装工程は[implementation plan](../implementation_plan.md)、
-変更と配布状況は[release notes](RELEASE_NOTES.md)、現在の整理と実行は[作業記録](evidence/retirement_2026_11_23/README.md)を参照してください。
+変更と配布状況は[release notes](RELEASE_NOTES.md)、責務・受渡し・数値説明の調査と実行は[作業記録](evidence/resolved_semantics_2026_11_23/README.md)を参照してください。
 現在の仕様だけを受理します。過去の科学・性能・Release資格は当時のsourceへ限定します。

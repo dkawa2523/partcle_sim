@@ -875,7 +875,7 @@ def _execute_run(specification: Mapping[str, Any], output: Path, *, digest: bool
     physics_dispatcher: Any = evaluate_physics_tile_into
     physics_signature_count = len(physics_dispatcher.signatures)
     _validate_run(summary, result, row, specification, physics_signature_count)
-    manifest = result.manifest
+    manifest = result.manifest_document()
     memory_plan = _mapping_value(manifest, "memory_plan")
     components = _mapping_value(memory_plan, "components")
     event_work = manifest.get("event_refinement")

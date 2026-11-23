@@ -1,0 +1,48 @@
+{
+  "status": "Three independent perspectives closed; no unresolved mandatory finding",
+  "records": {
+    "user_review.json": {
+      "path": "user_review.json",
+      "sha256": "717aa2ac8381987e6a9ce999fbac9673c183cf35c7edae0373aa9c04694a7462"
+    },
+    "structure_review.json": {
+      "path": "structure_review.json",
+      "sha256": "cc8cfbf919ae38ff4c22bad8fb2313a93e9968f02e465ea162ff99a6ed8fbc88"
+    },
+    "science_review.json": {
+      "path": "science_review.json",
+      "sha256": "d08a709c3459f0282d87c9e2f13a0566402560de9b5ebff3a184f9be90ba14fb"
+    }
+  },
+  "found_and_fixed": [
+    {
+      "issue": "Exact nonnegative constant zero rejected by outward range inflation",
+      "cause": "Field interval enclosure and exact constant value had been treated as the same fact",
+      "fix": "Resolve only certified constant zero components to [0,0] once; preserve outward bounds for positive constants and nonconstant fields",
+      "independent_recheck": "Both public saved witnesses check/run successfully; charge agrees with the analytic linear limit."
+    },
+    {
+      "issue": "Saved-population JSON serialization broke after nested metadata became immutable",
+      "cause": "External consumer implicitly depended on mutable internal container type",
+      "fix": "Use explicit ResultView manifest_document at the JSON boundary",
+      "independent_recheck": "Original CLI saved witness emits parseable JSON and returns complete."
+    },
+    {
+      "issue": "Same actual accepted roots could receive a qualified self-resolution PASS",
+      "cause": "Parent macro refinement was used without the root reintegration prerequisite",
+      "fix": "Known current execution policy plus global zero root-shortening counters is a sufficient certificate; otherwise qualification/order NOT_TESTED while raw/practical comparison remains",
+      "independent_recheck": "Both exp/RK4 zero-difference counterexamples NOT_TESTED; real16/32/64 root refinement positive control FAIL under its unchanged1e-12 budget."
+    }
+  ],
+  "scores_out_of_100": {
+    "structure": 85,
+    "maintainability": 80,
+    "scientific_explainability": 88
+  },
+  "score_meaning": "Independent bounded engineering judgments, not native numerical or physical certification. User workflow review is a recorded execution verdict, not a fabricated numeric score.",
+  "limits": [
+    "Specialized numerical modules require domain knowledge; adding state remains a deliberate vertical change.",
+    "Global nonzero counters cannot localize a selected cohort/window. Targeted execution or review evidence is required to qualify that case.",
+    "No independent reviewer claimed to rerun every large campaign. Root integration receipts identify those executions."
+  ]
+}

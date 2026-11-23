@@ -1,4 +1,4 @@
-"""COMSOL-export adapter for explicit selected nodal XY/RZ primitives."""
+"""Import explicit selected nodal XY/RZ primitives from CSV producers."""
 
 from .workflow import ADAPTER_REVISION, adapt_from_configuration
 

@@ -5,9 +5,39 @@
 凍結した正の`linear_relaxation(rate, target_velocity)`、その他の力を`explicit_acceleration`として返す。
 モデルの選択・required field・単位・成分・基底は`physics/catalog.py`が一つのownerである。
 `chamber-particles models`は同じdescriptorを表示し、stageの実行bindingも同じfield仕様を使う。
+field値の条件は`value_constraint: finite | positive | nonnegative`で宣言する。`finite`は符号自由、
+`positive`は厳密に正、`nonnegative`は0を含む。負イオン密度やprescribed chargeの傾き・ion rateは非負、
+electron exponent offsetは符号自由である。この宣言を公開情報、prepareのprimitive extrema検査、
+stageの粒子局所検査が使い、runtimeがmodel名を見て後から符号規則を追加しない。
+非負fieldの全節点・全snapshotがconstant zeroである証明がある場合、prepareはzeroの区間を検査とmodel boundsの
+両方へ渡す。0の外向きroundoff enclosureを負の物理値と解釈しない。正の定数と非constantのenclosureは保持し、
+weight和の丸めを無視して定数値へ縮めず、負下端をepsilonやclampで受理しない。
 現行方程式と適用域を以下に記す。過去revisionの導入順はGit履歴と保存receiptに保持する。
 実行に採用した正確なcatalog/runtime/compiled revisionは各`run.json`を参照する。
 continuous modelは有限の`J<=0`、fixed chargeは`J=0`を返し、運動と同じstageで評価する。
+
+選択時のdescriptorとcallerが指定したfield名は`SelectedModel`に保持し、resolved model表示や
+integrator候補をtyped planから再推定しない。stageにはdescriptor、dict、callbackを渡さず、
+`compiled.py`が所有する固定のfamily binding、独立粒子物性、primitive slab、出力recordを渡す。
+charge、drag、thermophoresis、DEP、lift、electric、gravity、ion dragの既存stage評価・加算順を維持する。
+
+各descriptorは、stage入力と区別してlocal applicabilityとlocal additive boundが参照するfield role、
+constant accelerationを証明できるfamilyかを明示する。prepareはそのroleをcallerのfield名とoffsetへ解決し、
+global family bounds、local証明入力、constant証明を一つの`PreparedPhysicsCertificates`へ保持する。
+実際に準備したglobal force boundが選択された全forceを覆わなければprepareを失敗させる。
+全modelがconstant証明を支持し、実際のfieldと全contributionがconstantと確認できた場合だけexact specializationを使う。
+local/constant証明の`None`は利用不能であり、ゼロforceではない。familyの適用域gateが不要な場合の`None`とも
+区別する。point式、global enclosure、local enclosure、適用域は
+異なる数学的役割を保ち、point式からboundを自動推定しない。
+
+finite-speed Epsteinのrate factorは一つのscalar bodyをprepareとcompiled stageで共有する。
+electric、DEP、gravity/buoyancyもconstant証明とstageが同じpoint bodyを使う。prepareではPython bodyを使い、
+追加のJIT entryを起動しない。独立速度積分・Decimal・解析極限・boundの包含検査はverificationに残す。
+共有body同士の一致は結線検査であり、独立した科学的資格の代用にはしない。
+
+モデルの追加・削減では、catalogの選択・値制約・証明role、familyの式とbounds、固定numeric bindingと
+stage合成、必要な連成、公開例と独立検証を一緒に更新する。新categoryには合成順と必要certificateの
+実装が必要であり、metadataの宣言だけでは新しい科学モデルを実装したことにならない。
 
 ## Particle authority
 

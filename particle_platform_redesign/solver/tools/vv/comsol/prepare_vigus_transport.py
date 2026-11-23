@@ -17,11 +17,9 @@ from pathlib import Path
 from typing import Any, cast
 
 import numpy as np
-import yaml
 
 from chamber_particles import load_case
-from chamber_particles.case_format import DataBundle, FieldData, write
-from chamber_particles.physics.catalog import resolve_physics_plan
+from chamber_particles.case_format import DataBundle, FieldData, content_hash
 from chamber_particles.physics.charge import ELECTRON_MASS_KG
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
@@ -29,6 +27,7 @@ from chamber_particles.physics.forces import (
     VACUUM_PERMITTIVITY_F_M,
 )
 from chamber_particles.yaml_input import parse_document
+from chamber_particles_tools.inputs import create_case
 
 TOOL_REVISION = "vigus_static_coefficient_transport_v2"
 _PROPERTY_NAMES = ("mass_kg", "drag_diameter_m", "electrostatic_radius_m", "displaced_volume_m3")
@@ -346,7 +345,6 @@ def prepare_transport(
         "maximum_abs_charge_number": parameters["maximum_abs_charge_number"],
     }
     document["physics"].update(models)
-    resolve_physics_plan(document["physics"], case.data.coordinate_system)
     document["solver"]["integrator"] = "ou_langevin"
     metadata = {
         "initial_content_hash": case.content_hash,
@@ -369,17 +367,15 @@ def prepare_transport(
         },
         allow_nan=False,
     )
-    output.mkdir(parents=True, exist_ok=False)
-    info = write(
-        output / "case.h5",
-        replace(case.data, fields=(*case.data.fields, *fields), provenance_json=provenance),
-    )
-    document["case"].update({"data_path": "case.h5", "expected_content_hash": info.content_hash})
-    (output / "case.yaml").write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
-    load_case(output / "case.yaml")
-    receipt = {"tool_revision": TOOL_REVISION, "content_hash": info.content_hash, **metadata}
-    (output / "build_manifest.json").write_text(
-        json.dumps(receipt, indent=2, allow_nan=False), encoding="utf-8"
+    bundle = replace(case.data, fields=(*case.data.fields, *fields), provenance_json=provenance)
+    receipt = {"tool_revision": TOOL_REVISION, "content_hash": content_hash(bundle), **metadata}
+    create_case(
+        bundle,
+        document,
+        output,
+        supporting_files={
+            "build_manifest.json": json.dumps(receipt, indent=2, allow_nan=False).encode("utf-8")
+        },
     )
     return receipt
 

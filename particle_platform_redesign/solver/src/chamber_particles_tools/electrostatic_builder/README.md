@@ -7,13 +7,13 @@ It does not implement the full-material/floating-conductor V/Q solver described 
 ```console
 uv run --locked python -m chamber_particles init electric-example --example reduced-electrostatic
 uv run --locked python -m chamber_particles inputs electrostatic check electric-example/builder.yaml
-uv run --locked python -m chamber_particles inputs electrostatic build electric-example/builder.yaml electric.h5 --report electric.json
+uv run --locked python -m chamber_particles inputs electrostatic build electric-example/builder.yaml electric
 ```
 
 Python uses `chamber_particles_tools.electrostatic_builder.workflow.check_from_configuration(configuration_path)`
-and `build_from_configuration(configuration_path, output_path, *, report_path=None)`.
+and `build_from_configuration(configuration_path, output_directory)`.
 `check` uses the same configuration/input/topology/anchor preparation without solving or publishing.
-`build` publishes a fresh canonical bundle; it does not select particle physics or write a second case dialect.
+`build` publishes `bundle.h5` and `report.json` together in a fresh directory; it does not select particle physics or write a second case dialect.
 Use the output as a recipe's `input_bundle`, choose models explicitly, and publish through `inputs.create_case`/CLI `create`.
 
 ## Supported problem and exclusions

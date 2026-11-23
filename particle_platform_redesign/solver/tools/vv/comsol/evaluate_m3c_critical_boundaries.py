@@ -668,7 +668,7 @@ def _run_candidate(
     release = result.read_release_events()
     boundary = result.read_boundary_events()
     failures = result.read_failure_events()
-    manifest = dict(result.manifest)
+    manifest = result.manifest_document()
     interactions = _mapping(manifest["boundary_interactions"], "boundary_interactions")
     summary = {
         "release_particle_ids": release.particle_id.astype(int).tolist(),

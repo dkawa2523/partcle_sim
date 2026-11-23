@@ -50,8 +50,8 @@ def test_linear_snapshot_field_uses_stage_time_and_splits_at_knot(tmp_path: Path
         np.testing.assert_allclose(frame.velocity_m_s, frame_velocity, rtol=0.0, atol=2.0e-14)
     assert summary.macro_step_count == 4
     assert result.manifest["field_time_revision"] == FIELD_TIME_REVISION
-    assert result.manifest["time"]["field_snapshot_splits_s"] == [_KNOT_S]
-    assert result.manifest["resolved"]["required_fields"] == [
+    assert result.manifest_document()["time"]["field_snapshot_splits_s"] == [_KNOT_S]
+    assert result.manifest_document()["resolved"]["required_fields"] == [
         {
             "name": "electric_field",
             "layout": "uniform",
@@ -83,7 +83,7 @@ def test_snapshot_knot_on_fixed_grid_does_not_duplicate_macro_boundary(tmp_path:
     result = open_result(tmp_path / "aligned-result")
 
     assert summary.macro_step_count == 3
-    assert result.manifest["time"]["field_snapshot_splits_s"] == []
+    assert result.manifest_document()["time"]["field_snapshot_splits_s"] == []
 
 
 def test_non_grid_snapshot_knot_resume_matches_uninterrupted_run(

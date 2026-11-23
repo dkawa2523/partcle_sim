@@ -117,10 +117,16 @@ register unsupported representation or a quantified approximation.
 
 Use `chamber-particles models` for current model requirements and `init` for
 editable installed examples, not a chamber-specific template. Publish through
-`chamber_particles_tools.inputs.create_case(bundle, settings, sources, output)`
-or CLI `create RECIPE -o OUTPUT`. Recipe format 1 binds an `input_bundle`,
-explicit CSV `sources` and normal case `settings`; the publisher owns data
+`chamber_particles_tools.inputs.create_case(bundle, settings, output)`
+or CLI `create RECIPE -o OUTPUT`. The bundle owns available source tables;
+settings select actual releases. Recipe format 2 binds an `input_bundle`,
+the complete `sources` table set and normal case `settings`. Each table is an
+explicit CSV/configuration or an `existing_table` reference; unlisted tables
+are removed. The publisher owns data
 path/hash and calls public `load_case` and `check_case` before publication.
+Normal CSV/cache/electrostatic producers publish `bundle.h5` with `report.json`
+in one fresh output directory; use that bundle path in the recipe. Runnable
+examples publish their editable sources/recipe in the same directory commit.
 It can add the first source to a bundle with no existing particle tables.
 Source format 2 supports internal and surface realized CSV rows; independent
 properties are explicit unless `inherit_from` requests an exact-ID join.

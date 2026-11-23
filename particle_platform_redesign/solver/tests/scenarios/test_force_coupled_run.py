@@ -26,6 +26,7 @@ from chamber_particles.case_format import (
     write,
 )
 from chamber_particles.cpu import MEMORY_PLAN_REVISION
+from chamber_particles.fields import REQUIRED_FIELD_REVISION
 from chamber_particles.physics.catalog import PHYSICS_CATALOG_REVISION
 from chamber_particles.physics.forces import (
     BOLTZMANN_J_K,
@@ -104,7 +105,7 @@ def test_force_coupled_microcases_match_analytic_time_series(
     np.testing.assert_array_equal(final.charge_number, expected["charge_number"][-1])
     assert result.read_boundary_events().particle_id.size == 0
     assert result.manifest["field_location_revision"] == "field_location_v5"
-    assert result.manifest["required_field_revision"] == "required_field_time_linear_v6"
+    assert result.manifest["required_field_revision"] == REQUIRED_FIELD_REVISION
     expected_enclosure_revision = (
         "rk4_global_abs_enclosure_v2" if path_kind == "rk4_dense" else None
     )
@@ -531,7 +532,7 @@ def test_continuous_charge_reaches_wall_through_shared_event_path(
         "model": "coulomb",
         "revision": "electric_coulomb_v1",
     }
-    assert result.manifest["maximum_dt_charge_lipschitz"] <= 0.5
+    assert result.manifest["prepared_stability_upper_bounds"]["dt_times_charge_lipschitz"] <= 0.5
     assert result.manifest["failure_reason_counts"]["integrator_accuracy"] == 0
 
 
@@ -702,7 +703,10 @@ def test_continuous_charge_stability_gate_is_owned_by_explicit_rk4(
     probe_output = tmp_path / "continuous-charge-hl-probe-result"
     simulate(load_case(probe_case), probe_output)
     charge_lipschitz = (
-        open_result(probe_output).manifest["maximum_dt_charge_lipschitz"] / probe_dt_s
+        open_result(probe_output).manifest["prepared_stability_upper_bounds"][
+            "dt_times_charge_lipschitz"
+        ]
+        / probe_dt_s
     )
     limit_dt_s = 0.5 / charge_lipschitz
     accepted_case = _continuous_charge_case(
@@ -717,7 +721,12 @@ def test_continuous_charge_stability_gate_is_owned_by_explicit_rk4(
 
     simulate(load_case(accepted_case), accepted_output)
 
-    assert open_result(accepted_output).manifest["maximum_dt_charge_lipschitz"] == 0.5
+    assert (
+        open_result(accepted_output).manifest["prepared_stability_upper_bounds"][
+            "dt_times_charge_lipschitz"
+        ]
+        == 0.5
+    )
     rejected_case = _continuous_charge_case(
         tmp_path / "continuous-charge-hl-excess",
         integrator="rk4_fixed",
@@ -744,7 +753,7 @@ def test_continuous_charge_stability_gate_is_owned_by_explicit_rk4(
     simulate(load_case(stable_case), stable_output)
     stable = open_result(stable_output)
 
-    assert stable.manifest["maximum_dt_charge_lipschitz"] > 2.0
+    assert stable.manifest["prepared_stability_upper_bounds"]["dt_times_charge_lipschitz"] > 2.0
     assert stable.manifest["failure_reason_counts"].get("integrator_numerical", 0) == 0
     assert stable.manifest["failure_reason_counts"].get("integrator_accuracy", 0) == 0
 
@@ -1080,9 +1089,7 @@ def test_general_rk4_material_wall_hit_converges_and_is_schedule_independent(
             assert result.manifest["resolved"]["path_kind"] == "rk4_dense"
             assert result.manifest["event_refinement"] is not None
             memory_plan = result.manifest["memory_plan"]
-            assert isinstance(memory_plan, dict)
             components = memory_plan["components"]
-            assert isinstance(components, dict)
             # The native binding table is resident even for a regular layout.
             assert components["field_runtime"] > 0
             if field_layout_kind == "regular":
@@ -1840,7 +1847,6 @@ def test_curved_integrators_preserve_corner_candidates_for_boundary_resolution(
     np.testing.assert_array_equal(final.lifecycle, [5, 2])
     np.testing.assert_array_equal(final.failure_reason_code, [0, 0])
     resolved = result.manifest["resolved"]
-    assert isinstance(resolved, dict)
     assert resolved["path_kind"] == path_kind
 
 
@@ -2026,16 +2032,13 @@ def test_memory_slab_partitioning_does_not_change_public_identity(
         results.append(open_result(output))
         expected_limit_bytes.append(memory_limit_mb * 1024 * 1024)
 
-    plans = [result.manifest["memory_plan"] for result in results]
-    assert all(isinstance(plan, dict) for plan in plans)
+    plans = [result.manifest_document()["memory_plan"] for result in results]
     assert plans[0]["slab_particles"] < plans[1]["slab_particles"]
     assert plans[1]["slab_particles"] == particle_count
     expected_event_work = 24 * (case.spec.solver.event.max_refinements + 1) + 539
     for plan, limit_bytes in zip(plans, expected_limit_bytes, strict=True):
         phase_peaks = plan["phase_peaks"]
         components = plan["components"]
-        assert isinstance(phase_peaks, dict)
-        assert isinstance(components, dict)
         assert plan["limit_bytes"] == limit_bytes
         assert plan["planned_bytes"] == max(phase_peaks.values())
         assert phase_peaks["run"] == sum(components.values())
@@ -3180,7 +3183,9 @@ def test_exponential_midpoint_c03_matches_the_closed_form(
         result.manifest["exponential_midpoint_enclosure_revision"]
         == "exponential_midpoint_local_stage_enclosure_v4"
     )
-    assert result.manifest["maximum_dt_over_tau"] == pytest.approx(4.0 * dt_s)
+    assert result.manifest["prepared_stability_upper_bounds"][
+        "dt_times_drag_velocity_lipschitz"
+    ] == pytest.approx(4.0 * dt_s)
 
 
 def test_exponential_midpoint_result_is_independent_of_output_schedule(tmp_path: Path) -> None:
@@ -3239,8 +3244,7 @@ def _assert_public_result_identity(reference: Any, partitioned: Any) -> None:
         "lifecycle_counts",
         "failure_reason_codes",
         "failure_reason_counts",
-        "maximum_dt_over_tau",
-        "maximum_dt_charge_lipschitz",
+        "prepared_stability_upper_bounds",
         "counts",
     ):
         assert reference.manifest[name] == partitioned.manifest[name]

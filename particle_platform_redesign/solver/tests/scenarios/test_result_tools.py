@@ -18,8 +18,9 @@ import yaml
 
 from chamber_particles import SimulationError, load_case, open_result, simulate
 from chamber_particles.case_format import write
-from chamber_particles.output import ResultWriter
+from chamber_particles.output import ResultView, ResultWriter
 from chamber_particles_tools.analysis import export_result, summarize_result
+from chamber_particles_tools.selection import select_result
 from chamber_particles_tools.visualization import render_result
 from tests.scenarios.test_periodic_run import _materialize_periodic_case
 from tests.verification.microcases import build_microcase, materialize_microcase
@@ -264,6 +265,87 @@ def test_exact_cohort_weight_histogram_and_streaming_export(tmp_path: Path) -> N
     assert rendered["particle_id"] is None and rendered["trajectory_source"] == "unrequested"
 
 
+def test_opened_result_cohort_is_reused_by_all_consumers_without_reopening(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    view = open_result(_cohort_result(tmp_path / "cohort"))
+    expected = summarize_result(view, source_ids=(1,), particle_ids=(9001,))
+    cohort = select_result(view, source_ids=(1,), particle_ids=(9001,))
+    np.testing.assert_array_equal(cohort.selected_ids, [9001])
+    with pytest.raises(ValueError, match="read-only"):
+        cohort.selected[0] = True
+    with pytest.raises(ValueError, match="read-only"):
+        cohort.selected_ids[0] = 801
+    with pytest.raises(ValueError, match="already defines"):
+        select_result(cohort, particle_ids=(801,))
+    for arguments in (
+        {"source_ids": (-1,)},
+        {"source_ids": (2,)},
+        {"particle_ids": (-1,)},
+        {"particle_ids": (2**63,)},
+    ):
+        with pytest.raises(ValueError, match="unknown ID"):
+            select_result(view, **arguments)
+    np.testing.assert_array_equal(
+        select_result(view, particle_ids=(9001, 801)).selected_ids, [801, 9001]
+    )
+    assert not select_result(view, source_ids=(0,), particle_ids=(9001,)).selected_ids.size
+    assert not select_result(view, particle_ids=()).selected_ids.size
+
+    def unexpected_read(*args: Any, **kwargs: Any) -> Any:
+        raise AssertionError("an already bound cohort must not reopen or reread final/context")
+
+    monkeypatch.setattr("chamber_particles_tools.selection.open_result", unexpected_read)
+    monkeypatch.setattr(ResultView, "read_context", unexpected_read)
+    monkeypatch.setattr(ResultView, "read_final", unexpected_read)
+    summary = summarize_result(cohort)
+    assert summary == expected
+    exported = export_result(cohort, tmp_path / "export")
+    rendered = render_result(cohort, tmp_path / "view")
+    assert exported["source_result"] == summary["source_result"]
+    assert rendered["source_manifest_sha256"] == view.manifest_sha256
+    assert rendered["population"]["selected_particles"] == 1
+    assert exported["selection"]["selected_particles"] == 1
+
+
+@pytest.mark.parametrize("operation", ["export", "view"])
+def test_derived_publication_failure_leaves_no_partial_package_and_can_retry(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, operation: str
+) -> None:
+    cohort = select_result(_cohort_result(tmp_path / "cohort"))
+    destination = tmp_path / "derived"
+    write_text = Path.write_text
+    receipt_name = "export.json" if operation == "export" else "visualization.json"
+    publish = export_result if operation == "export" else render_result
+
+    def fail_receipt(path: Path, *args: Any, **kwargs: Any) -> int:
+        if path.name == receipt_name:
+            raise OSError("receipt publication interrupted")
+        return write_text(path, *args, **kwargs)
+
+    with monkeypatch.context() as patch:
+        patch.setattr(Path, "write_text", fail_receipt)
+        with pytest.raises(OSError, match="publication interrupted"):
+            publish(cohort, destination)
+    assert not destination.exists()
+    assert not list(tmp_path.glob(".result-*-*"))
+    publish(cohort, destination)
+    receipt = (destination / receipt_name).read_bytes()
+    with pytest.raises(FileExistsError):
+        publish(cohort, destination)
+    assert (destination / receipt_name).read_bytes() == receipt
+
+
+def test_export_rejects_a_context_replaced_after_cohort_was_opened(tmp_path: Path) -> None:
+    cohort = select_result(_cohort_result(tmp_path / "cohort"))
+    with (cohort.result.path / "context.h5").open("ab") as stream:
+        stream.write(b"changed after opening")
+    destination = tmp_path / "export"
+    with pytest.raises(ValueError, match="context changed after opening"):
+        export_result(cohort, destination)
+    assert not destination.exists()
+
+
 def test_pending_no_frames_and_no_events_render_context_without_nan(tmp_path: Path) -> None:
     result = tmp_path / "pending"
     final = replace(
@@ -272,12 +354,16 @@ def test_pending_no_frames_and_no_events_render_context_without_nan(tmp_path: Pa
         kinematics_valid=np.zeros(3, dtype="<u1"),
         failure_reason_code=np.zeros(3, dtype="<u2"),
     )
+    checkpoint = _checkpoint_state(macro_step_count=1)
     checkpoint = replace(
-        _checkpoint_state(macro_step_count=1),
-        lifecycle=final.lifecycle,
-        failure_reason_code=final.failure_reason_code,
+        checkpoint,
+        particles=replace(
+            checkpoint.particles,
+            lifecycle=final.lifecycle,
+            failure_reason_code=final.failure_reason_code,
+            terminal_time_s=np.full(3, np.inf),
+        ),
         active_particle_index=np.empty(0, dtype="<i8"),
-        terminal_time_s=np.full(3, np.inf),
         release_cursor=0,
         probe_cursor=0,
     )

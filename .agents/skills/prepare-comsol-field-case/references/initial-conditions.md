@@ -101,7 +101,7 @@ existing zero-time departure law rather than adding a positional nudge.
 
 Read `solver/src/chamber_particles_tools/source_builder/README.md`. The
 installed source client accepts configuration format 2 and feeds the shared
-case publisher. A format-1 case recipe can start from a source-free bundle:
+case publisher. A format-2 case recipe can start from a source-free bundle:
 
 ```console
 uv run --locked python -m chamber_particles create RECIPE.yaml -o NEW_DIRECTORY
@@ -122,7 +122,9 @@ release rows explicitly before conversion. The producer keeps numeric correlatio
 records CSV/config identities, and uses the single publisher's canonical writer,
 public `load_case` and shared `check_case`. It neither solves trajectories nor
 verifies the physical source law. The Python `read_csv_source` returns rows
-without writes; `inputs.create_case` publishes the complete intended source set.
+without writes; `inputs.create_case` publishes the bundle's complete table set.
+Recipe entries explicitly retain an existing table or supply a CSV/configuration;
+unlisted tables are removed. Release selection in normal settings remains separate.
 
 This producer does not evaluate native expressions, sample thermal/angular/time
 distributions or handle nonzero third DOF/dynamic frames. It converts supplied

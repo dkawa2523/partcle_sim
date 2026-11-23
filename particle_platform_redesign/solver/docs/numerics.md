@@ -455,6 +455,23 @@ required temporal fieldのrun内部snapshot knotの和集合を固定`dt_s` grid
 変わるknotを一つのmacro intervalが跨がない。gridと一致するknotは重複境界にせず、静的場だけのcaseは従来の
 macro partitionを保つ。
 
+この親時計の唯一の所有者は`time_grid.MacroGrid`であり、policy revisionは
+`fixed_macro_grid_field_knots_v1`である。固定gridの補償積とrun終端のroundoff snapping、非grid knotの併合を
+engineと外部評価が同じpure規則で扱う。`run.json`とresume identityには`macro_grid_revision`を保存する。
+nominal dtがrun両端の時刻をbinary64で進められない場合、または必要な固定grid indexが連続整数の表現範囲
+`2**53`を超える場合は、区間の反復・件数照会を開始せずprepareで失敗させる。
+完成runの件数は解決済み全gridの件数と照合でき、選択時間窓の区間は全runのboundary列を保存せずに復元できる。
+観測を含む最後のmacro intervalは観測時刻へ切り詰めない。releaseが区間内部なら最初の粒子区間だけが短くなる。
+
+この復元が証明するのは親macro分割である。粒子別のcoefficient root、geometry/safetyによる再積分、
+同じdense pathのapplicability証明区間、Brownian base/adaptive leaf、保存clockは別の事実であり、
+全runの`macro_steps`や最大refinement depthから相互に推定しない。外部比較は対象release/windowの実分割を比較し、
+窓外だけの細分やfield knotに支配された同一分割を新しい収束levelへ数えない。
+非一様な実分割についてnominal `dt_s`比だけからobserved orderを計算しない。
+親分割が細かくても、安全性のための物理再積分が同じ粒子区間へ飽和する場合がある。
+外部比較器の自己差の資格・次数解釈には、review済み実行policyと全runの再分割・event・failure件数0という
+別の十分条件も必要である。正のglobal件数を対象窓へ帰属させず、証拠不足時はraw差を保持して資格を未確認にする。
+
 verificationはregular/P1/Q1の解析的space-time affine field、全snapshotを含むglobal bound、interval-overlapping
 bracketing snapshotだけを含むlocal bound、範囲外status、および非grid knotを持つ区分線形一様電場の解析trajectoryを
 含む。20×20 regular grid、4,096 local row、256 snapshotのwarm characterizationでは、同じmethod/candidateに対する
@@ -509,6 +526,13 @@ YAMLは`geometry_rtol`、`roundoff_ulps`、`max_refinements`、`max_interactions
 `corner_policy`を明示する。P02 caseは順に`1e-12`, `64`, `48`, `8`,
 `priority_then_combined_normal_v1`を使う。これらはmicrocase値であり、全製品caseへ無条件に適用する
 defaultではない。
+
+prepareは既存入力値から`NumericalWorkPolicy`を一度解決する。proposal/residualのdepth上限、
+immutable dense pathのcertificate subdivision数、係数midpoint guardの半減数・restart数、
+決定論intervalのinteraction trigger、確率rootのmacro内restart上限は別の役割として保持する。
+現行の要求値と停止規則は変えず、公開knobや別advance loopを追加しない。wavefront/certificateの容量計画と
+実行はそれぞれ同じ解決済みpolicyを使い、`run.json.numerical_work_policy`へ意味と上限を保存する。
+決定論のinteraction値は下記の残区間二分triggerであり、確率restartのhard limitとは異なる。
 
 決定論のexact／RK4／exponential経路では、`max_interactions_per_step`はmacro step全体のhard hit総数ではなく、一つのresidual-work intervalを
 二分するtriggerである。子intervalのinteraction countは0から始め、refinement depthは引き継ぐ。したがって

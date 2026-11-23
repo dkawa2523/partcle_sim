@@ -122,6 +122,13 @@ from `particle_platform_redesign/solver/` with uv.
 - Python equivalents are `chamber_particles_tools.visualization.render_result`
   and `chamber_particles_tools.analysis.summarize_result` / `export_result`.
   Cohorts use exact `particle_ids` / resolved `source_ids`, not display samples.
+  Reuse a public `ResultView` or a cohort from
+  `chamber_particles_tools.selection.select_result` across these clients;
+  the result identity and selected rows are resolved once. Export/view publish
+  complete packages to a fresh directory (view also accepts an empty directory),
+  without partially overwriting an earlier package. Use
+  `ResultView.manifest_document()` for a mutable JSON
+  document; the public manifest is recursively immutable.
 - `uv run --locked python -m tools.vv.comsol.plot_matched_trajectories` renders
   normalized solver/COMSOL XY or RZ overlays, including canonical geometry
   and supplied precontact flags. It expects identical ID sets and has no

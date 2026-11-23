@@ -17,6 +17,7 @@ uv run --locked python -m pytest tests/verification tests/scenarios -q
 
 変更関数は原則CC10以下、数値上の理由がある場合も15以下。薄いhelper、blanket ignore、baselineで失敗を隠さない。
 通常clientをsrc全体のgateへ入れ、既存依存契約でcore/APIからclient/nativeへの逆依存を禁止する。
+現行性能clientも同じPyrefly対象に含め、prepare/state/metadataの変更による入口の陳腐化を検出する。
 
 ## 確認する性質
 
@@ -30,6 +31,9 @@ uv run --locked python -m pytest tests/verification tests/scenarios -q
 | report/説明 | 実行値/単位/分母/scope/hash、missingと0、同reviewed入力の再構築 |
 
 件数は成功条件ではない。構造固定/旧入口/重複assertは置換し、独立oracle/RNG golden/未知revision拒否/resume/bounded出力/実I/O障害注入は維持する。
+数値評価は判定前提の反例も扱う。nominal dtだけ異なる同一window partition、窓外だけの細分、
+非一様gridの次数、未知clock revisionと不足coverageを、数値差が小さいだけで認定しない。
+ResultViewの不変性とJSON用documentの意味を確認し、内部dict/list型を固定するassertへ戻さない。
 
 ## installed wheel
 

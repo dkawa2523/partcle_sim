@@ -1,0 +1,194 @@
+{
+  "scope": "Projection of final source-bound execution receipts; source authorities retain their original scopes and conclusions",
+  "base_source": "824a7ac8df1e4d69f9fc17f8fa3f7b27598af290",
+  "authoritative_receipts": [
+    {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/verification.json",
+      "sha256": "sha256:795ad8ca202fb6e17d63ed1caa3823223e3ab2a2547300deee6c93585e6c5b17"
+    },
+    {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json",
+      "sha256": "sha256:7c6d69a793576fe2d2e6c7ffd6bd56e48fd848c234bdad8d0d7680107a90dd0f"
+    },
+    {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/numerical_qualification_fix.json",
+      "sha256": "sha256:a5d7c4ff1e791feb97aa4a9346813451d1feabd416a36c2508e1a21f39700578"
+    }
+  ],
+  "quality_commands": [
+    {
+      "command": "uv lock --check",
+      "exit_code": 0,
+      "observation": "24 packages resolved; lock unchanged"
+    },
+    {
+      "command": "uv run --locked ruff format --check src tests tools scripts examples",
+      "exit_code": 0,
+      "observation": "188 files already formatted"
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools scripts examples",
+      "exit_code": 0,
+      "observation": "all checks passed"
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "exit_code": 0,
+      "observation": "0 errors; performance clients included"
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "exit_code": 0,
+      "observation": "6 kept, 0 broken;49 files/126 dependencies"
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "exit_code": 0,
+      "observation": "every function/method CC<16"
+    },
+    {
+      "command": "git diff --check",
+      "exit_code": 0,
+      "observation": "no whitespace errors"
+    }
+  ],
+  "core_scenarios": {
+    "tests": 1227,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "elapsed_s": 572.864,
+    "path": "solver/.artifacts/resolved_semantics_20261123/core_scenarios_final.xml",
+    "sha256": "sha256:8da20d4b52d7a60f492a1a9c1fc4ed44cdddb1a97eee82a98a19d42544f44054"
+  },
+  "external": {
+    "tests": 146,
+    "errors": 0,
+    "failures": 0,
+    "skipped": 0,
+    "elapsed_s": 32.767,
+    "path": "solver/.artifacts/resolved_semantics_20261123/external_final_documented.xml",
+    "sha256": "sha256:a43a74708289ebe3d89797a497fec9ff38aa020f88026e84671344e040ce5538"
+  },
+  "windows_clean_wheel": {
+    "receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/clean_wheel_windows.json",
+      "sha256": "sha256:285c7c702fddfa48668a34f41311896f97c341a0efc758eded8938476d302078"
+    },
+    "wheel_sha256": "f9276b999a6360d2bb73df4b64804130dfb3600ee9bfe4e53256094acf2b942c",
+    "python_files": 49,
+    "public_operations": [
+      "load_case",
+      "check_case",
+      "simulate",
+      "open_result"
+    ],
+    "status": "complete"
+  },
+  "linux_clean_wheel": {
+    "receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/clean_wheel_linux.json",
+      "sha256": "sha256:43429478d7ee23486e5aad745507ba812c458c419ffe07f67526754a82a4001b"
+    },
+    "wheel_sha256": "f9276b999a6360d2bb73df4b64804130dfb3600ee9bfe4e53256094acf2b942c",
+    "python_files": 49,
+    "public_operations": [
+      "load_case",
+      "check_case",
+      "simulate",
+      "open_result"
+    ],
+    "status": "complete"
+  },
+  "installed_workflow": {
+    "windows": {
+      "receipt": {
+        "path": "solver/evidence/resolved_semantics_2026_11_23/installed_workflow_windows.json",
+        "sha256": "sha256:ed20c44f73213dda57f114809e480130118beef455b5ff2b315d61114629387a"
+      },
+      "commands": [
+        "models",
+        "init",
+        "inputs import-csv",
+        "inputs cache",
+        "create",
+        "check",
+        "run",
+        "inspect",
+        "analyze",
+        "export",
+        "view",
+        "inputs electrostatic check",
+        "inputs electrostatic build"
+      ],
+      "examples": "five passed",
+      "own_csv_first_source": "analytic field trajectory and hit verified"
+    },
+    "linux": {
+      "receipt": {
+        "path": "solver/evidence/resolved_semantics_2026_11_23/installed_workflow_linux.json",
+        "sha256": "sha256:8fa1da3f8c6f7420345ca9c40fbbbeb91ba1cf3f5011c7c05abbc72d83942849"
+      },
+      "commands": [
+        "models",
+        "init",
+        "inputs import-csv",
+        "inputs cache",
+        "create",
+        "check",
+        "run",
+        "inspect",
+        "analyze",
+        "export",
+        "view",
+        "inputs electrostatic check",
+        "inputs electrostatic build"
+      ],
+      "examples": "five passed",
+      "own_csv_first_source": "analytic field trajectory and hit verified"
+    }
+  },
+  "user_review": {
+    "receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/user_review.json",
+      "sha256": "sha256:717aa2ac8381987e6a9ce999fbac9673c183cf35c7edae0373aa9c04694a7462"
+    },
+    "mandatory_findings": [],
+    "executed": [
+      "CLI init/check/run for xy-ballistic",
+      "own CSV mesh plus constant-E import",
+      "two-source recipe2 create/check/run with analytic first-hit references",
+      "complete source removal and regenerated CSV check/run",
+      "single ResultCohort reused for analysis/export/view",
+      "existing completed view output rejected",
+      "P1-to-regular cache",
+      "reduced-electrostatic init/check/build"
+    ]
+  },
+  "science_review": {
+    "receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/science_review.json",
+      "sha256": "sha256:d08a709c3459f0282d87c9e2f13a0566402560de9b5ebff3a184f9be90ba14fb"
+    },
+    "outstanding_mandatory_findings": [],
+    "claim_limits": [
+      "Zero-counter prerequisite is deliberately sufficient rather than necessary: otherwise useful runs with adaptation elsewhere may retain unqualified numerical roots.",
+      "Existing macro sensitivity and practical result comparisons remain useful independently.",
+      "A/P retained practical conclusions do not certify numerical native all-equation parity, individual Brownian paths or physical capture laws.",
+      "Independent scientific tests, exact equations and actual execution remain distinct from owner reports and preserved history."
+    ]
+  },
+  "independent_reviews": {
+    "receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/reviews.json",
+      "sha256": "sha256:5e96c20f67c0989515f679afa8ba40aff6a4448dfffeb389bc3849b9df56aab2"
+    },
+    "structure_receipt": {
+      "path": "solver/evidence/resolved_semantics_2026_11_23/structure_review.json",
+      "sha256": "sha256:cc8cfbf919ae38ff4c22bad8fb2313a93e9968f02e465ea162ff99a6ed8fbc88"
+    },
+    "status": "Three independent perspectives closed; no unresolved mandatory finding",
+    "score_meaning": "Independent bounded engineering judgments, not native numerical or physical certification. User workflow review is a recorded execution verdict, not a fabricated numeric score."
+  },
+  "warning_scope": "One expected overflow warning from the invalid-budget probe; not an observed production-result warning"
+}

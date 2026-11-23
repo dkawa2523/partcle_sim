@@ -1,0 +1,21 @@
+{
+  "before": {
+    "seconds": [
+      6.08462670003064,
+      5.845137899974361,
+      5.27549899998121
+    ],
+    "median_s": 5.845137899974361
+  },
+  "after": {
+    "seconds": [
+      0.015633199946023524,
+      0.014466000022366643,
+      0.01729049999266863
+    ],
+    "median_s": 0.015633199946023524
+  },
+  "particle_count": 1000000,
+  "requested_ids": 30000,
+  "purpose": "exact ID selection only; excludes result opening and simulation"
+}

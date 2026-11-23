@@ -71,5 +71,5 @@ output、host、cache条件で行い、実測scopeを超えるCPU数比例やpor
 数値resolutionを粗くした速さを同一精度の実装speedupへ置き換えない。
 
 今回の再実行条件・結果・未実行範囲は
-[`retirement_2026_11_23/performance`](../evidence/retirement_2026_11_23/performance/README.md)へ記録する。
+[`resolved_semantics_2026_11_23`](../evidence/resolved_semantics_2026_11_23/README.md)へ記録する。
 過去sourceの実測値・資格は現行の性能保証へ転用しない。

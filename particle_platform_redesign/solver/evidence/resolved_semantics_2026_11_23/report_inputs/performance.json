@@ -1,0 +1,76 @@
+{
+  "queries": {
+    "implementation_work_packages": {
+      "rows": [
+        {
+          "package": "利用の一巡",
+          "capability": "Windows/Linux wheelで13操作・5例題と独自CSV入力",
+          "deliverable": "入力→check/run→元caseなしのanalysis/export/view",
+          "gate": "文書更新後の同じwheelを両OSで再install・再実行"
+        },
+        {
+          "package": "9つの性能系列",
+          "capability": "proposal/memory/JIT/exponential/matrix/representative/Brownian/local applicability/workers",
+          "deliverable": "現行sourceの小型実行と独立した数値検査",
+          "gate": "9系列exit0。P14-U release matrixと1M積分は未再実行"
+        },
+        {
+          "package": "1 process / 1万粒子",
+          "capability": "公開API 28.771412 s / 320 macro",
+          "deliverable": "load/simulate/open、spawn/IPC/writer/shutdownを含む",
+          "gate": "既知targetへ全粒子capture、failure0、残留child0"
+        },
+        {
+          "package": "4 process / 同一入力",
+          "capability": "公開API 17.400465 s / 320 macro",
+          "deliverable": "同条件の1 process比 1.6535倍、科学payload一致",
+          "gate": "frames/probesなし。各1観測、一般SLAや普遍的speedupの認定なし"
+        },
+        {
+          "package": "同一入力のbefore/after",
+          "capability": "owned plan: W1 135.455 MBで不変、W4 432.417→432.355 MB",
+          "deliverable": "同一YAML/H5と条件を確認。各1標本・別session/host負荷",
+          "gate": "速度改善の統計的認定なし。solver-owned予測量はprocess RSSと別",
+          "before_owned_plan_bytes": {
+            "1": 135454767,
+            "4": 432417248
+          },
+          "after_owned_plan_bytes": {
+            "1": 135454767,
+            "4": 432354878
+          }
+        },
+        {
+          "package": "計時の範囲と資源",
+          "capability": "実行前1回serial warmup、入力作成・検証・hashingは計時外",
+          "deliverable": "同じ1万粒子・320 macro・0–4 s。その他小型計時には並行host負荷あり",
+          "gate": "solver-owned memory planはRSSと別。独立収束検査とworker identityも別"
+        }
+      ],
+      "source": {
+        "label": "変更後sourceの性能実行と明示した条件",
+        "files": [
+          "solver/evidence/resolved_semantics_2026_11_23/performance.json",
+          "solver/evidence/resolved_semantics_2026_11_23/performance/process.json",
+          "solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "変更後sourceの性能実行と明示した条件",
+            "definition": "One observation per worker count after one serial warmup; public API includes load/simulate/open, process team, IPC, writer and shutdown. No frames/probes, no portable throughput SLA. Other small timings may share host load.",
+            "componentIds": [
+              "work-package-table",
+              "implementation-sequence"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact executed receipt identities",
+            "detail": "[{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/performance.json\", \"sha256\": \"sha256:2fb79a1dc72dc594b13d0159010b4d41ff422d2ce827ee948b3bc4f8a811ef60\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/performance/process.json\", \"sha256\": \"sha256:95eb794a05a932419fbf1343c6c19230a34bedbf46cf3d939dec68b569343da8\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json\", \"sha256\": \"sha256:7c6d69a793576fe2d2e6c7ffd6bd56e48fd848c234bdad8d0d7680107a90dd0f\"}]"
+          }
+        ]
+      }
+    }
+  }
+}

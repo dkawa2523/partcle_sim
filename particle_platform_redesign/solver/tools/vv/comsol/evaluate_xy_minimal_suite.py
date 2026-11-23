@@ -506,7 +506,7 @@ def _candidate_trajectory(result_path: Path) -> tuple[Trajectory, dict[str, obje
         for index in range(events.particle_id.size)
     ]
     receipt: dict[str, object] = {
-        "manifest": dict(result.manifest),
+        "manifest": result.manifest_document(),
         "boundary_events": event_rows,
     }
     return trajectory, receipt
@@ -866,7 +866,7 @@ def evaluate(
 
 Status: **{summary["scientific_status"]}**
 
-This package compares seven fresh, unsaved COMSOL microcases with candidate
+This package compares seven supplied normalized COMSOL microcases with candidate
 runs made only through `load_case`, `simulate`, and `open_result`.  Both are
 also checked against independent closed-form motion.  The three fixed steps
 are {list(STEPS_S)} s; the comparison is not tied to matching private solver

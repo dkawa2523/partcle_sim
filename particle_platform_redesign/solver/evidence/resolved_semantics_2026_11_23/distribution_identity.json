@@ -1,0 +1,22 @@
+{
+  "status": "documented wheel reinstalled and executed on Windows and Linux",
+  "wheel": {
+    "path": ".artifacts/resolved_semantics_20261123/dist_documented/chamber_particles-0.4.0-py3-none-any.whl",
+    "sha256": "f9276b999a6360d2bb73df4b64804130dfb3600ee9bfe4e53256094acf2b942c"
+  },
+  "source_python_files": 49,
+  "source_readme_sha256": "4af2c7c9ee9eb6851ae1a3cc328c517236812597b67342d50d075ab8134deaa5",
+  "code_identity": "Source, wheel and both installed49 Python files and METADATA are compared inside release_smoke; all passed.",
+  "revision_note": "The final README changes only the current evidence link. Both OS runtimes were reinstalled and smoke/workflow rerun for that exact wheel. Earlier initial-clean setup receipt is historical provenance, not the final wheel hash.",
+  "initial_linux_setup": "linux_initial_installation.json",
+  "commands": [
+    "uv build --wheel --out-dir .artifacts/resolved_semantics_20261123/dist_documented",
+    "uv pip install --python SHORT_ISOLATED_RUNTIME --no-deps --reinstall EXACT_WHEEL",
+    "ISOLATED_PYTHON -m tests.release_smoke --wheel EXACT_WHEEL --json RECEIPT",
+    "ISOLATED_PYTHON STANDALONE_WORKFLOW_SCRIPT --output RECEIPT"
+  ],
+  "limits": [
+    "Small analytic/public input verification, not a full Linux numerical suite or throughput qualification.",
+    "No publication to a package index."
+  ]
+}

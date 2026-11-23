@@ -89,6 +89,7 @@ def _observation(
     result = open_result(output)
     opened = time.perf_counter()
     _validate_result(result, summary, particles, steps)
+    manifest = result.manifest_document()
     return {
         "workers": workers,
         "timing_s": {
@@ -98,13 +99,13 @@ def _observation(
             "public_end_to_end": opened - started,
         },
         "full_scientific_payload_sha256": _scientific_payload_digest(result),
-        "solver_memory_plan": result.manifest["memory_plan"],
+        "solver_memory_plan": manifest["memory_plan"],
         "boundary_events": summary.boundary_event_count,
         "failure_events": summary.failure_event_count,
         "live_children_after_return": 0,
         "known_target_and_lifecycle_checked": True,
         "algorithm_revisions": {
-            key: value for key, value in result.manifest.items() if key.endswith("_revision")
+            key: value for key, value in manifest.items() if key.endswith("_revision")
         },
     }
 

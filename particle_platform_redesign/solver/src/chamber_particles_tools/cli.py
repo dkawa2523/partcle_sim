@@ -106,7 +106,7 @@ def _simulation_operation(arguments: argparse.Namespace) -> object:
         "summary": summary,
     }
     if arguments.full:
-        payload["manifest"] = dict(result.manifest)
+        payload["manifest"] = result.manifest_document()
     return payload
 
 
@@ -114,9 +114,7 @@ def _input_operation(arguments: argparse.Namespace) -> object:
     if arguments.input_command == "import-csv":
         from .csv_import.workflow import adapt_from_configuration
 
-        report = adapt_from_configuration(
-            arguments.configuration, arguments.output, report_path=arguments.report
-        )
+        report = adapt_from_configuration(arguments.configuration, arguments.output)
         return {"operation": "inputs import-csv", "status": "created", "report": report}
     if arguments.input_command == "cache":
         from .field_preprocessor.workflow import preprocess_from_configuration
@@ -124,7 +122,6 @@ def _input_operation(arguments: argparse.Namespace) -> object:
         report = preprocess_from_configuration(
             arguments.configuration,
             arguments.output,
-            report_path=arguments.report,
             source_time_diagnostic_requested=arguments.source_time_diagnostic,
         )
         return {"operation": "inputs cache", "status": "created", "report": report}
@@ -136,9 +133,7 @@ def _input_operation(arguments: argparse.Namespace) -> object:
             "status": "ready",
             "report": check_from_configuration(arguments.configuration),
         }
-    report = build_from_configuration(
-        arguments.configuration, arguments.output, report_path=arguments.report
-    )
+    report = build_from_configuration(arguments.configuration, arguments.output)
     return {"operation": "inputs electrostatic build", "status": "created", "report": report}
 
 
@@ -252,6 +247,8 @@ def _parser() -> argparse.ArgumentParser:
 def _preparation_arguments(
     commands: argparse._SubParsersAction, common: argparse.ArgumentParser
 ) -> None:
+    from .examples import EXAMPLE_NAMES
+
     models = commands.add_parser(
         "models", parents=[common], help="list models and input requirements"
     )
@@ -263,13 +260,7 @@ def _preparation_arguments(
     init.add_argument(
         "--example",
         default="xy-ballistic",
-        choices=(
-            "xy-ballistic",
-            "rz-charged",
-            "xy-time-field",
-            "brownian-wall",
-            "reduced-electrostatic",
-        ),
+        choices=EXAMPLE_NAMES,
     )
     create = commands.add_parser(
         "create", parents=[common], help="compose own bundle, sources, and settings"
@@ -296,8 +287,9 @@ def _preparation_arguments(
 
 def _builder_arguments(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("configuration", type=Path)
-    parser.add_argument("output", type=Path, help="new canonical HDF5 bundle")
-    parser.add_argument("--report", type=Path)
+    parser.add_argument(
+        "output", type=Path, help="new directory containing bundle.h5 and report.json"
+    )
 
 
 def _simulation_arguments(

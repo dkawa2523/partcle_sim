@@ -125,17 +125,28 @@ size of the discrepancy. Define near-zero handling with an absolute SI scale.
    boundaries, output times, and observation windows fixed. Run independent
    cases at `h`, `h/2`, `h/4` in fresh output directories; retain hashes and
    all failure/lifecycle counts.
-2. Confirm these are different integration resolutions. Inspect
-   `time.field_snapshot_splits_s`, `counts.macro_steps`, and where available
-   `event_refinement.accepted_particle_pieces` / `refinements`. A changed
+2. Confirm these are different integration resolutions in the selected release
+   and physical window. For current public results, consume the known
+   `macro_grid_revision` and shared `time_grid.MacroGrid` policy; global
+   `counts.macro_steps` is only a completed-run consistency check. Inspect
+   `time.field_snapshot_splits_s` and, where available, accepted-particle
+   intervals. Aggregate `event_refinement` counts describe work, not a
+   window-specific accepted-path partition. A changed
    nominal h that produces the same intervals because of dense snapshot knots
    or event subdivisions is precision repeatability evidence, not a new
-   convergence level.
+   convergence level. Nonuniform macro partitions do not justify an observed
+   order from nominal step ratios alone.
    Record actual interval ranges/counts, including release-local intervals,
    field knots and event subdivisions when they affect the observable. For
    Brownian experiments also record the generated root intervals and numerical
    tree policy where available. Treat a missing diagnostic as unavailable;
    do not invent a readback or infer root count from output frame count.
+   The current pre-event evaluator also requires a reviewed deterministic
+   execution policy and all-zero run-wide refinement/depth, axis, residual,
+   boundary/topology and failure counters as a sufficient no-reintegration
+   condition. A positive global counter cannot locate work within a selected
+   cohort/window. Without more evidence, retain raw changes and leave its
+   fixed-root prerequisite and observed-order interpretation unqualified.
 3. Compare aligned states at fixed physical times in the same lifecycle
    domain. Separate pre-event motion from event timing/response. Do not
    evaluate active velocity against a source's held/frozen/undefined velocity.
@@ -240,8 +251,16 @@ specific missing evidence are acceptable conclusions.
 
 Three declared step sizes are not three actual refinements if the physical
 window executes the same partition (for example every step exceeds the run
-span and all runs take one macro step). Check completed manifests and existing
-time/field-knot evidence. Distinct labels or files cannot supply this evidence.
+span and all runs take one macro step). Check bound completed manifests and
+the selected window's time/field-knot partition. More steps outside that window
+cannot supply its refinement evidence. Missing/unknown clock policy leaves the
+current evaluator's macro prerequisite unqualified. A reconstructed macro grid
+does not establish coefficient-root, event/safety or stochastic-path resolution.
+The evaluator's separate `fixed_root_execution` prerequisite uses only the
+reviewed global-zero sufficient condition above. Physically reintegrated
+RK4 or exponential paths can saturate at the same accepted partition despite
+different macro counts; their tiny self changes alone do not establish accuracy.
+Distinct labels or files cannot supply this evidence.
 Select each participant's empirical self-sensitivity allowance independently
 of cross-solver differences, using the physical/numerical objective. Missing
 or exceeded allowances leave resolution unqualified even when finest results

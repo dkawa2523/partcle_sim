@@ -11,18 +11,26 @@ import struct
 from collections.abc import Callable, Iterable
 from os import PathLike
 from pathlib import Path
+from tempfile import TemporaryDirectory
 from typing import Any
 
 import numpy as np
 
-from chamber_particles import open_result
+from chamber_particles.lifecycle import ACTIVE, ESCAPED, FAILED, HELD, NAMES, PENDING, STUCK
 from chamber_particles.output import ResultContext
 
-from ..selection import select_particles
+from ..selection import ResultCohort, ResultInput, select_result
 
 VISUALIZATION_REVISION = "result_context_population_svg_v4"
 _WIDTH, _HEIGHT, _MARGIN = 900, 620, 70
-_COLORS = {0: "#94a3b8", 1: "#2563eb", 2: "#dc2626", 3: "#d97706", 4: "#111827", 5: "#7c3aed"}
+_COLORS = {
+    PENDING: "#94a3b8",
+    ACTIVE: "#2563eb",
+    STUCK: "#dc2626",
+    ESCAPED: "#d97706",
+    FAILED: "#111827",
+    HELD: "#7c3aed",
+}
 _OUTCOME_COLOR = {
     "reflected": "#2563eb",
     "stuck": "#dc2626",
@@ -36,7 +44,7 @@ type _Point = tuple[float, float, float, int] | None
 
 
 def render_result(
-    path: str | PathLike[str],
+    path: ResultInput,
     output_directory: str | PathLike[str],
     *,
     particle_id: int | None = None,
@@ -52,16 +60,55 @@ def render_result(
 
     Saved-position chords are broken at missing/nonfinite/terminal state and
     recorded interactions. They do not reconstruct unresolved stochastic paths.
+    The completed view is published in a new or empty directory.
     """
     _validate_limits((max_event_points, max_particle_points, max_trajectory_points))
-    result = open_result(path)
-    context, final = result.read_context(), result.read_final()
-    selected = select_particles(final, context, source_ids=source_ids, particle_ids=particle_ids)
-    ids = final.particle_id[selected]
+    cohort = select_result(path, source_ids=source_ids, particle_ids=particle_ids)
     destination = Path(output_directory).expanduser().resolve()
-    if destination == result.path or result.path in destination.parents:
+    if destination == cohort.result.path or cohort.result.path in destination.parents:
         raise ValueError("visualization output must be outside the source result directory")
-    destination.mkdir(parents=True, exist_ok=True)
+    if destination.exists() and (not destination.is_dir() or any(destination.iterdir())):
+        raise FileExistsError(f"visualization requires a new or empty directory: {destination}")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with TemporaryDirectory(prefix=".result-view-", dir=destination.parent) as temporary:
+        staging = Path(temporary) / "view"
+        staging.mkdir()
+        report = _render_result(
+            cohort,
+            staging,
+            destination,
+            particle_id=particle_id,
+            event_batch_rows=event_batch_rows,
+            max_event_points=max_event_points,
+            max_particle_points=max_particle_points,
+            max_trajectory_points=max_trajectory_points,
+            detail=detail,
+        )
+        if destination.exists():
+            destination.rmdir()
+        staging.rename(destination)
+    return report
+
+
+def _render_result(
+    cohort: ResultCohort,
+    destination: Path,
+    published_directory: Path,
+    *,
+    particle_id: int | None,
+    event_batch_rows: int,
+    max_event_points: int,
+    max_particle_points: int,
+    max_trajectory_points: int,
+    detail: bool,
+) -> dict[str, object]:
+    result, context, final, selected, ids = (
+        cohort.result,
+        cohort.context,
+        cohort.final,
+        cohort.selected,
+        cohort.selected_ids,
+    )
     selected_particle = _detail_particle(ids, particle_id, detail)
     points, trajectory_source, truncated = _detail_points(
         result, selected_particle, max_trajectory_points
@@ -73,10 +120,7 @@ def render_result(
         max_event_points,
         points,
     )
-    manifest_json = json.dumps(
-        dict(result.manifest), allow_nan=False, separators=(",", ":"), sort_keys=True
-    ).encode()
-    digest = "sha256:" + hashlib.sha256(manifest_json).hexdigest()
+    digest = result.manifest_sha256
     transform = _plot_transform(context)
     population_body, population_info = _population_body(
         final, selected, context, transform, max_particle_points
@@ -142,14 +186,14 @@ def render_result(
             "event_batch_rows": event_batch_rows,
             "max_event_points": max_event_points,
             "requested_particle_id": particle_id,
-            "particle_ids": particle_ids,
-            "source_ids": source_ids,
+            "particle_ids": cohort.particle_ids,
+            "source_ids": cohort.source_ids,
             "max_particle_points": max_particle_points,
             "max_trajectory_points": max_trajectory_points,
             "detail": detail,
         },
         "source_manifest_sha256": digest,
-        "context": dict(result.manifest)["context"],
+        "context": result.source_identity()["context"],
         "particle_id": selected_particle,
         "trajectory_source": trajectory_source,
         "trajectory_points": sum(point is not None for point in points),
@@ -164,8 +208,8 @@ def render_result(
             "max_points_per_view": max_event_points,
         },
         "trajectory_meaning": "saved positions only; gaps and recorded interactions break chords; no reconstructed Brownian path",
-        **{name: str(file) for name, file in files.items()},
-        "metadata_json": str(destination / "visualization.json"),
+        **{name: str(published_directory / file.name) for name, file in files.items()},
+        "metadata_json": str(published_directory / "visualization.json"),
     }
     (destination / "visualization.json").write_text(
         json.dumps(report, allow_nan=False, indent=2, sort_keys=True) + "\n", encoding="utf-8"
@@ -211,7 +255,7 @@ def _trajectory_points(
             row = int(rows[0])
             position = frame.position_m[row]
             life = int(frame.lifecycle[row])
-            if life in (1, 2, 5) and np.isfinite(position).all():
+            if life in (ACTIVE, STUCK, HELD) and np.isfinite(position).all():
                 point = (float(frame.time_s), float(position[0]), float(position[1]), life)
         if len(points) < limit:
             points.append(point)
@@ -282,7 +326,7 @@ def _population_body(
         selected
         & (final.kinematics_valid == 1)
         & np.isfinite(final.position_m).all(axis=1)
-        & np.isin(final.lifecycle, (1, 2, 5))
+        & np.isin(final.lifecycle, (ACTIVE, STUCK, HELD))
     )
     bounds = context.geometry.nodes_m
     lower, upper = bounds.min(axis=0), bounds.max(axis=0)
@@ -294,16 +338,18 @@ def _population_body(
             final.position_m[valid & (final.lifecycle == code), 1],
             bins=edges,
         )[0]
-        for code in range(6)
+        for code in NAMES
     ]
     total = np.sum(histograms, axis=0)
     marks = []
     for i, j in zip(*np.nonzero(total), strict=True):
         x0, y0 = transform(float(edges[0][i]), float(edges[1][j + 1]))
         x1, y1 = transform(float(edges[0][i + 1]), float(edges[1][j]))
-        dominant = int(np.argmax([h[i, j] for h in histograms]))
+        dominant = tuple(NAMES)[int(np.argmax([h[i, j] for h in histograms]))]
         label = "; ".join(
-            f"lifecycle {code}: {int(h[i, j])}" for code, h in enumerate(histograms) if h[i, j]
+            f"{NAMES[code]}: {int(h[i, j])}"
+            for code, h in zip(NAMES, histograms, strict=True)
+            if h[i, j]
         )
         opacity = 0.25 + 0.75 * math.log1p(total[i, j]) / math.log1p(float(total.max()))
         marks.append(
@@ -335,7 +381,7 @@ def _trajectory_body(
     for index, point in enumerate(points):
         if point is not None:
             _, x, y, life = point
-            if previous is not None and index not in breaks and previous[3] == life == 1:
+            if previous is not None and index not in breaks and previous[3] == life == ACTIVE:
                 x0, y0 = transform(previous[1], previous[2])
                 x1, y1 = transform(x, y)
                 marks.append(
@@ -346,7 +392,7 @@ def _trajectory_body(
                     transform(x, y),
                     2.2,
                     _COLORS[life],
-                    f"saved state t={point[0]:.9g} s; lifecycle={life}",
+                    f"saved state t={point[0]:.9g} s; lifecycle={NAMES[life]}",
                 )
             )
         previous = point

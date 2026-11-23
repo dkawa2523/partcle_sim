@@ -182,9 +182,32 @@ def _unstructured_strip(
     return _bundle(geometry, (layout,), (field,)), layout, field
 
 
-_DENSITY_REQUIREMENT = RequiredFieldMetadata("kg/m^3", ("value",), "scalar", True)
-_RZ_VECTOR_REQUIREMENT = RequiredFieldMetadata("m/s", ("r", "z"), "axisymmetric_rz", False)
-_RZ_AXIS_ODD_SCALAR_REQUIREMENT = RequiredFieldMetadata("1/s", ("value",), "scalar", False, True)
+_DENSITY_REQUIREMENT = RequiredFieldMetadata("kg/m^3", ("value",), "scalar", "positive")
+_RZ_VECTOR_REQUIREMENT = RequiredFieldMetadata("m/s", ("r", "z"), "axisymmetric_rz", "finite")
+_RZ_AXIS_ODD_SCALAR_REQUIREMENT = RequiredFieldMetadata("1/s", ("value",), "scalar", "finite", True)
+
+
+@pytest.mark.parametrize(
+    ("constraint", "value", "accepted"),
+    [
+        ("positive", 0.0, False),
+        ("positive", np.nextafter(0.0, 1.0), True),
+        ("nonnegative", 0.0, True),
+        ("nonnegative", np.nextafter(0.0, -1.0), False),
+        ("finite", -1.0, True),
+    ],
+)
+def test_declared_node_value_constraint_preserves_zero_and_signed_limits(
+    constraint: Literal["finite", "positive", "nonnegative"], value: float, accepted: bool
+) -> None:
+    field = replace(_scalar_field(), values=np.full((2, 2, 1), value))
+    data = _bundle(_quad_geometry(), (_regular_layout(),), (field,))
+    requirements = {field.name: RequiredFieldMetadata("kg/m^3", ("value",), "scalar", constraint)}
+    if accepted:
+        prepare_required_fields(data, requirements)
+    else:
+        with pytest.raises(FieldLocationError, match=constraint):
+            prepare_required_fields(data, requirements)
 
 
 def test_required_catalog_samples_in_physics_requirement_order() -> None:
@@ -487,7 +510,7 @@ def test_required_fields_must_share_one_layout() -> None:
     )
     requirements = {
         "gas_density": _DENSITY_REQUIREMENT,
-        "potential": RequiredFieldMetadata("V", ("value",), "scalar", False),
+        "potential": RequiredFieldMetadata("V", ("value",), "scalar", "finite"),
     }
 
     with pytest.raises(FieldLocationError, match="one common layout"):
@@ -824,7 +847,7 @@ def test_prepared_field_sample_keeps_provisional_values_separate_from_support() 
     )
     prepared = prepare_required_fields(
         _bundle(_quad_geometry(), (layout,), (affine,)),
-        {"affine": RequiredFieldMetadata("1", ("value",), "scalar", False)},
+        {"affine": RequiredFieldMetadata("1", ("value",), "scalar", "finite")},
     )
 
     sampled = prepared.sample(np.asarray([[0.25, 0.5], [1.25, 0.5]], dtype="<f8"))

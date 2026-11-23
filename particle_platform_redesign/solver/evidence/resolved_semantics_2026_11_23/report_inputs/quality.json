@@ -1,0 +1,84 @@
+{
+  "queries": {
+    "quality_findings": {
+      "rows": [
+        {
+          "severity": "passed",
+          "finding": "標準品質gate合格・core/scenario 1227件",
+          "disposition": "最終sourceで全件実行。invalid-budget probeの期待overflow warningを実計算のwarningと区別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "変更後の外部V&V tests 146件",
+          "disposition": "native小型参照・比較器・独立衝突参照の検査。全native方程式や実装置の認定とは別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "Windows/Linux clean wheel: 各49 Python filesとMETADATA一致",
+          "disposition": "同じwheelで四API、console/module、workers2科学payload一致、contact/time-fieldを実行。一般性能SLAは対象外",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "Windows/Linuxのruntime-only環境で13操作と5例題",
+          "disposition": "checkoutをimportせず独自CSV入力→計算→元caseなしの解析/export/view。両環境のreceiptを区別",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "独自CSV・複数source・明示table削減・cohort再利用を実行",
+          "disposition": "入力→run→analysis/export/view、cache/electrostaticのbundle+reportを確認。利用者reviewの必須指摘なし",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "reviewed",
+          "finding": "利用者・構造・科学の独立reviewに未解決の必須指摘なし",
+          "disposition": "macro/実再積分pathの前提不足はNOT_TESTED。raw/practical比較は各scopeで有用。review scoreは物理精度率ではない",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        },
+        {
+          "severity": "passed",
+          "finding": "A/P各40seedを現行solverで再実行、科学payload 80/80一致",
+          "disposition": "保存native参照は不変。同じseed/windowの再実行で新標本ではない。実用的population対応と局所留保を保持",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json"
+        },
+        {
+          "severity": "not_certified",
+          "finding": "全native方程式・連続OU first passage・実機付着量は認定外",
+          "disposition": "実用的population対応、数値資格、装置妥当性を区別。今回の実行scopeを越えたPASSは補わない",
+          "evidence": "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json"
+        }
+      ],
+      "source": {
+        "label": "変更後sourceで実行した検査と明示した限界",
+        "files": [
+          "solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json",
+          "solver/evidence/resolved_semantics_2026_11_23/verification.json",
+          "solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json",
+          "solver/evidence/resolved_semantics_2026_11_23/numerical_qualification_fix.json",
+          "solver/evidence/resolved_semantics_2026_11_23/reviews.json",
+          "solver/evidence/resolved_semantics_2026_11_23/science_review.json",
+          "solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json"
+        ],
+        "metricDefinitions": [
+          {
+            "label": "変更後sourceで実行した検査と明示した限界",
+            "definition": "Executed current-source scopes are separate observations; counts are not an accuracy score or general qualification. Historical receipts never supply a current PASS.",
+            "componentIds": [
+              "quality-table",
+              "dataset-role"
+            ]
+          }
+        ],
+        "evidenceFlow": [
+          {
+            "title": "Exact executed receipt identities",
+            "detail": "[{\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_execution_receipts.json\", \"sha256\": \"sha256:3baf2c2e9aa901d59cf82277d124c7b341376d43ec5e2486589c21cece82f8d6\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/verification.json\", \"sha256\": \"sha256:795ad8ca202fb6e17d63ed1caa3823223e3ab2a2547300deee6c93585e6c5b17\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/distribution_identity.json\", \"sha256\": \"sha256:7c6d69a793576fe2d2e6c7ffd6bd56e48fd848c234bdad8d0d7680107a90dd0f\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/numerical_qualification_fix.json\", \"sha256\": \"sha256:a5d7c4ff1e791feb97aa4a9346813451d1feabd416a36c2508e1a21f39700578\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/reviews.json\", \"sha256\": \"sha256:5e96c20f67c0989515f679afa8ba40aff6a4448dfffeb389bc3849b9df56aab2\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/science_review.json\", \"sha256\": \"sha256:d08a709c3459f0282d87c9e2f13a0566402560de9b5ebff3a184f9be90ba14fb\"}, {\"path\": \"solver/evidence/resolved_semantics_2026_11_23/report_population_receipt.json\", \"sha256\": \"sha256:4d1f6f5eb814b8095e0081e9305196b94f4b2e383e1e7eee508f306faa76fc7b\"}]"
+          }
+        ]
+      }
+    }
+  }
+}

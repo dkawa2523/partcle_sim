@@ -5,6 +5,8 @@
 0.4.0はcoreと通常clientを一つのwheelへ収録し、CLI/Pythonで入力から結果再利用までを提供する。
 契約は[製品仕様](product_specification.md)、[architecture](architecture_proposal.md)、solver/docsの各ownerが所有する。
 全体変更の調査・実行・未確認は[全体対応表](solver/evidence/retirement_2026_11_23/README.md)へ残す。
+その後の意味・状態・公開境界の根因改良は[再構成記録](solver/evidence/resolved_semantics_2026_11_23/README.md)へ残す。
+過去sourceの完了記録は、そのsourceだけの証拠である。
 
 | 単位 | 完了条件 |
 |---|---|
@@ -15,6 +17,20 @@
 | 解析/表示 | counts/weights/分母/coverage、interaction/first-hit/terminal区別、bounded/finite/gap/equal aspect |
 | 外部経路 | native/V&V分離、現行descriptorと明示primitive、native/解析参照。旧固定campaign経路は提供しない |
 | 配布/説明 | checkout外のwheel一巡、README/AGENTS/skills、reviewed report、CIとsource同一性 |
+
+## 解決済み事実を渡す変更単位
+
+| 単位 | 一つにする事実 | 保持する役割差 |
+|---|---|---|
+| model prepare | identity/binding、値制約、proof role、compiled numeric record | point式/global bound/local証明、charge/drag/noise/forceの連成 |
+| 時間・数値評価 | macro gridと丸め規則、選択windowの実partition | nominal dt、accepted root/path、証明細分、観測、実用比較と精度資格 |
+| 実行・再開 | active facts、永続particle列、transportに必要なsettings | 親入力/provenance、worker、resume条件、cursor/index/hint、最終説明 |
+| 結果再利用 | 不変metadata、結果identity、束縛cohort、lifecycle wire意味 | 科学集計・coverage・表示・物理的captureの認定 |
+| 入力の完成物 | bundle＋receipt、case＋編集元、静的例題定義 | tableの保持集合とrelease選択、producerと計算core |
+
+変更は旧selector/暗黙overlay/別report公開/consumer別identity/手動ABIを同時撤去し、二重経路を残さない。
+既存categoryの追加ではfamilyの式・binding・証明を更新し、新categoryではcompositionとproof coverageも閉じる。
+新stateは初期authorityからdense/event/checkpoint/resultまで、削減は他modelの共有primitive依存まで確認する。
 
 ## 実装と受入の順序
 

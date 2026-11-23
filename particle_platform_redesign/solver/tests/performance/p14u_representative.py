@@ -553,6 +553,7 @@ def _worker(specification_path: Path) -> None:
         particle_count=int(specification["particle_count"]),
         output_mode=str(specification["output_mode"]),
     )
+    manifest = result.manifest_document()
     observation = {
         "particle_count": int(specification["particle_count"]),
         "output_mode": specification["output_mode"],
@@ -576,16 +577,16 @@ def _worker(specification_path: Path) -> None:
             "process high-water since worker start through load/simulate/open; excludes "
             "external result validation; additional=max(0, after-before)"
         ),
-        "solver_memory_plan": result.manifest["memory_plan"],
-        "event_work": result.manifest["event_refinement"],
-        "boundary_interactions": result.manifest["boundary_interactions"],
-        "failure_reason_counts": result.manifest["failure_reason_counts"],
+        "solver_memory_plan": manifest["memory_plan"],
+        "event_work": manifest["event_refinement"],
+        "boundary_interactions": manifest["boundary_interactions"],
+        "failure_reason_counts": manifest["failure_reason_counts"],
         "result_artifact_bytes": _directory_bytes(Path(specification["output_path"])),
         "core_payload_sha256": _core_payload_digest(result),
         "probe_payload_sha256": _probe_payload_digest(result),
         "output_utility": utility,
         "algorithm_revisions": {
-            key: value for key, value in result.manifest.items() if key.endswith("_revision")
+            key: value for key, value in manifest.items() if key.endswith("_revision")
         },
     }
     print(json.dumps(observation, allow_nan=False, sort_keys=True))
@@ -609,6 +610,7 @@ def _profile_worker(specification: Mapping[str, Any]) -> None:
     if owners is None:
         raise RuntimeError("P14-U profiler did not produce owner statistics")
     largest_owner = next(iter(owners)) if owners else None
+    manifest = result.manifest_document()
     profile = {
         "operation": "separate_untimed_profile",
         "particle_count": int(specification["particle_count"]),
@@ -622,10 +624,10 @@ def _profile_worker(specification: Mapping[str, Any]) -> None:
         "core_payload_sha256": _core_payload_digest(result),
         "probe_payload_sha256": _probe_payload_digest(result),
         "algorithm_revisions": {
-            key: value for key, value in result.manifest.items() if key.endswith("_revision")
+            key: value for key, value in manifest.items() if key.endswith("_revision")
         },
-        "event_work": result.manifest["event_refinement"],
-        "boundary_interactions": result.manifest["boundary_interactions"],
+        "event_work": manifest["event_refinement"],
+        "boundary_interactions": manifest["boundary_interactions"],
         "output_utility": utility,
     }
     print(json.dumps(profile, allow_nan=False, sort_keys=True))
@@ -670,6 +672,7 @@ def _run_rz_case(directory: Path, dt_s: float, memory_limit_mb: int) -> dict[str
 
 
 def _result_observation(case: Any, result: Any, summary: Any) -> dict[str, Any]:
+    manifest = result.manifest_document()
     probes = tuple(result.iter_probes())
     positions = np.stack([probe.position_m[0] for probe in probes])
     velocities = np.stack([probe.velocity_m_s[0] for probe in probes])
@@ -704,9 +707,9 @@ def _result_observation(case: Any, result: Any, summary: Any) -> dict[str, Any]:
         "event_outcome": None if not events.time_s.size else str(events.outcome[0]),
         "axis_crossings": int(result.manifest["boundary_interactions"]["axis_crossings"]),
         "boundary_event_count": int(events.time_s.size),
-        "event_work": result.manifest["event_refinement"],
+        "event_work": manifest["event_refinement"],
         "failure_count": summary.failure_event_count,
-        "failure_reason_counts": result.manifest["failure_reason_counts"],
+        "failure_reason_counts": manifest["failure_reason_counts"],
         "path_kind": result.manifest["resolved"]["path_kind"],
     }
 
