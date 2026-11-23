@@ -9,8 +9,20 @@
 - 必須のgeometry・源・境界contextをresult4へ保存します。result3と旧途中結果は読み込みません。入力schema3、checkpoint配列schema2は維持します。
 - 親時計・writer、process実行、粒子slab更新の責務を分離しました。数値処理とRNGの意味は一つのengineに維持します。
 
-最新の実行済み範囲と外部条件は[現行の整理・実行記録](evidence/retirement_2026_11_23/README.md)を参照してください。
+旧経路整理時の実行済み範囲と外部条件は[整理・実行記録](evidence/retirement_2026_11_23/README.md)、
+今回の修復後の確認は下記の修復記録を参照してください。
 過去の認定を新しいsourceへ自動適用しません。基本操作は[README](README.md)にまとめています。
+
+## 公開入力・出力の不具合修復
+
+- selected CSVのnode IDを元tokenからexact int64へ解決し、scope選択と物理値の並替えを同じ行へ適用します。
+  adapter revisionはv5。domain/boundary/materialのint32範囲も配列作成前に検査します。
+- source設定を値の使用前に解決し、必須列と全行の幅をfilter前に検査します。numeric filterもexact decimal比較です。
+- 静的電場builderは時系列の速度・温度をcheck/build共通prepareで拒否します。builder revisionはv4です。
+- `analyze -o`は完成JSONを既存先へ上書きせず公開します。公開後の一時file削除失敗は、完成fileを保持して明示します。
+
+case/data、result、checkpointの形式と数値core・物理式は維持しています。
+修復の再現・正常操作・実行済み確認は[修復記録](evidence/public_io_fix_2026_11_23/README.md)にまとめています。
 
 ## 現行経路への整理
 

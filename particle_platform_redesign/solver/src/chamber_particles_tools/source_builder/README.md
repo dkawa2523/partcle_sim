@@ -85,6 +85,17 @@ physical identity: verify the same cohort and property authorities before reques
 
 A CSV containing several times per ID must explicitly select its initial rows with `filter_equals`, such as
 `{time_s: 0}`. No time filter is implied. IDs and material IDs must be exact integers; selected IDs must be unique.
+The reader resolves configuration mappings, column lists, units and filter declarations before consuming rows.
+Every mapped or filter column must exist, and every nonblank data row must have exactly the header's cell count,
+including rows excluded by the filter. Extra header-declared columns are allowed. Scientific values and exact
+integer IDs are converted only for selected rows; an excluded row need not contain valid particle values.
+String filters compare literal CSV text. Numeric filters compare exact decimal values (floating configuration
+values use their decimal string representation), so large integer IDs or nearby decimal tokens do not alias
+through float64 rounding. Nonfinite row tokens never match a finite numeric filter.
+Malformed configuration, missing columns, row-width errors and invalid selected IDs raise `ValueError` in Python;
+CLI `create --json` reports a structured error with exit 2 and leaves the output directory unpublished.
+Values and their declared unit/basis conversions must be representable as finite float64 data. Rejected
+conversions report input errors without mixing numerical warning text into the CLI's JSON error document.
 Metadata records assumptions, rather than authenticating a native source law.
 
 ## Surface rows
@@ -118,5 +129,5 @@ bind the runnable case. Canonical validation remains with the writer; model/supp
 with `check_case`. Conversion alone establishes neither native-frame equivalence nor trajectory agreement.
 
 ```console
-uv run --locked pytest tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py -q
+uv run --locked pytest tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py tests/scenarios/test_source_input_errors.py -q
 ```

@@ -1,0 +1,60 @@
+{
+  "status": "PASS",
+  "reviewer": "fix_json_publication",
+  "scope": "Independent read-only R16 implementation/test/documentation review; no production edits",
+  "files_sha256": {
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "8ab5738e4c771975453d3a2ac7ec62dea618068d1c1cc6237f898654e73ebe8c",
+    "src/chamber_particles_tools/electrostatic_builder/README.md": "9ec804f46b515ad88d113511d6e07bfdfd20f85179e25c477918701c243553cf",
+    "tests/scenarios/test_builder_static_inputs.py": "af6342e97a400a79933115faa8a4ec585578450a28d5d2b3e7d3acc1a0180906"
+  },
+  "handoff": "canonical read validates shapes/finite values; producer resolves layout/association/basis/unit/static time before slicing; both check/build consume PreparedBuilderInput; generated fields use resolved static arrays",
+  "mathematics": "solve, closure, field recovery and ion velocity bodies unchanged; only temporal contract and input ownership changed",
+  "rejected_before_solver": [
+    {
+      "configuration": "linear-builder.yaml",
+      "operation": "check",
+      "message": "thermal field 'gas_velocity' must be static; time snapshots are unsupported"
+    },
+    {
+      "configuration": "linear-builder.yaml",
+      "operation": "build",
+      "message": "thermal field 'gas_velocity' must be static; time snapshots are unsupported"
+    },
+    {
+      "configuration": "linear-temperature-builder.yaml",
+      "operation": "check",
+      "message": "thermal field 'gas_temperature' must be static; time snapshots are unsupported"
+    },
+    {
+      "configuration": "linear-temperature-builder.yaml",
+      "operation": "build",
+      "message": "thermal field 'gas_temperature' must be static; time snapshots are unsupported"
+    }
+  ],
+  "solver_calls_for_temporal_input": 0,
+  "normal_nonzero_static_probe": {
+    "nodes": 4,
+    "gas_z_velocity_m_s": 0.125,
+    "temperature_minmax_K": [
+      310.0,
+      390.0
+    ],
+    "gas_velocity_exact_preserved": true,
+    "ion_temperature_exact_preserved": true,
+    "electric_potential_and_field_zero": true,
+    "ion_velocity_oracle": "u_B*u_g/sqrt(|u_g|^2+v_regularization^2), since E=0 and constant ni",
+    "max_ion_velocity_error_m_s": 5.684341886080802e-14,
+    "check_build_same_content": true
+  },
+  "tests": {
+    "command": "uv run --locked pytest tests/scenarios/test_builder_static_inputs.py -q",
+    "passed": 3,
+    "seconds": 6.11
+  },
+  "required_findings": [],
+  "limits": [
+    "No new fullsuite/COMSOL/mesh-convergence run",
+    "No claim of fullmaterial solver capability",
+    "Temporary synthetic probe inputs/results discarded after scalar evidence extraction; no permanent helper or diagnostic added"
+  ]
+}

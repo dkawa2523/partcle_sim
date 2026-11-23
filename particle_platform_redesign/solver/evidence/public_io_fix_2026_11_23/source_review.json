@@ -1,0 +1,89 @@
+{
+  "status": "PASS",
+  "reviewer": "fix_json_publication",
+  "recorded_utc": "2026-11-23T10:01:20.561642+00:00",
+  "scope": "Independent R06 source-owner review; no production/test edits by reviewer",
+  "files_sha256": {
+    "src/chamber_particles_tools/source_builder/producer.py": "81b8a82d226484d8af6c17dada18178d7909a5c200529c241a29237924fb7beb",
+    "src/chamber_particles_tools/source_builder/README.md": "9dcbebc8e6abe82c7d28aeb9d381c28d2a3f17c06d204925693571cf0abfaf8d",
+    "tests/scenarios/test_source_input_errors.py": "24186f6c4e03487a831db4d544dc107c73911767d82cc5d5a3a5c032f4754db7"
+  },
+  "handoff_review": [
+    "Raw configuration resolves once before CSV consumption; required nested mappings/lists/units/modes/filter types have owner-specific errors.",
+    "CSV header names and mapped/filter dependencies checked; row arity verified before filtering, including excluded rows; extra header-declared columns allowed.",
+    "Numeric selectors use Decimal of lexical row tokens and configured decimal values; no float64 alias between2^53/2^53+1 or adjacent decimal tokens.",
+    "Selected ID/material/facet identities use exact Decimal and canonical integer ranges; unsupported IDs have no default.",
+    "Property inheritance is explicit table+exact particle_id, returns copied base arrays, unmatched IDs require every property.",
+    "Internal/surface sources preserve separate location authorities, release/ID/order and velocity/mass correlation; convert_velocity remains the one physical velocity owner.",
+    "Mappings are fresh MappingProxyType values, names/lists/filter controls become immutable tuples, basis is copied and read-only; no raw mutable config is used by downstream row/state consumers.",
+    "Complete recipe case publication and core check/simulate remain the actual downstream path; no CLI catch-all, second engine or parser framework."
+  ],
+  "initial_required_findings": [
+    {
+      "id": "SRC_REVIEW01",
+      "trigger": "basis_to_case=[[10**400,0],[0,1]]",
+      "observed_before": "Python create and CLI main both leaked OverflowError; output absent",
+      "cause": "Numeric basis coercion translated only ValueError/TypeError",
+      "fix_verified": "Owner now also translates OverflowError to named ValueError; public error remains structured."
+    },
+    {
+      "id": "SRC_REVIEW02",
+      "trigger": "finite CSV velocity1e308 with km/s unit",
+      "observed_before": "Actual subprocess exit2, no output, but RuntimeWarning plus JSON made stderr invalid JSON",
+      "cause": "Arithmetic warning escaped unit/basis conversion before final finite check",
+      "fix_verified": "Scoped np.errstate around conversion and scaling with final finite rejection; no global warning suppression/default/floor. Public JSON remains a single error document."
+    }
+  ],
+  "closed_observed_findings": [
+    {
+      "scenario": "huge-basis",
+      "python": "ValueError",
+      "cli_exit_code": 2,
+      "valid_single_error_json": true,
+      "message": "source configuration.basis_to_case must contain representable numeric values",
+      "output_absent": true
+    },
+    {
+      "scenario": "unit-overflow",
+      "python": "ValueError",
+      "cli_exit_code": 2,
+      "valid_single_error_json": true,
+      "message": "converted velocity_m_s must be finite",
+      "output_absent": true
+    }
+  ],
+  "normal_preservation": {
+    "recipe": ".artifacts\\current_only_20261123\\post_manual_user_flow\\example\\own_recipe.yaml",
+    "logical_content_hash_identical": true,
+    "logical_content_hash": "sha256:70ff937058f2ab1b1393a57841080d353e698cfe68fc25199e2b07192df64506",
+    "scientific_values_and_provenance": "whole canonical logical content equal"
+  },
+  "tests_reexecuted": [
+    {
+      "command": "uv run --locked pytest tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py tests/scenarios/test_source_input_errors.py -q",
+      "passed": 46,
+      "seconds": 12.84,
+      "scope": "Intermediate revision including huge-basis fix and preserved source modes/surface/inheritance/multiple recipes; before final five conversion-boundary regressions were added"
+    },
+    {
+      "command": "uv run --locked pytest tests/scenarios/test_source_input_errors.py -q",
+      "passed": 25,
+      "seconds": 3.69,
+      "scope": "Final current source error matrix, including all four unrepresentable velocity modes and huge finite basis; success includes exact filtered IDs and public simulation result"
+    }
+  ],
+  "required_findings_remaining": [],
+  "limitations": [
+    "No new fullsuite/native/scale/clean-wheel run by this reviewer",
+    "The normal canonical identity check is the existing own-ballistic recipe only, not all possible source configurations",
+    "No independently rederived model physics beyond preserved velocity/unit oracles and existing source verification"
+  ],
+  "temporary_probe_policy": "Public verification scripts ran inline. Synthetic inputs/results were temporary and discarded after observations; no persistent probe runner or generic diagnostics added.",
+  "final_recheck": {
+    "recorded_utc": "2026-11-23T10:01:34.076983+00:00",
+    "all_three_owner_doc_test_hashes_still_match": true,
+    "named_required_corrections_closed": true,
+    "remaining_required_findings": [],
+    "author_execution": "Final combined51 tests/14.39s reported to root by author; independently reviewed final25 regressions remain25passed/3.69s"
+  }
+}

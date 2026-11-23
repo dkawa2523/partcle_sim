@@ -1,0 +1,32 @@
+{
+  "baseline_head": "1ab0ee9",
+  "baseline_csv_owner_sha256": "c3ec86e424217d41b8890e02d797d9e2905ea35b75efb28bbbe37f7020e30b54",
+  "reproduction": "Mesh exact ID2**53; corresponding raw field ID2**53+1 at same coordinate",
+  "command": [
+    "uv",
+    "run",
+    "--locked",
+    "python",
+    "-m",
+    "chamber_particles",
+    "inputs",
+    "import-csv",
+    "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\identity_reproduction\\adapter.yaml"
+  ],
+  "before": {
+    "exit_code": 0,
+    "published": true
+  },
+  "after": {
+    "exit_code": 2,
+    "error": {
+      "error_type": "ValueError",
+      "message": "field node IDs cannot form a bijection to selected mesh vertex IDs",
+      "operation": "inputs",
+      "status": "error"
+    },
+    "output_absent": true
+  },
+  "regression": "tests/verification/test_csv_adapter.py: false join, int64 edges, both scopes and excluded NaN; existing analytic value/axis/coordinate tests retained",
+  "ephemeral_baseline_runner": "isolated current client copy, priorcsv owner only, deleted after witness; no production rollback or archived environment"
+}

@@ -94,7 +94,20 @@ No coordinate origin/basis transformation or implicit unit inference is performe
 
 Prefer a genuine scoped mesh node ID and verify its coordinates. Without it, set `node_id_column: null` and
 prove the selected coordinate bijection within the declared export tolerance. Row/probe indices are not mesh IDs.
+Field node IDs are decoded from their original numeric tokens as exact signed int64 integers, including
+integer-valued decimal/exponent notation. They never pass through float64 for identity matching. IDs outside
+int64, nonintegers, missing selected IDs, duplicate IDs and mismatches are rejected before publication.
+Canonical domain, physical boundary and material IDs use signed int32 storage; their configured ranges are
+checked before mesh-array construction. External node/cell/facet identities use signed int64 storage.
+Physical field values remain float64. Mesh and field row order may differ; the same ID permutation orders
+coordinates and all mapped values. Adapter revision v5 fixes this identity interpretation; the format remains 4.
+Re-import original CSVs when an earlier bundle may have been built from rounded/mismatched IDs. Reading that
+bundle again cannot reconstruct the original ID tokens or repair its field join; regenerate the dependent recipe
+with the newly imported bundle. Valid existing canonical bundles keep their current schema meaning.
 `domain_scope` is null or `{column, mode, evidence}` with `equals_domain_id` or `finite`.
+`equals_domain_id` decodes finite scope IDs exactly as int64; NaN scope rows are excluded. Scope and finite
+coordinates are selected before decoding node IDs, so missing node IDs/primitives outside that selection
+remain permitted. No missing selected primitive is filled or rounded into an identity.
 The latter needs independent evidence that the anchor column identifies the selected producer domain;
 finite values alone do not establish physical support. Surviving duplicate or missing selected rows are rejected.
 

@@ -1,0 +1,192 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-11-23T10:01:04.681113+00:00",
+  "commands": [
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "init",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\example",
+        "--example",
+        "xy-ballistic",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.5818305000429973,
+      "status": "created"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "import-csv",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\mapping.yaml",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\field",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.2974437000229955,
+      "status": "created"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "create",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\example\\own_recipe.yaml",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\input",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.6286919999402016,
+      "status": "created"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "check",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\input\\case.yaml",
+        "--workers",
+        "1",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.6569202999817207,
+      "status": "ready"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "run",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\input\\case.yaml",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\result",
+        "--workers",
+        "1",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 4.563321099965833,
+      "status": "complete"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inspect",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\result",
+        "--full",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.3081658999435604,
+      "status": "complete"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "analyze",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\summary.json",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.295062099932693,
+      "status": null
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "export",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\export",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.3268230999819934,
+      "status": null
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "view",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\public_flow\\view",
+        "--detail",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.3826162000186741,
+      "status": null
+    }
+  ],
+  "scope": "Repaired installed normal clients: own generic field CSV including exact oddIDabove2**53, own chargedsource/recipe, public simulation and result reuse",
+  "analytic_oracle": {
+    "formula": "constant a=e*Z*E/m; wall distance=v0*t+a*t^2/2",
+    "acceleration_m_s2": 0.4806529902,
+    "expected_hit_s": 0.017319770479845585,
+    "observed_hit_s": 0.017319770479845568,
+    "absolute_hit_error_s": 1.734723475976807e-17,
+    "maximum_frame_position_error_m": 5.204170427930421e-18,
+    "tolerance": 1e-12,
+    "frames": 5,
+    "particles": 1,
+    "failure_events": 0,
+    "model_weight": 2,
+    "exact_mesh_node_id": 9007199254740993,
+    "derived_identity_matches": true
+  },
+  "source_sha256": {
+    "src/chamber_particles_tools/csv_import/workflow.py": "4e3bb2b59ca047acbcf246eac9376b87e45d293e519ab1378f3360d42d69187a",
+    "src/chamber_particles_tools/source_builder/producer.py": "81b8a82d226484d8af6c17dada18178d7909a5c200529c241a29237924fb7beb",
+    "src/chamber_particles_tools/electrostatic_builder/workflow.py": "8ab5738e4c771975453d3a2ac7ec62dea618068d1c1cc6237f898654e73ebe8c",
+    "src/chamber_particles_tools/cli.py": "8edf32dc07e505087e0c3409428da604a81b7509d96f72820dc39a6e4efa9428"
+  }
+}

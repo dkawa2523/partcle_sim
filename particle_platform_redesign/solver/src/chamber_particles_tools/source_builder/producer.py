@@ -5,9 +5,11 @@ from __future__ import annotations
 import csv
 import io
 from collections.abc import Mapping, Sequence
-from decimal import Decimal
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
-from typing import Any, Literal
+from types import MappingProxyType
+from typing import Any, Literal, cast
 
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
@@ -21,6 +23,39 @@ from chamber_particles.case_format import (
 
 type FloatArray = NDArray[np.float64]
 type VelocityMode = Literal["vector", "speed_direction", "momentum", "energy_direction"]
+type SourceKind = Literal["table", "surface"]
+type SourceFilter = tuple[str, str | Decimal]
+
+
+@dataclass(frozen=True, slots=True)
+class _SourceColumns:
+    particle_id: str
+    release_time: str
+    location: tuple[str, ...]
+    properties: Mapping[str, str]
+
+
+@dataclass(frozen=True, slots=True)
+class _CSVVelocity:
+    mode: VelocityMode
+    columns: tuple[str, ...]
+    unit: str
+    components: tuple[str, ...]
+    basis_to_case: FloatArray
+    frame: str
+    direction_columns: tuple[str, ...] | None
+
+
+@dataclass(frozen=True, slots=True)
+class _SourceSpecification:
+    table: str
+    kind: SourceKind
+    columns: _SourceColumns
+    unit_factors: Mapping[str, float]
+    velocity: _CSVVelocity
+    filters: tuple[SourceFilter, ...]
+    inherit_table: str | None
+
 
 _ELEMENTARY_CHARGE_C = 1.602176634e-19
 _LENGTH_UNITS = {"m": 1.0, "cm": 1e-2, "mm": 1e-3, "um": 1e-6, "nm": 1e-9}
@@ -48,7 +83,11 @@ _PROPERTIES = (
 
 
 def _finite(values: ArrayLike, label: str) -> FloatArray:
-    array = np.asarray(values, dtype="<f8")
+    try:
+        with np.errstate(over="ignore", invalid="ignore"):
+            array = np.asarray(values, dtype="<f8")
+    except (ValueError, TypeError, OverflowError) as error:
+        raise ValueError(f"{label} must contain representable numeric values") from error
     if not np.isfinite(array).all():
         raise ValueError(f"{label} must be finite")
     return array
@@ -130,18 +169,19 @@ def convert_velocity(
     if mass.ndim != 1 or np.any(mass <= 0):
         raise ValueError("mass_kg must be a positive row vector")
     raw = _finite(values, mode)
-    if mode in ("vector", "momentum"):
-        vector = _component_velocity(raw, mass, mode, unit, components, coordinate_system)
-        if direction is not None:
-            raise ValueError("vector/momentum input does not use a separate direction")
-    elif mode in ("speed_direction", "energy_direction"):
-        speed = _scalar_speed(raw, mass, mode, unit)
-        vector = speed[:, None] * _direction_vectors(
-            direction, mass.size, components, coordinate_system
-        )
-    else:
-        raise ValueError(f"unsupported velocity mode: {mode}")
-    return _finite(_rotate(vector, basis_to_case), "converted velocity_m_s")
+    with np.errstate(over="ignore", invalid="ignore", divide="ignore"):
+        if mode in ("vector", "momentum"):
+            vector = _component_velocity(raw, mass, mode, unit, components, coordinate_system)
+            if direction is not None:
+                raise ValueError("vector/momentum input does not use a separate direction")
+        elif mode in ("speed_direction", "energy_direction"):
+            speed = _scalar_speed(raw, mass, mode, unit)
+            vector = speed[:, None] * _direction_vectors(
+                direction, mass.size, components, coordinate_system
+            )
+        else:
+            raise ValueError(f"unsupported velocity mode: {mode}")
+        return _finite(_rotate(vector, basis_to_case), "converted velocity_m_s")
 
 
 def _component_velocity(
@@ -185,7 +225,10 @@ def _unit_factor(unit: str, supported: Mapping[str, float], label: str) -> float
 
 
 def _integer_column(rows: list[dict[str, str]], column: str, dtype: str) -> NDArray:
-    values = [Decimal(row[column]) for row in rows]
+    try:
+        values = [Decimal(row[column]) for row in rows]
+    except InvalidOperation as error:
+        raise ValueError(f"CSV column {column!r} must contain exact integers") from error
     if any(not value.is_finite() or value != value.to_integral_value() for value in values):
         raise ValueError(f"{column} must contain exact integers")
     bounds = np.iinfo(np.dtype(dtype))
@@ -200,30 +243,77 @@ def _csv_values(rows: list[dict[str, str]], columns: str | Sequence[str]) -> Flo
     return _finite([[float(row[name]) for name in columns] for row in rows], "CSV components")
 
 
-def _select_rows(raw: bytes, filters: Mapping[str, str | float]) -> list[dict[str, str]]:
+def _scaled_csv_values(
+    rows: list[dict[str, str]], columns: str | Sequence[str], factor: float, label: str
+) -> FloatArray:
+    with np.errstate(over="ignore", invalid="ignore"):
+        converted = _csv_values(rows, columns) * factor
+    return _finite(converted, f"converted {label}")
+
+
+def _select_rows(raw: bytes, specification: _SourceSpecification) -> list[dict[str, str]]:
     with io.StringIO(raw.decode("utf-8-sig"), newline="") as stream:
-        reader = csv.DictReader(stream)
-        if reader.fieldnames is None or len(set(reader.fieldnames)) != len(reader.fieldnames):
-            raise ValueError("CSV headers must be present and unique")
-        selected = [row for row in reader if _matches(row, filters)]
+        reader = csv.reader(stream, strict=True)
+        try:
+            header = next(reader, None)
+            _source_header(header, specification)
+            assert header is not None
+            selected = []
+            for values in reader:
+                if not values:
+                    continue
+                if len(values) != len(header):
+                    raise ValueError(
+                        f"source CSV line {reader.line_num} has {len(values)} cells; "
+                        f"expected {len(header)} from the header"
+                    )
+                row = dict(zip(header, values, strict=True))
+                if _matches(row, specification.filters):
+                    selected.append(row)
+        except csv.Error as error:
+            raise ValueError(f"source CSV is malformed near line {reader.line_num}") from error
     if not selected:
         raise ValueError("CSV selection contains no initial rows")
     return selected
 
 
-def _matches(row: dict[str, str], filters: Mapping[str, str | float]) -> bool:
-    for name, expected in filters.items():
+def _source_header(header: list[str] | None, specification: _SourceSpecification) -> None:
+    if not header or len(set(header)) != len(header) or any(not name for name in header):
+        raise ValueError("CSV headers must be present, nonempty and unique")
+    columns = specification.columns
+    velocity = specification.velocity
+    required = {
+        columns.particle_id,
+        columns.release_time,
+        *columns.location,
+        *columns.properties.values(),
+        *velocity.columns,
+        *(velocity.direction_columns or ()),
+        *(name for name, _ in specification.filters),
+    }
+    if missing := required - set(header):
+        raise ValueError(f"source CSV is missing mapped or filter columns: {sorted(missing)}")
+
+
+def _matches(row: dict[str, str], filters: tuple[SourceFilter, ...]) -> bool:
+    for name, expected in filters:
         value = row[name]
         if isinstance(expected, str):
             equal = value == expected
         else:
-            equal = float(value) == expected
+            try:
+                actual = Decimal(value)
+            except InvalidOperation as error:
+                raise ValueError(
+                    f"CSV filter column {name!r} must contain numeric values"
+                ) from error
+            equal = actual.is_finite() and actual == expected
         if not equal:
             return False
     return True
 
 
-def _configuration(config: Mapping[str, Any]) -> None:
+def _configuration(config: Mapping[str, object]) -> _SourceSpecification:
     required = {
         "format_version",
         "table",
@@ -239,42 +329,147 @@ def _configuration(config: Mapping[str, Any]) -> None:
         "metadata",
     }
     optional = {"direction_columns", "filter_equals", "inherit_from"}
-    if set(config) - required - optional or required - set(config):
+    if (
+        not isinstance(config, Mapping)
+        or set(config) - required - optional
+        or required - set(config)
+    ):
         raise ValueError("source configuration has missing or unknown keys")
     if config["format_version"] != 2:
         raise ValueError("only source configuration format_version 2 is supported")
-    if config["kind"] not in ("table", "surface"):
+    kind = config["kind"]
+    if kind not in ("table", "surface"):
         raise ValueError("source kind must be table or surface")
-    columns = config["columns"]
-    location = {"position_m"} if config["kind"] == "table" else {"facet_id", "facet_parameter"}
-    if set(columns) - {"particle_id", "release_time_s", *location, *_PROPERTIES}:
-        raise ValueError("unknown canonical source column")
-    if {"particle_id", "release_time_s", *location} - set(columns):
-        raise ValueError("CSV must explicitly supply particle ID, release time and location")
-    if set(config["units"]) - set(columns):
-        raise ValueError("units must name supplied columns")
-    for name in {"particle_id", "material_id", "facet_id", "facet_parameter"} & set(
-        config["units"]
-    ):
-        if config["units"][name] != "1":
-            raise ValueError(f"{name} is dimensionless")
+    columns = _source_columns(config["columns"], cast(SourceKind, kind))
     _source_metadata(config["metadata"])
-    _inheritance_configuration(config.get("inherit_from"))
+    return _SourceSpecification(
+        _text(config["table"], "table"),
+        cast(SourceKind, kind),
+        columns,
+        _source_units(config["units"], config["columns"]),
+        _velocity_configuration(config),
+        _source_filters(config.get("filter_equals", {})),
+        _inheritance_configuration(config.get("inherit_from")),
+    )
 
 
-def _inheritance_configuration(inheritance: object) -> None:
+def _text(value: object, label: str) -> str:
+    if not isinstance(value, str) or not value:
+        raise ValueError(f"source configuration.{label} must be a nonempty string")
+    return value
+
+
+def _column_sequence(value: object, label: str, count: int) -> tuple[str, ...]:
+    if not isinstance(value, (list, tuple)) or len(value) != count:
+        raise ValueError(f"source configuration.{label} must list {count} CSV columns")
+    return tuple(_text(item, label) for item in value)
+
+
+def _source_columns(raw: object, kind: SourceKind) -> _SourceColumns:
+    if not isinstance(raw, Mapping):
+        raise ValueError("source configuration.columns must be a mapping")
+    location = {"position_m"} if kind == "table" else {"facet_id", "facet_parameter"}
+    if set(raw) - {"particle_id", "release_time_s", *location, *_PROPERTIES}:
+        raise ValueError("unknown canonical source column")
+    if {"particle_id", "release_time_s", *location} - set(raw):
+        raise ValueError("CSV must explicitly supply particle ID, release time and location")
+    places = (
+        _column_sequence(raw["position_m"], "columns.position_m", 2)
+        if kind == "table"
+        else tuple(_text(raw[name], f"columns.{name}") for name in ("facet_id", "facet_parameter"))
+    )
+    properties = {name: _text(raw[name], f"columns.{name}") for name in _PROPERTIES if name in raw}
+    return _SourceColumns(
+        _text(raw["particle_id"], "columns.particle_id"),
+        _text(raw["release_time_s"], "columns.release_time_s"),
+        places,
+        MappingProxyType(properties),
+    )
+
+
+def _source_units(raw: object, raw_columns: object) -> Mapping[str, float]:
+    if not isinstance(raw, Mapping):
+        raise ValueError("source configuration.units must be a mapping")
+    assert isinstance(raw_columns, Mapping)
+    if set(raw) - set(raw_columns):
+        raise ValueError("units must name supplied columns")
+    for name in {"particle_id", "material_id", "facet_id", "facet_parameter"} & set(raw):
+        if raw[name] != "1":
+            raise ValueError(f"{name} is dimensionless")
+    factors = {}
+    for name in set(raw_columns) & set(_FIELD_UNITS):
+        unit = _text(
+            raw.get(name, "1" if name in ("charge_number", "model_weight") else ""), f"units.{name}"
+        )
+        factors[name] = _unit_factor(unit, _FIELD_UNITS[name], name)
+    return MappingProxyType(factors)
+
+
+def _velocity_configuration(config: Mapping[str, object]) -> _CSVVelocity:
+    mode = config["velocity_mode"]
+    if mode not in ("vector", "momentum", "speed_direction", "energy_direction"):
+        raise ValueError("unsupported source configuration.velocity_mode")
+    raw_components = config["components"]
+    if not isinstance(raw_components, (list, tuple)) or len(raw_components) not in (2, 3):
+        raise ValueError("source configuration.components must list two or three components")
+    components = tuple(_text(item, "components") for item in raw_components)
+    scalar = mode in ("speed_direction", "energy_direction")
+    columns = _column_sequence(
+        config["velocity_columns"], "velocity_columns", 1 if scalar else len(components)
+    )
+    directions = config.get("direction_columns")
+    if scalar:
+        directions = _column_sequence(directions, "direction_columns", len(components))
+    elif directions is not None:
+        raise ValueError("vector/momentum input does not use separate direction_columns")
+    try:
+        basis = np.array(config["basis_to_case"], dtype="<f8", copy=True)
+    except (ValueError, TypeError, OverflowError) as error:
+        raise ValueError(
+            "source configuration.basis_to_case must contain representable numeric values"
+        ) from error
+    basis.setflags(write=False)
+    return _CSVVelocity(
+        cast(VelocityMode, mode),
+        columns,
+        _text(config["velocity_unit"], "velocity_unit"),
+        components,
+        basis,
+        _text(config["frame"], "frame"),
+        directions,
+    )
+
+
+def _source_filters(raw: object) -> tuple[SourceFilter, ...]:
+    if not isinstance(raw, Mapping):
+        raise ValueError("source configuration.filter_equals must be a mapping")
+    filters: list[SourceFilter] = []
+    for name, expected in raw.items():
+        column = _text(name, "filter_equals column")
+        if isinstance(expected, bool) or not isinstance(expected, (str, int, float)):
+            raise ValueError(f"filter_equals.{column} must be a string or finite number")
+        if isinstance(expected, float) and not np.isfinite(expected):
+            raise ValueError(f"filter_equals.{column} must be finite")
+        number = Decimal(str(expected)) if isinstance(expected, float) else expected
+        filters.append((column, number if isinstance(number, str) else Decimal(number)))
+    return tuple(filters)
+
+
+def _inheritance_configuration(inheritance: object) -> str | None:
     if inheritance is None:
-        return
+        return None
     if (
         not isinstance(inheritance, dict)
         or set(inheritance) != {"table", "join"}
         or inheritance["join"] != "particle_id"
         or not isinstance(inheritance["table"], str)
+        or not inheritance["table"]
     ):
         raise ValueError("inherit_from must explicitly name table and join: particle_id")
+    return inheritance["table"]
 
 
-def _source_metadata(metadata: Any) -> None:
+def _source_metadata(metadata: object) -> None:
     if not isinstance(metadata, dict):
         raise ValueError("metadata must explicitly record source scope and unresolved assumptions")
     if not isinstance(metadata.get("scope"), str) or not metadata["scope"]:
@@ -288,11 +483,11 @@ def _source_metadata(metadata: Any) -> None:
 def _property_values(
     name: str,
     rows: list[dict[str, str]],
-    config: Mapping[str, Any],
+    specification: _SourceSpecification,
     base: RealizedSource | None,
     index: NDArray[np.int64],
 ) -> NDArray:
-    columns = config["columns"]
+    columns = specification.columns.properties
     if name not in columns:
         if base is None:
             raise ValueError(f"CSV requires explicit {name}; inheritance was not requested")
@@ -301,13 +496,11 @@ def _property_values(
         return np.array(getattr(base, name)[index], copy=True)
     if name == "material_id":
         return _integer_column(rows, columns[name], "<i4")
-    units = _FIELD_UNITS[name]
-    unit = config["units"].get(name, "1" if name in ("charge_number", "model_weight") else "")
-    return _csv_values(rows, columns[name]) * _unit_factor(unit, units, name)
+    return _scaled_csv_values(rows, columns[name], specification.unit_factors[name], name)
 
 
 def read_csv_source(
-    path: str | Path, data: DataBundle, config: Mapping[str, Any]
+    path: str | Path, data: DataBundle, config: Mapping[str, object]
 ) -> RealizedSource:
     """Read explicit realized rows, optionally joining properties by exact IDs.
 
@@ -315,68 +508,73 @@ def read_csv_source(
     is supplied. This function returns rows; the canonical writer owns schema
     validation. It never evaluates native expressions or generates random rows.
     """
+    specification = _configuration(config)
     raw = Path(path).read_bytes()
-    return _source_from_rows(_select_rows(raw, config.get("filter_equals", {})), data, config)
+    return _source_from_rows(_select_rows(raw, specification), data, specification)
 
 
 def _source_from_rows(
-    rows: list[dict[str, str]], data: DataBundle, config: Mapping[str, Any]
+    rows: list[dict[str, str]], data: DataBundle, specification: _SourceSpecification
 ) -> RealizedSource:
-    _configuration(config)
     tables = {source.name: source for source in data.sources}
-    inheritance = config.get("inherit_from")
-    base = None if inheritance is None else tables.get(inheritance["table"])
+    inheritance = specification.inherit_table
+    base = None if inheritance is None else tables.get(inheritance)
     if inheritance is not None and base is None:
         raise ValueError("inherit_from.table does not name an existing source")
-    columns = config["columns"]
-    ids = _integer_column(rows, columns["particle_id"], "<i8")
+    columns = specification.columns
+    ids = _integer_column(rows, columns.particle_id, "<i8")
     if np.unique(ids).size != ids.size:
         raise ValueError("selected initial rows have duplicate particle IDs")
     lookup = {} if base is None else {int(value): i for i, value in enumerate(base.particle_id)}
     index = np.asarray([lookup.get(int(value), -1) for value in ids], dtype="<i8")
-    properties = {name: _property_values(name, rows, config, base, index) for name in _PROPERTIES}
-    release = _csv_values(rows, columns["release_time_s"]) * _unit_factor(
-        config["units"].get("release_time_s", ""), _FIELD_UNITS["release_time_s"], "release_time_s"
+    properties = {
+        name: _property_values(name, rows, specification, base, index) for name in _PROPERTIES
+    }
+    release = _scaled_csv_values(
+        rows, columns.release_time, specification.unit_factors["release_time_s"], "release_time_s"
     )
-    velocity = _csv_velocity(rows, properties["mass_kg"], data.coordinate_system, config)
+    velocity = _csv_velocity(
+        rows, properties["mass_kg"], data.coordinate_system, specification.velocity
+    )
     common: dict[str, Any] = dict(
-        name=config["table"],
+        name=specification.table,
         particle_id=ids,
         release_time_s=release,
         velocity_m_s=velocity,
         **properties,
     )
-    if config["kind"] == "surface":
+    if specification.kind == "surface":
         return RealizedSurfaceSource(
-            facet_id=_integer_column(rows, columns["facet_id"], "<i8"),
-            facet_parameter=_csv_values(rows, columns["facet_parameter"]),
+            facet_id=_integer_column(rows, columns.location[0], "<i8"),
+            facet_parameter=_csv_values(rows, columns.location[1]),
             **common,
         )
-    position = _csv_values(rows, columns["position_m"]) * _unit_factor(
-        config["units"].get("position_m", ""), _LENGTH_UNITS, "position_m"
+    position = _scaled_csv_values(
+        rows, columns.location, specification.unit_factors["position_m"], "position_m"
     )
     return RealizedTableSource(position_m=position, **common)
 
 
 def _csv_velocity(
-    rows: list[dict[str, str]], mass: FloatArray, coordinate_system: str, config: Mapping[str, Any]
+    rows: list[dict[str, str]],
+    mass: FloatArray,
+    coordinate_system: str,
+    specification: _CSVVelocity,
 ) -> FloatArray:
-    mode = config["velocity_mode"]
-    columns = config["velocity_columns"]
-    if mode in ("speed_direction", "energy_direction"):
-        if len(columns) != 1:
-            raise ValueError("speed/energy requires exactly one CSV value column")
-        columns = columns[0]
-    direction_columns = config.get("direction_columns")
+    mode = specification.mode
+    columns = specification.columns
+    direction_columns = specification.direction_columns
     direction = None if direction_columns is None else _csv_values(rows, direction_columns)
     return convert_velocity(
-        _csv_values(rows, columns),
+        _csv_values(
+            rows, columns[0] if mode in ("speed_direction", "energy_direction") else columns
+        ),
         mass,
         mode=mode,
-        unit=config["velocity_unit"],
-        components=config["components"],
+        unit=specification.unit,
+        components=specification.components,
         coordinate_system=coordinate_system,
-        basis_to_case=config["basis_to_case"],
-        frame=config["frame"],
+        basis_to_case=specification.basis_to_case,
+        frame=specification.frame,
         direction=direction,
     )

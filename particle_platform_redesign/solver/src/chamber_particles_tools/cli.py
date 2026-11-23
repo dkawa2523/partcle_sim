@@ -5,7 +5,9 @@ from __future__ import annotations
 import argparse
 import dataclasses
 import json
+import os
 import sys
+import tempfile
 from collections.abc import Mapping, Sequence
 from pathlib import Path
 from typing import TextIO
@@ -224,9 +226,29 @@ def _write_derived_json(result: Path, output: Path, payload: object) -> None:
     source, target = result.expanduser().resolve(), output.expanduser().resolve()
     if target == source or source in target.parents:
         raise ValueError("derived output must be outside the immutable source result directory")
+    encoded = json.dumps(_plain(payload), allow_nan=False, indent=2, sort_keys=True) + "\n"
     target.parent.mkdir(parents=True, exist_ok=True)
-    with target.open("x", encoding="utf-8") as handle:
-        handle.write(json.dumps(_plain(payload), allow_nan=False, indent=2, sort_keys=True) + "\n")
+    descriptor, name = tempfile.mkstemp(prefix=f".{target.name}.", suffix=".tmp", dir=target.parent)
+    os.close(descriptor)
+    temporary = Path(name)
+    published = False
+    try:
+        with temporary.open("w", encoding="utf-8") as handle:
+            handle.write(encoded)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.link(temporary, target)
+        published = True
+    finally:
+        try:
+            temporary.unlink(missing_ok=True)
+        except OSError as error:
+            if published:
+                raise OSError(
+                    f"analysis JSON was published at {target}; "
+                    f"temporary cleanup failed for {temporary}: {error}"
+                ) from error
+            raise
 
 
 def _parser() -> argparse.ArgumentParser:

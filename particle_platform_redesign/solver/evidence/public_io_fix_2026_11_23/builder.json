@@ -1,0 +1,254 @@
+{
+  "status": "FIXED_R16_STATIC_THERMAL_PREPARATION",
+  "baseline": [
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "check",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-builder.yaml",
+        "--json"
+      ],
+      "exit_code": 1,
+      "seconds": 1.255775299970992,
+      "stdout": "",
+      "stderr_tail": [
+        "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 186, in _read_builder_input",
+        "    velocity, temperature = _select_thermal_fields(data, specification.input, layout)",
+        "                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+        "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 482, in _select_thermal_fields",
+        "    if bool((velocity.values[axis, 0] != 0.0).any()):",
+        "             ~~~~~~~~~~~~~~~^^^^^^^^^",
+        "IndexError: boolean index did not match indexed array along axis 0; size of axis is 3 but size of corresponding boolean axis is 4"
+      ]
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "check",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-temperature-builder.yaml",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.3338359999470413,
+      "stdout": "{\"operation\": \"inputs electrostatic check\", \"report\": {\"builder_revision\": \"reduced_electrostatic_builder_v3\", \"cell_count\": 2, \"configuration_sha256\": \"sha256:4bbc72e8fd7f8ffa2d5b487566ae8059f2f9ec74d974e87c73c9b5825bbaa2e9\", \"fixed_node_count\": 4, \"input_content_hash\": \"sha256:08b3bbaff69758f755646bf7732f70627e26351d78282b9a0bf2fb68331d6594\", \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"node_count\": 4, \"status\": \"checked\"}, \"status\": \"ready\"}\n",
+      "stderr_tail": []
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "build",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-temperature-builder.yaml",
+        ".artifacts\\bugfix_20261123\\baseline_static_build_output",
+        "--json"
+      ],
+      "exit_code": 1,
+      "seconds": 1.2550844999495894,
+      "stdout": "",
+      "stderr_tail": [
+        "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 293, in _generated_fields",
+        "    ion_velocity = _ion_velocity(",
+        "                   ^^^^^^^^^^^^^^",
+        "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 412, in _ion_velocity",
+        "    velocity[axis_nodes, 0] = 0.0",
+        "    ~~~~~~~~^^^^^^^^^^^^^^^",
+        "IndexError: boolean index did not match indexed array along axis 0; size of axis is 3 but size of corresponding boolean axis is 4"
+      ]
+    }
+  ],
+  "after_public_cli": [
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "check",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-builder.yaml",
+        "--json"
+      ],
+      "exit_code": 2,
+      "seconds": 1.5651033000322059,
+      "stdout": "",
+      "stderr": "{\"error_type\": \"ValueError\", \"message\": \"thermal field 'gas_velocity' must be static; time snapshots are unsupported\", \"operation\": \"inputs\", \"status\": \"error\"}\n"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "build",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-builder.yaml",
+        ".artifacts\\bugfix_20261123\\rejected-linear-builder",
+        "--json"
+      ],
+      "exit_code": 2,
+      "seconds": 1.3283533999929205,
+      "stdout": "",
+      "stderr": "{\"error_type\": \"ValueError\", \"message\": \"thermal field 'gas_velocity' must be static; time snapshots are unsupported\", \"operation\": \"inputs\", \"status\": \"error\"}\n"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "check",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-temperature-builder.yaml",
+        "--json"
+      ],
+      "exit_code": 2,
+      "seconds": 1.2740267999470234,
+      "stdout": "",
+      "stderr": "{\"error_type\": \"ValueError\", \"message\": \"thermal field 'gas_temperature' must be static; time snapshots are unsupported\", \"operation\": \"inputs\", \"status\": \"error\"}\n"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "build",
+        ".artifacts\\foundation_design_20261123\\probe_inputs_v2\\linear-temperature-builder.yaml",
+        ".artifacts\\bugfix_20261123\\rejected-linear-temperature-builder",
+        "--json"
+      ],
+      "exit_code": 2,
+      "seconds": 1.3331920000491664,
+      "stdout": "",
+      "stderr": "{\"error_type\": \"ValueError\", \"message\": \"thermal field 'gas_temperature' must be static; time snapshots are unsupported\", \"operation\": \"inputs\", \"status\": \"error\"}\n"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "init",
+        ".artifacts\\bugfix_20261123\\builder_normal_example",
+        "--example",
+        "reduced-electrostatic",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.8838623999617994,
+      "stdout": "{\"case\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\bugfix_20261123\\\\builder_normal_example\\\\case.yaml\", \"content_hash\": \"sha256:ad120642a3ac3900927f610935f03bf332072941feb4f641d00a95322fc18323\", \"data\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\bugfix_20261123\\\\builder_normal_example\\\\case.h5\", \"operation\": \"init\", \"status\": \"created\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "check",
+        ".artifacts\\bugfix_20261123\\builder_normal.yaml",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.424861100036651,
+      "stdout": "{\"operation\": \"inputs electrostatic check\", \"report\": {\"builder_revision\": \"reduced_electrostatic_builder_v4\", \"cell_count\": 2, \"configuration_sha256\": \"sha256:f4f3e0bbda238e73f3a0b427b0ef0739c0114df99051df510e079bb995f25e67\", \"fixed_node_count\": 4, \"input_content_hash\": \"sha256:97a3f7ff4fedf95b73136c0ae477b0c47c85f53e92251038d509168f7e3ea52a\", \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"node_count\": 4, \"status\": \"checked\"}, \"status\": \"ready\"}\n",
+      "stderr": ""
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inputs",
+        "electrostatic",
+        "build",
+        ".artifacts\\bugfix_20261123\\builder_normal.yaml",
+        ".artifacts\\bugfix_20261123\\builder_normal_output",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.682042000000365,
+      "stdout": "{\"operation\": \"inputs electrostatic build\", \"report\": {\"builder_revision\": \"reduced_electrostatic_builder_v4\", \"configuration_sha256\": \"sha256:f4f3e0bbda238e73f3a0b427b0ef0739c0114df99051df510e079bb995f25e67\", \"convergence\": {\"boundary_reaction_charge_C\": -0.0, \"cell_count\": 2, \"charge_balance_error_C\": 0.0, \"continuation\": [{\"absolute_residual_C\": 0.0, \"line_search_reductions\": 0, \"linear_iterations\": 0, \"newton_iterations\": 0, \"ramp\": 0.0, \"relative_residual\": 0.0}, {\"absolute_residual_C\": 0.0, \"line_search_reductions\": 0, \"linear_iterations\": 0, \"newton_iterations\": 0, \"ramp\": 1.0, \"relative_residual\": 0.0}], \"discretization_revision\": \"axisymmetric_p1_newton_gmres_v1\", \"electron_density_floor_nodes\": 0, \"free_residual_linf_C\": 0.0, \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"node_count\": 4, \"positive_ion_density_floor_nodes\": 0, \"positive_ion_speed_floor_nodes\": 0, \"relative_residual\": 0.0, \"total_space_charge_C\": 0.0}, \"field_ranges\": {\"electric_field\": {\"maximum\": [-0.0, -0.0], \"minimum\": [-0.0, -0.0], \"unit\": \"V/m\"}, \"electric_potential\": {\"maximum\": [0.0], \"minimum\": [0.0], \"unit\": \"V\"}, \"electron_number_density\": {\"maximum\": [1000000000000.0], \"minimum\": [1000000000000.0], \"unit\": \"1/m^3\"}, \"electron_temperature\": {\"maximum\": [34813.55436465024], \"minimum\": [34813.55436465024], \"unit\": \"K\"}, \"positive_ion_mass\": {\"maximum\": [6.6335209e-26], \"minimum\": [6.6335209e-26], \"unit\": \"kg\"}, \"positive_ion_number_density\": {\"maximum\": [1000000000000.0], \"minimum\": [1000000000000.0], \"unit\": \"1/m^3\"}, \"positive_ion_speed\": {\"maximum\": [2691.806102287694], \"minimum\": [2691.806102287694], \"unit\": \"m/s\"}, \"positive_ion_temperature\": {\"maximum\": [300.0], \"minimum\": [300.0], \"unit\": \"K\"}, \"positive_ion_velocity\": {\"maximum\": [0.0, 0.0], \"minimum\": [0.0, 0.0], \"unit\": \"m/s\"}, \"space_charge_density\": {\"maximum\": [0.0], \"minimum\": [0.0], \"unit\": \"C/m^3\"}}, \"generated_fields\": [\"electric_potential\", \"electric_field\", \"electron_number_density\", \"positive_ion_number_density\", \"space_charge_density\", \"electron_temperature\", \"positive_ion_temperature\", \"positive_ion_velocity\", \"positive_ion_speed\", \"positive_ion_mass\"], \"input_content_hash\": \"sha256:97a3f7ff4fedf95b73136c0ae477b0c47c85f53e92251038d509168f7e3ea52a\", \"input_path\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\bugfix_20261123\\\\builder_normal_example\\\\thermal.h5\", \"linear_storage\": {\"basis_and_hessenberg_bytes\": 0, \"basis_bytes\": 0, \"effective_krylov_dimension\": 0, \"free_node_count\": 0, \"hessenberg_bytes\": 0}, \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"output_content_hash\": \"sha256:0fb04730e33fa14f7952cef7f7fe3111ee1432e03463d9b4ee3448f60c903951\", \"output_path\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\bugfix_20261123\\\\builder_normal_output\\\\bundle.h5\", \"solve_wall_seconds\": 0.0010722000151872635, \"status\": \"complete\"}, \"status\": \"created\"}\n",
+      "stderr": ""
+    }
+  ],
+  "root_cause": "Canonical supports legal static or time-snapshot FieldData; builder consumed generic FieldData arrays without resolving its own static prerequisite. Check could discard invalid thermal shape, build sliced it only after solve.",
+  "change": "One shared prepare returns PreparedBuilderInput with resolved StaticThermalInput values; selected thermal fields with time_s are rejected before layout-axis slicing or solve; check/build consume same record. Old tuple-shaped handoff removed.",
+  "history": "Previous review/proposal did not implement a fix. Generic canonical validation correctly permits time-dependent fields and cannot own this static-producer policy.",
+  "revisions": {
+    "builder": "reduced_electrostatic_builder_v4",
+    "configuration_format": 2,
+    "model": "boltzmann_bohm_sheath_c2_v1",
+    "numerics_changed": false
+  },
+  "regression_execution": {
+    "before": "2 failed,1 passed /7.07s",
+    "after_command": "uv run --locked pytest tests/scenarios/test_builder_static_inputs.py tests/verification/test_electrostatic_builder.py -q",
+    "after_passed": 19,
+    "after_seconds": 8.48,
+    "checks": [
+      "Ruff format/check owner and new scenarios passed",
+      "Pyrefly owner/new scenarios0errors2warningssuppressed",
+      "Complexity gate all functions CC<16"
+    ]
+  },
+  "normal_oracle": {
+    "input": "Installed editable reduced-electrostatic example; explicit all-zero potentials",
+    "potential_and_electric_field": "exact0 at all four gasnodes; quasi-neutral bulk closure",
+    "ion_temperature": "exact preserved selected static gas temperature",
+    "gas_velocity": "exact preserved upstream values",
+    "particle_reuse": "Scenario creates recipe from generated bundle, checks, simulates, reopens final1particle/failure0"
+  },
+  "source_sha256": {
+    "src\\chamber_particles_tools\\electrostatic_builder\\workflow.py": "8ab5738e4c771975453d3a2ac7ec62dea618068d1c1cc6237f898654e73ebe8c",
+    "src\\chamber_particles_tools\\electrostatic_builder\\README.md": "9ec804f46b515ad88d113511d6e07bfdfd20f85179e25c477918701c243553cf",
+    "tests\\scenarios\\test_builder_static_inputs.py": "af6342e97a400a79933115faa8a4ec585578450a28d5d2b3e7d3acc1a0180906"
+  },
+  "limits": [
+    "No new COMSOL extraction/solve",
+    "No field mesh convergence or fullmaterial/VQ certification",
+    "No production solver/integrator/model formula modification"
+  ]
+}

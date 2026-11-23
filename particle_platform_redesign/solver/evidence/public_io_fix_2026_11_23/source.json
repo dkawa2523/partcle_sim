@@ -1,0 +1,198 @@
+{
+  "before": [
+    {
+      "case": "columns_null",
+      "exit_code": 1,
+      "stderr_tail": [
+        "    if set(columns) - {\"particle_id\", \"release_time_s\", *location, *_PROPERTIES}:",
+        "       ^^^^^^^^^^^^",
+        "TypeError: 'NoneType' object is not iterable"
+      ],
+      "published": false
+    },
+    {
+      "case": "filter_null",
+      "exit_code": 1,
+      "stderr_tail": [
+        "    for name, expected in filters.items():",
+        "                          ^^^^^^^^^^^^^",
+        "AttributeError: 'NoneType' object has no attribute 'items'"
+      ],
+      "published": false
+    },
+    {
+      "case": "filter_missing",
+      "exit_code": 1,
+      "stderr_tail": [
+        "    value = row[name]",
+        "            ~~~^^^^^^",
+        "KeyError: 'missing'"
+      ],
+      "published": false
+    },
+    {
+      "case": "invalid_id",
+      "exit_code": 1,
+      "stderr_tail": [
+        "    values = [Decimal(row[column]) for row in rows]",
+        "              ^^^^^^^^^^^^^^^^^^^^",
+        "decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]"
+      ],
+      "published": false
+    },
+    {
+      "case": "extra_cell",
+      "exit_code": 0,
+      "stderr_tail": [],
+      "published": true
+    }
+  ],
+  "reason_previous_work_not_effective": "Prior turns documented and reviewed these source-owner bugs without implementing their fixes. A separate external CSV reader fix did not modify this installed source reader.",
+  "after": [
+    {
+      "case": "columns_null",
+      "exit_code": 2,
+      "error": {
+        "error_type": "ValueError",
+        "message": "source configuration.columns must be a mapping",
+        "operation": "create",
+        "status": "error"
+      },
+      "published": false
+    },
+    {
+      "case": "filter_null",
+      "exit_code": 2,
+      "error": {
+        "error_type": "ValueError",
+        "message": "source configuration.filter_equals must be a mapping",
+        "operation": "create",
+        "status": "error"
+      },
+      "published": false
+    },
+    {
+      "case": "filter_missing",
+      "exit_code": 2,
+      "error": {
+        "error_type": "ValueError",
+        "message": "source CSV is missing mapped or filter columns: ['missing']",
+        "operation": "create",
+        "status": "error"
+      },
+      "published": false
+    },
+    {
+      "case": "invalid_id",
+      "exit_code": 2,
+      "error": {
+        "error_type": "ValueError",
+        "message": "CSV column 'particle_id' must contain exact integers",
+        "operation": "create",
+        "status": "error"
+      },
+      "published": false
+    },
+    {
+      "case": "extra_cell",
+      "exit_code": 2,
+      "error": {
+        "error_type": "ValueError",
+        "message": "source CSV line 2 has 15 cells; expected 14 from the header",
+        "operation": "create",
+        "status": "error"
+      },
+      "published": false
+    }
+  ],
+  "cause": "Raw nested configuration was only checked after filtering; the old validation helper returned no resolved fact. DictReader silently retained surplus cells under a None key, and Decimal lexical exceptions were not translated at their source owner.",
+  "change": "Resolve source/velocity/columns/units/filter/inheritance before CSV consumers; strict header and every row arity before filtering; selected physical and exact integer values afterwards. No broad CLI exception handling or default values.",
+  "normal_scope": "Existing internal/surface/inheritance/velocity conversion and recipe tests plus a selected exact2^53+1 particle ID and filtered invalid scientific row through public create/simulate/result.",
+  "files": {
+    "src/chamber_particles_tools/source_builder/producer.py": "81b8a82d226484d8af6c17dada18178d7909a5c200529c241a29237924fb7beb",
+    "src/chamber_particles_tools/source_builder/README.md": "9dcbebc8e6abe82c7d28aeb9d381c28d2a3f17c06d204925693571cf0abfaf8d",
+    "tests/scenarios/test_source_input_errors.py": "24186f6c4e03487a831db4d544dc107c73911767d82cc5d5a3a5c032f4754db7"
+  },
+  "numeric_filter_before": {
+    "expected_ids": [
+      9007199254740992
+    ],
+    "actual_ids": [
+      9007199254740992,
+      9007199254740993
+    ],
+    "filter_equals": {
+      "particle_id": 9007199254740992
+    }
+  },
+  "numeric_filter_after": {
+    "expected_ids": [
+      9007199254740992
+    ],
+    "actual_ids": [
+      9007199254740992
+    ],
+    "comparison": "exact finite Decimal(raw token) versus explicit decimal configuration number; string filters remain literal"
+  },
+  "status": "SOURCE_INPUT_FIX_IMPLEMENTED_AND_TARGETED_CHECKS_PASSED",
+  "recorded_utc": "2026-11-23T09:59:37.147698+00:00",
+  "tests": [
+    {
+      "command": "uv run --locked pytest tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py -q",
+      "passed": 26,
+      "seconds": 10.86,
+      "phase": "typed source and structure fix before exact numeric filter change"
+    },
+    {
+      "command": "uv run --locked pytest tests/scenarios/test_source_input_errors.py tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py -q",
+      "passed": 45,
+      "seconds": 15.1,
+      "phase": "final including19 new cause regressions/normal scenarios"
+    },
+    {
+      "command": "uv run --locked pytest tests/scenarios/test_source_input_errors.py tests/verification/test_source_builder.py tests/scenarios/test_input_clients.py -q",
+      "passed": 51,
+      "seconds": 14.39,
+      "phase": "final after two independent-review mandatory corrections; existing26 plus new25"
+    }
+  ],
+  "quality": {
+    "Ruff_format_and_check": "passed for producer.py and newtest",
+    "Pyrefly": "0errors for producer.py and newtest",
+    "complexity": "whole current project everyfunction/method CC<16",
+    "diff_check": "passed for owned files"
+  },
+  "remaining_owner_work": [],
+  "limits": [
+    "Only R06 source input behavior repaired by this agent",
+    "No full suite/native COMSOL or large-scale execution by this agent",
+    "Inputs recipe producer unchanged; metadata/provenance records declared source configuration as before; schema format2 unchanged"
+  ],
+  "basis_overflow_before": {
+    "exception": "OverflowError",
+    "message": "int too large to convert to float",
+    "public_operation": "read_csv_source",
+    "scope": "basis_to_case includes unrepresentable numeric input"
+  },
+  "basis_overflow_after": {
+    "exception": "ValueError",
+    "message": "source configuration.basis_to_case must contain representable numeric values"
+  },
+  "review_fix": "Independent review found basis integer overflow was not yet translated; reproduced it, added narrow owner catch and one public regression parameter.",
+  "conversion_overflow_before": {
+    "exit_code": 2,
+    "stderr": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py:201: RuntimeWarning: overflow encountered in multiply\n  vector = vector * _unit_factor(unit, units, mode)\n{\"error_type\": \"ValueError\", \"message\": \"converted velocity_m_s must be finite\", \"operation\": \"create\", \"status\": \"error\"}\n",
+    "structured_stderr_json": false
+  },
+  "conversion_overflow_after": {
+    "exit_code": 2,
+    "stderr": "{\"error_type\": \"ValueError\", \"message\": \"converted velocity_m_s must be finite\", \"operation\": \"create\", \"status\": \"error\"}\n",
+    "structured_stderr_json": true,
+    "published": false
+  },
+  "review_fixes": [
+    "basis coercion OverflowError narrowly translated at source owner; one public Python/CLI regression",
+    "velocity/unit/basis conversion numeric warnings locally suppressed only around arithmetic with explicit finite rejection; source unit-scaled outputs checked; four modes and finite huge basis exercised"
+  ],
+  "source_code_finalized": true
+}

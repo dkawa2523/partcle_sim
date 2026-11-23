@@ -34,7 +34,7 @@ from .numerics import (
 type PotentialProfile = ConstantPotential | RadialExponentialPotential
 
 BUILDER_FORMAT_VERSION: Final = 2
-BUILDER_REVISION: Final = "reduced_electrostatic_builder_v3"
+BUILDER_REVISION: Final = "reduced_electrostatic_builder_v4"
 MODEL_REVISION: Final = "boltzmann_bohm_sheath_c2_v1"
 FIELD_SEMANTICS_REVISION: Final = "reduced_electrostatic_fields_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
@@ -108,6 +108,26 @@ class BuilderSpecification:
     solver: SolverSettings
 
 
+@dataclass(frozen=True, slots=True)
+class StaticThermalInput:
+    """Selected thermal values after the static producer's contract is resolved."""
+
+    velocity_m_s: np.ndarray
+    temperature_K: np.ndarray
+
+
+@dataclass(frozen=True, slots=True)
+class PreparedBuilderInput:
+    """The same resolved input used by check and build before any solve."""
+
+    data: DataBundle
+    info: CaseFileInfo
+    layout: P1TriLayout
+    thermal: StaticThermalInput
+    fixed_node_ids: np.ndarray
+    target_potential_V: np.ndarray
+
+
 def build_from_configuration(
     configuration_path: str | Path,
     output_directory: str | Path,
@@ -159,12 +179,12 @@ def check_from_configuration(configuration_path: str | Path) -> dict[str, object
     path = Path(configuration_path).expanduser().resolve()
     raw = path.read_bytes()
     specification = parse_configuration(raw, base_directory=path.parent)
-    _, info, layout, _, _, fixed_ids, target = _read_builder_input(specification)
+    prepared = _prepare_builder_input(specification)
     counts = check_axisymmetric_p1(
-        layout.nodes_m,
-        layout.connectivity,
-        fixed_ids,
-        target,
+        prepared.layout.nodes_m,
+        prepared.layout.connectivity,
+        prepared.fixed_node_ids,
+        prepared.target_potential_V,
         specification.closure,
         specification.solver,
     )
@@ -172,45 +192,44 @@ def check_from_configuration(configuration_path: str | Path) -> dict[str, object
         "status": "checked",
         "builder_revision": BUILDER_REVISION,
         "model_revision": MODEL_REVISION,
-        "input_content_hash": info.content_hash,
+        "input_content_hash": prepared.info.content_hash,
         "configuration_sha256": "sha256:" + hashlib.sha256(raw).hexdigest(),
         **counts,
     }
 
 
-def _read_builder_input(
+def _prepare_builder_input(
     specification: BuilderSpecification,
-) -> tuple[DataBundle, CaseFileInfo, P1TriLayout, FieldData, FieldData, np.ndarray, np.ndarray]:
+) -> PreparedBuilderInput:
     data, info = read_with_info(specification.input.data_path)
     layout = _select_layout(data, specification.input.layout)
-    velocity, temperature = _select_thermal_fields(data, specification.input, layout)
+    thermal = _select_thermal_fields(data, specification.input, layout)
     collisions = set(_GENERATED_FIELD_NAMES).intersection(field.name for field in data.fields)
     if collisions:
         raise ValueError(f"generated field names already exist: {sorted(collisions)}")
     fixed_ids, target = _resolve_boundaries(data, layout, specification.boundaries)
-    return data, info, layout, velocity, temperature, fixed_ids, target
+    return PreparedBuilderInput(data, info, layout, thermal, fixed_ids, target)
 
 
 def _build(
     specification: BuilderSpecification, config_hash: str, output: Path
 ) -> dict[str, object]:
-    data, source_info, layout, gas_velocity, gas_temperature, fixed_ids, target = (
-        _read_builder_input(specification)
-    )
+    prepared = _prepare_builder_input(specification)
+    data, source_info, layout = prepared.data, prepared.info, prepared.layout
     solve_started = time.perf_counter()
     solution = solve_axisymmetric_p1(
         layout.nodes_m,
         layout.connectivity,
-        fixed_ids,
-        target,
+        prepared.fixed_node_ids,
+        prepared.target_potential_V,
         specification.closure,
         specification.solver,
     )
     solve_wall_seconds = time.perf_counter() - solve_started
     generated_fields = _generated_fields(
         layout,
-        gas_velocity.values,
-        gas_temperature.values[:, 0],
+        prepared.thermal.velocity_m_s,
+        prepared.thermal.temperature_K,
         solution,
         specification,
     )
@@ -257,7 +276,7 @@ def _build(
         "generated_fields": list(_GENERATED_FIELD_NAMES),
         "solve_wall_seconds": solve_wall_seconds,
         "linear_storage": _linear_storage_report(
-            layout.nodes_m.shape[0] - fixed_ids.size,
+            layout.nodes_m.shape[0] - prepared.fixed_node_ids.size,
             specification.solver.linear_krylov_dimension,
             specification.solver.max_linear_iterations,
         ),
@@ -455,7 +474,7 @@ def _select_layout(data: DataBundle, name: str) -> P1TriLayout:
 
 def _select_thermal_fields(
     data: DataBundle, specification: InputSpecification, layout: P1TriLayout
-) -> tuple[FieldData, FieldData]:
+) -> StaticThermalInput:
     by_name = {field.name: field for field in data.fields}
     try:
         velocity = by_name[specification.gas_velocity_field]
@@ -481,7 +500,7 @@ def _select_thermal_fields(
     axis = layout.nodes_m[:, 0] == 0.0
     if bool((velocity.values[axis, 0] != 0.0).any()):
         raise ValueError("gas radial velocity must be exactly zero on the symmetry axis")
-    return velocity, temperature
+    return StaticThermalInput(velocity.values, temperature.values[:, 0])
 
 
 def _require_field(
@@ -492,6 +511,10 @@ def _require_field(
     basis: str,
     unit: str,
 ) -> None:
+    if field.time_s is not None:
+        raise ValueError(
+            f"thermal field {field.name!r} must be static; time snapshots are unsupported"
+        )
     expected = (layout.name, "node", components, basis, unit)
     actual = (
         field.layout,

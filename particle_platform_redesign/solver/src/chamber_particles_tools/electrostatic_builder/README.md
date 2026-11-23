@@ -18,10 +18,15 @@ Use the output as a recipe's `input_bundle`, choose models explicitly, and publi
 
 ## Supported problem and exclusions
 
-The revision is `reduced_electrostatic_builder_v3`; configuration format is 2.
+The revision is `reduced_electrostatic_builder_v4`; configuration format is 2.
 It requires axisymmetric RZ, one gas domain, a fully supported P1 layout exactly matching triangle-only geometry,
 canonical gas velocity/temperature and a potential on every non-axis perimeter facet. Each connected component
 must have a potential anchor. Axis facets are symmetry, not material potential or particle walls.
+
+The selected velocity and temperature must both be static canonical fields (`time_s` absent).
+`check` and `build` resolve this requirement before solving: snapshot fields are rejected with the selected
+field name, even when all snapshots contain the same values. Select and publish a physically justified static
+input explicitly; the builder does not choose a first snapshot or average a time series.
 
 The model has vacuum permittivity, one bulk electron/positive-ion density, Boltzmann electrons and collisionless
 Bohm ions, with explicit density/speed floors and C2 sheath smoothing. Boundary groups use fixed potential or a

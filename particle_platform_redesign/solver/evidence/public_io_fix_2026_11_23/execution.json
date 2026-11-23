@@ -1,0 +1,211 @@
+{
+  "status": "COMPLETE_FOUR_PUBLIC_BUGS_FIXED_AND_VERIFIED",
+  "base_head": "1ab0ee9e3f94d169be198929ef408c7e7b90325c",
+  "recorded_utc": "2026-11-23T10:09:07.951034+00:00",
+  "scope": "Four final-review public bugs R06/R07/R15/R16 and necessary connected input/conversion/publication boundaries; no global physics/architecture/native refactor",
+  "requirements": [
+    {
+      "requirement": "Reproduce expected versus actual using public callers and bind prior failed correction scope",
+      "evidence": [
+        "identity.json",
+        "source.json",
+        "builder.json",
+        "publication.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Repair root ownership and transfer, preserving required normal roles without catch-all/default fallback",
+      "evidence": [
+        "source_map.json",
+        "identity_review.json",
+        "source_review.json",
+        "builder_review.json",
+        "publication_review.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Keep independent correct verification; add cause-level public regression in existing test layers",
+      "evidence": [
+        "identity_review.json",
+        "source_review.json",
+        "builder_review.json",
+        "publication_review.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Execute repaired reproduction and affected normal user path, check semantic/numerical outcome",
+      "evidence": [
+        "public_flow.json",
+        "closeout_review.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Independent impact review, resolve mandatory findings and retest after modifications",
+      "evidence": [
+        "identity_review.json",
+        "source_review.json",
+        "builder_review.json",
+        "publication_review.json",
+        "closeout_review.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Final configured quality/full verification/external workflow on frozen candidate",
+      "evidence": [
+        "source_map.json"
+      ],
+      "status": "passed"
+    },
+    {
+      "requirement": "Update affected client guidance and release notes, no permanent investigation framework or unrelated AGENTS growth",
+      "evidence": [
+        "README.md",
+        "../../RELEASE_NOTES.md",
+        "../../README.md"
+      ],
+      "status": "passed"
+    }
+  ],
+  "tests": {
+    "interim_before_last_peer_fixes": {
+      "local_junit": ".artifacts/bugfix_20261123/full.xml",
+      "sha256": "b59cfbb61fd0f1309f657444075f0f195b8dcb312f8e1121cb9da224a8c1a95f",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1291",
+        "time": "601.331",
+        "timestamp": "2026-11-23T18:53:47.991139+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    },
+    "external_final": {
+      "local_junit": ".artifacts/bugfix_20261123/external_final.xml",
+      "sha256": "cdbbbdd1f7110a5d64d2daaf8fac17695fcfd41b67db5767f04c529dfd6da84e",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "156",
+        "time": "51.263",
+        "timestamp": "2026-11-23T19:04:50.070006+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      },
+      "command": "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q --junitxml=.artifacts/bugfix_20261123/external_final.xml",
+      "exit_code": 0,
+      "console_seconds": 51.43
+    },
+    "final_full": {
+      "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q --junitxml=.artifacts/bugfix_20261123/final_full.xml",
+      "exit_code": 0,
+      "local_junit": ".artifacts/bugfix_20261123/final_full.xml",
+      "sha256": "b4c4f7da4849d68063afa586c63424f671ae768842b0c0f2b5ab305944a9f853",
+      "counts": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1298",
+        "time": "619.749",
+        "timestamp": "2026-11-23T19:02:13.692672+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      },
+      "console_seconds": 619.77,
+      "console_warnings": 1,
+      "warning_scope": "Existing extreme invalid scalar-budget(time) verification at events.py470; core unchanged"
+    },
+    "source_targeted": {
+      "passed": 51,
+      "seconds": 14.39
+    },
+    "identity_targeted": {
+      "passed": 48,
+      "seconds": 3.97
+    },
+    "builder_targeted_with_existing": {
+      "passed": 19,
+      "seconds": 8.48
+    },
+    "publication_targeted": {
+      "passed": 9,
+      "seconds": 4.05
+    }
+  },
+  "quality_final": {
+    "lock": "passed",
+    "ruff_format": "185files passed",
+    "ruff_lint": "passed",
+    "pyrefly": "0errors/172warnings suppressed",
+    "import_linter": "6kept/0broken",
+    "complexity": "CC<16",
+    "documentation": "33docs/4skills passed after integration; relative links separately checked"
+  },
+  "normal_user_flow": {
+    "commands": 9,
+    "input": "own selected generic fieldCSV and own chargedsourceCSV/recipe",
+    "particles": 1,
+    "failure_events": 0,
+    "hit_error_s": 1.734723475976807e-17,
+    "max_frame_error_m_float_oracle": 5.204170427930421e-18,
+    "max_frame_error_m_independent_decimal_oracle": 6.938893903907228e-18,
+    "absolute_tolerance": 1e-12,
+    "exact_node_id": 9007199254740993,
+    "derived_identity_matches": true
+  },
+  "revisions": {
+    "adapter": "selected_nodal_csv_adapter_v5",
+    "builder": "reduced_electrostatic_builder_v4",
+    "format_change": false,
+    "numeric_core_or_physics_change": false
+  },
+  "observer_corrections": [
+    "Initial external uv run pytest entry lacked checkout tools/tests import path;13collectionerrors retained in external_wrong_invocation.xml. Correct documented uv run python -m pytest yielded156pass. No production import workaround.",
+    "Interim full1291 began before final peer corrections; postreview frozen-candidate final full is separate and not yet claimed.",
+    "Root normal-frame oracle used float and independent reviewer used Decimal60; both distinct measured errors are retained rather than silently equated."
+  ],
+  "no_longer_required_or_unrelated": [
+    "No new model, core integrator/event/RNG or result schema rewrite",
+    "No broad validators/contracts/diagnostic framework or permanent probe script",
+    "AGENTS unchanged because stable ownership/policy did not change"
+  ],
+  "not_executed": [
+    "Native COMSOL or new A/P ensemble",
+    "Scale/performance or release certification",
+    "New clean wheel install or report authoring/build/browser checks"
+  ],
+  "claim_limit": "Normal1particle/independentconstantacceleration flow demonstrates affected caller chain; does not certify every physical model or apparatus. Tests/source maps bind dirty source, not only base HEAD.",
+  "evidence_sha256": {
+    "builder.json": "fa20f8ab6ed5cc1ccffe39e3153d027603ca3b75a9652b864eb8dfb5be3c307b",
+    "builder_review.json": "98c56ab7e3eb103f75d8c5594e9a6e3fece92bad07199b8e235506458f509d6e",
+    "closeout_review.json": "27fbef6a391f0850be284add42f50b569955ad013343a91391956d9c91e455f0",
+    "identity.json": "d4b3c269ef83c1ccd41aaf771b4774ec80c00267487784530e100a3214ae4f19",
+    "identity_review.json": "0fcc414a861ada28c4ca791a833d27d3f8852797da5561a6dc82f9d2c2ab2b04",
+    "public_flow.json": "c7e8571c5414c37e2dbb632020c80e7c93b1a1ebcd1821c876ce9ed0cc506dd1",
+    "publication.json": "d22bbafe6af1a572fd2549671267eb69fa4f8e14185f4a1320ab7f93b8d9e817",
+    "publication_review.json": "827738ba978936d5e615db6d5b0ff71c8ca64b382a604319e8305eabba90c7bd",
+    "source.json": "e41679855fa61f8fa4c65b5dfa445508819e7e7c805e6dba4d71369bde848cd7",
+    "source_map.json": "fe26a16bb7e084cff9f848a6fecbd0581027f859e53cebdd598093b7abce1ad9",
+    "source_review.json": "465c4b98bbaeebe19ff37e6788ff2ad4858ce88c9bf471fc6aa86e61bc9350f7"
+  },
+  "completed_utc": "2026-11-23T10:14:52.734055+00:00",
+  "remaining_required_work": [],
+  "external_blockers": [],
+  "independent_closeout": "closeout_review.json",
+  "documentation_sha256": {
+    "README.md": "f731b3cda0c783932c92d5ea5bf9c2f4ac29f3a725141e2854234fb9fffd04dd",
+    "RELEASE_NOTES.md": "68140ef1be605f5779def1e548eaeb8b036da8680025bda0fa574ba01565e8fd",
+    "src\\chamber_particles_tools\\source_builder\\README.md": "9dcbebc8e6abe82c7d28aeb9d381c28d2a3f17c06d204925693571cf0abfaf8d",
+    "src\\chamber_particles_tools\\csv_import\\README.md": "a2aba9ba71897df3e81b4d6dcc170c78b1b94f0278bbb5fe8bb332f44c600935",
+    "src\\chamber_particles_tools\\electrostatic_builder\\README.md": "9ec804f46b515ad88d113511d6e07bfdfd20f85179e25c477918701c243553cf",
+    "evidence\\public_io_fix_2026_11_23\\README.md": "b47c67068bcb9f57993a7d19c25ec6123e1a859c39231c715f54570e7c6d190d"
+  },
+  "evidence_distribution": "Compact observations and executable regression fixtures are tracked; raw .artifacts inputs, full JUnit and local CLI outputs stay local, are identified by hashes and are not clone-portable assets."
+}

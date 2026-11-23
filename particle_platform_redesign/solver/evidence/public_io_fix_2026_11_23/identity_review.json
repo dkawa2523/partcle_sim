@@ -1,0 +1,116 @@
+{
+  "status": "PASS",
+  "reviewer": "fix_static_builder independent R15 reviewer",
+  "recorded_utc": "2026-11-23T09:53:52.270205+00:00",
+  "scope": "Root R15 patch across original lexical ID/scope/physical value parsing, row order, canonical identity and useful public failure; read-only production review",
+  "source_sha256": {
+    "src/chamber_particles_tools/csv_import/workflow.py": "4e3bb2b59ca047acbcf246eac9376b87e45d293e519ab1378f3360d42d69187a",
+    "tests/verification/test_csv_adapter.py": "93e39168dbe84181ba5a04dcc89a68704fb6199561163b31a3479e3cb7adadc5",
+    "src/chamber_particles_tools/csv_import/README.md": "b7aab5bf7980e2668f28ae4b233e238e624fba427313db15c0ac8a831f1f7733"
+  },
+  "baseline_identity_record_source_hash_rechecked": true,
+  "traced": [
+    "source raw bytes and strict dictionary/row/number token checks",
+    "physical names exclude identity except explicitly requested duplicate roles",
+    "coordinate finite plus finite or exact domain scope mask",
+    "selected node ID exact Decimal integer then int64 storage",
+    "same geometry join permutation applied to coordinates/all physical fields",
+    "selected finite/inside requirements, units/scale/offset, axis recovery, provenance/current canonical publication"
+  ],
+  "fresh_probes": {
+    "cases": [
+      {
+        "case": "exponent node beyond2**53",
+        "status": "prior fresh public output independently reread exact IDs and affine values"
+      },
+      {
+        "case": "int64max exact exponent",
+        "status": "prior fresh public output independently reread exact IDs and affine values"
+      },
+      {
+        "case": "canonical int32max domain exact exponent scope",
+        "status": "accepted exact IDs, affine science unchanged",
+        "provider_rows": 5,
+        "selected_rows": 4
+      },
+      {
+        "case": "identity columns explicitly mapped as physical values",
+        "status": "accepted exact IDs, affine science unchanged",
+        "provider_rows": 5,
+        "selected_rows": 4
+      },
+      {
+        "case": "finite scope uses ID; excluded NaN remains excluded",
+        "status": "accepted exact IDs, affine science unchanged",
+        "provider_rows": 5,
+        "selected_rows": 4
+      },
+      {
+        "case": "nonintegral_domain",
+        "status": "structured rejection, unpublished",
+        "exit_code": 2,
+        "message": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\identity_review_cases\\nonintegral_domain\\fields.csv:5: domain_id must be an exact int64 integer"
+      },
+      {
+        "case": "huge_exponent",
+        "status": "structured rejection, unpublished",
+        "exit_code": 2,
+        "message": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\identity_review_cases\\huge_exponent\\fields.csv:5: field node ID mesh_id must be an exact int64 integer"
+      },
+      {
+        "case": "fractional_beyond_float",
+        "status": "structured rejection, unpublished",
+        "exit_code": 2,
+        "message": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\bugfix_20261123\\identity_review_cases\\fractional_beyond_float\\fields.csv:5: field node ID mesh_id must be an exact int64 integer"
+      }
+    ],
+    "observer_note": "Initial probe used unsupported2**53+1domainID; geometry domain IDs are int32 and old mesh builder raisedOverflowError. Reported separately to root, then tested validint32maxdomain; no production files edited."
+  },
+  "review_findings": [
+    {
+      "id": "ID_REVIEW01",
+      "kind": "related preexisting canonical ID width missing from input boundary",
+      "trigger": "domain.external_id=2**53+1, while selected triangle_domain_id storage isint32",
+      "before": "OverflowError at np.full before field stage; not an R15 ID-join regression",
+      "fix": "Existing integer decoders resolve explicit canonical int32/int64 width before arrays, no new validator framework",
+      "after": {
+        "case": "previous public oversized domain overflow",
+        "after_exit_code": 2,
+        "after_error": {
+          "error_type": "ValueError",
+          "message": "domain.external_id must fit 32-bit signed integer storage",
+          "operation": "inputs",
+          "status": "error"
+        },
+        "output_absent": true,
+        "status": "review finding resolved"
+      },
+      "status": "RESOLVED"
+    }
+  ],
+  "fresh_tests": {
+    "command": "uv run --locked pytest tests/verification/test_csv_adapter.py -q",
+    "passed": 48,
+    "seconds": 3.59,
+    "scope": "Full CSV adapter verification, including coordinate bijection, units/science/axis, exact identities and canonical range guards"
+  },
+  "quality_rechecked": [
+    "Ruff owner and test passed",
+    "Pyrefly owner and test0errors7warningssuppressed",
+    "Complexity gate all functions CC<16"
+  ],
+  "interpretation": [
+    "Old numeric/scientific values and field ordering preserved in verified normal paths",
+    "Exact integer-valued decimal/exponent syntax accepts valid signed int64 endpoints without float join",
+    "NaN node IDs outside selected scope remain allowed; selected missing identity/primitive rejected",
+    "NaN scope excluded; equals_domain_id accepts exact scope IDs; physical finite scope remains float semantics",
+    "Explicit identity-as-physical role retains float field values and separate exact join authority",
+    "Potential unit-conflicting aliases continue to fail dictionary unit validation; no ambiguous hidden coercion"
+  ],
+  "remaining_mandatory_findings": [],
+  "not_executed": [
+    "No production edits by reviewer",
+    "No new COMSOL or particle ensemble",
+    "No full solver suite or installed wheel matrix rerun by reviewer"
+  ]
+}

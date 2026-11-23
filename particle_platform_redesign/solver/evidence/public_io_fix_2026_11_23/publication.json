@@ -1,0 +1,69 @@
+{
+  "status": "FIXED_AND_TARGETED_CHECKED",
+  "recorded_utc": "2026-11-23T09:56:45.706457+00:00",
+  "base_head": "1ab0ee9e3f94d169be198929ef408c7e7b90325c",
+  "issue": "R07 interrupted or unencodable analysis JSON published at final path",
+  "reproduction": {
+    "public_entry": "chamber_particles_tools.cli.main analyze with actual C01 result; bounded malformed summary or interrupted filesystem write",
+    "before_regression": "2 failed /1.80s, both destination-absence assertions failed",
+    "observed_partial_outputs": [
+      {
+        "scenario": "encoding failure",
+        "target_existed": true
+      },
+      {
+        "scenario": "interrupted write",
+        "target_existed": true
+      }
+    ],
+    "limit": "Existence observed in failing regression output; temporary pytest paths no longer retained, so no new raw byte-count claim is made."
+  },
+  "root_cause": "Final destination was opened in exclusive-create mode before JSON encoding/write completed; open(x) prevents overwrite but does not make a multi-stage write atomic.",
+  "past_status": "Prior reviews recorded the defect and directory publishers handled other artifacts. No earlier R07 repair was present; this was not a regression from an applied R07 fix.",
+  "change": "Keep source-result guard; serialize full payload; write sibling temp, flush and fsync; atomically hard-link to new destination; attempt temporary cleanup. Report explicit post-publication cleanup failure while preserving the complete published target, with no rollback or swallowed error.",
+  "production_owner": "src/chamber_particles_tools/cli.py",
+  "new_regression_file": "tests/scenarios/test_analysis_publication.py",
+  "regression": {
+    "command": "uv run --locked pytest tests/scenarios/test_analysis_publication.py -q",
+    "passed": 9,
+    "seconds": 4.05,
+    "behavior": [
+      "encoding failure leaves no target/temp and retry succeeds",
+      "partial write failure leaves no target/temp and retry succeeds",
+      "fsync failure leaves no target/temp and retry succeeds",
+      "publish/link failure leaves no target/temp and retry succeeds",
+      "real subprocess CLI publishes full semantic summary and source manifest unchanged",
+      "preexisting destination bytes retained",
+      "concurrent destination bytes retained",
+      "result-directory derived output rejected",
+      "post-publication denied cleanup reports completed target path and temp cleanup error; valid target/source preserved, residual temp observable"
+    ]
+  },
+  "normal_routes": {
+    "command": "uv run --locked pytest tests/scenarios/test_cli.py tests/scenarios/test_result_tools.py -q",
+    "passed": 37,
+    "seconds": 23.5
+  },
+  "quality": {
+    "ruff_format": "passed, two owned files only",
+    "ruff_check": "passed",
+    "pyrefly_cli": "0errors",
+    "radon_changed_function_CC": 5
+  },
+  "source_sha256": {
+    "src/chamber_particles_tools/cli.py": "8edf32dc07e505087e0c3409428da604a81b7509d96f72820dc39a6e4efa9428",
+    "tests/scenarios/test_analysis_publication.py": "0b43d788d2bddfa40337c9f8da6560b74eb65ad6d1d56722412b41ee2e433082"
+  },
+  "scope": "No numerical/core/state/formula/schema/RNG change; no full suite, clean wheel, Linux or native COMSOL run by this agent.",
+  "documentation_handoff": "Root to add analysis -o atomic new-file publication/never-overwrite/no hard-link fallback wording to README. Shared README not edited by this agent.",
+  "observer_correction": "After repair, initial retry assertions attempted capfd capture of import-bound stdout; changed to public summary content plus a separate real subprocess stdout check. Production behavior was not changed to fit capture internals.",
+  "independent_review_correction": {
+    "finding": "Cleanup PermissionError after successful link originally returned ambiguous error with complete target present",
+    "resolution": "Explicit published flag and phase-aware OSError message; no rollback/default/warning suppression",
+    "verified_by_new_regression": true
+  },
+  "publication_outcomes": {
+    "before_publication_failure": "Tested encode/write/fsync/link failures leave no target; cleanup attempts can fail independently",
+    "after_publication_cleanup_failure": "Complete target remains; CLI exit2 says JSON was published and names the cleanup failure; temporary residue cannot be guaranteed absent when unlink is denied"
+  }
+}

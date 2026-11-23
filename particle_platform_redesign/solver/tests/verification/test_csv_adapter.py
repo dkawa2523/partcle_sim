@@ -11,6 +11,7 @@ import pytest
 import yaml
 
 from chamber_particles.case_format import DataBundle, read
+from chamber_particles_tools.cli import main
 from chamber_particles_tools.csv_import import ADAPTER_REVISION, adapt_from_configuration
 from tests.verification.field_reference import locate_field_cell, sample_field
 
@@ -239,6 +240,134 @@ def test_adapter_rejects_axis_projection_above_explicit_limit(tmp_path: Path) ->
         adapt_from_configuration(configuration, tmp_path / "case.h5")
 
 
+def _identity_fixture(tmp_path: Path, first_id: int, scope: str = "finite") -> Path:
+    configuration = _fixture(tmp_path)
+    identifiers = {10: first_id, 20: 20, 30: 30, 40: 40}
+    for name in ["vertices.csv", "quads.csv", "boundaries.csv"]:
+        path = tmp_path / name
+        with path.open(encoding="utf-8", newline="") as stream:
+            reader = csv.DictReader(stream)
+            header, rows = reader.fieldnames, list(reader)
+        assert header is not None
+        for row in rows:
+            for key in ["vertex_id", "node1_id", "node2_id", "node3_id", "node4_id"]:
+                if key in row:
+                    row[key] = str(identifiers[int(row[key])])
+        _write_csv(path, header, [[row[key] for key in header] for row in rows])
+    with (tmp_path / "columns.csv").open("a", encoding="utf-8", newline="") as stream:
+        csv.writer(stream).writerows(
+            [["mesh_id", "native mesh identity", "1"], ["domain_id", "selected domain", "1"]]
+        )
+    path = tmp_path / "fields.csv"
+    with path.open(encoding="utf-8", newline="") as stream:
+        values = [row for row in csv.reader(stream) if row and not row[0].startswith("%")]
+    ids = [identifiers[40], identifiers[30], "NaN", identifiers[20], identifiers[10]]
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        csv.writer(stream).writerows(
+            [*row, str(identity), "7" if i == 2 else "3"]
+            for i, (row, identity) in enumerate(zip(values, ids, strict=True))
+        )
+    document = yaml.safe_load(configuration.read_text(encoding="utf-8"))
+    document["fields"]["node_id_column"] = "mesh_id"
+    document["fields"]["domain_scope"] = {
+        "column": "gas_temperature_K" if scope == "finite" else "domain_id",
+        "mode": scope,
+        "evidence": "manufactured selected domain; excluded row has missing ID and primitives",
+    }
+    configuration.write_text(yaml.safe_dump(document, sort_keys=False), encoding="utf-8")
+    return configuration
+
+
+@pytest.mark.parametrize("first_id", [2**53, 2**53 + 1, -(2**63), 2**63 - 1])
+@pytest.mark.parametrize("scope", ["finite", "equals_domain_id"])
+def test_selected_field_identity_is_exact_int64_and_preserves_affine_values(
+    tmp_path: Path, first_id: int, scope: str
+) -> None:
+    configuration = _identity_fixture(tmp_path, first_id, scope)
+    output = tmp_path / "imported"
+    report = adapt_from_configuration(configuration, output)
+    data = read(output / "bundle.h5")
+    np.testing.assert_array_equal(data.geometry.node_external_id, sorted([first_id, 20, 30, 40]))
+    temperature = next(field for field in data.fields if field.name == "gas_temperature")
+    r, z = data.geometry.nodes_m.T
+    np.testing.assert_allclose(temperature.values[:, 0], 310 + 10 * r + 20 * z, rtol=0, atol=0)
+    assert report["field_join_method"] == "scoped_node_id"
+    assert report["provider_field_row_count"] == 5
+    assert report["selected_field_row_count"] == 4
+
+
+@pytest.mark.parametrize(
+    "token",
+    [
+        str(2**53 + 1),
+        "NaN",
+        "1.5",
+        str(2**63),
+        str(-(2**63) - 1),
+        "20",
+        "1e99999999999999999999999999",
+    ],
+)
+def test_public_import_rejects_false_or_invalid_identity_without_publication(
+    tmp_path: Path, token: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    configuration = _identity_fixture(tmp_path, 2**53)
+    path = tmp_path / "fields.csv"
+    with path.open(encoding="utf-8", newline="") as stream:
+        rows = list(csv.reader(stream))
+    rows[-1][-2] = token
+    with path.open("w", encoding="utf-8", newline="") as stream:
+        csv.writer(stream).writerows(rows)
+    output = tmp_path / "rejected"
+    assert main(["inputs", "import-csv", str(configuration), str(output), "--json"]) == 2
+    error = json.loads(capsys.readouterr().err)
+    assert error["status"] == "error"
+    assert not output.exists()
+
+
+@pytest.mark.parametrize("token", ["9007199254740993.0", "9.007199254740993e15"])
+def test_integer_valued_export_notation_preserves_exact_field_identity(
+    tmp_path: Path, token: str
+) -> None:
+    configuration = _identity_fixture(tmp_path, 2**53 + 1)
+    path = tmp_path / "fields.csv"
+    rows = path.read_text(encoding="utf-8").splitlines()
+    columns = rows[-1].split(",")
+    columns[-2] = token
+    rows[-1] = ",".join(columns)
+    path.write_text("\n".join(rows) + "\n", encoding="utf-8")
+    output = tmp_path / "converted"
+    adapt_from_configuration(configuration, output)
+    ids = read(output / "bundle.h5").geometry.node_external_id
+    assert ids is not None and 2**53 + 1 in ids
+
+
+@pytest.mark.parametrize("role", ["domain", "material", "boundary", "node"])
+def test_public_import_rejects_ids_outside_their_canonical_storage(
+    tmp_path: Path, role: str, capsys: pytest.CaptureFixture[str]
+) -> None:
+    configuration = _identity_fixture(tmp_path, 10)
+    document = yaml.safe_load(configuration.read_text(encoding="utf-8"))
+    if role == "domain":
+        document["domain"]["external_id"] = 2**31
+    elif role == "material":
+        document["boundary_groups"][0]["material_id"] = 2**31
+    elif role == "boundary":
+        document["boundary_groups"][0]["external_ids"] = [2**31]
+    else:
+        path = tmp_path / "vertices.csv"
+        path.write_text(
+            path.read_text(encoding="utf-8").replace("10,", f"{2**63},"), encoding="utf-8"
+        )
+    configuration.write_text(yaml.safe_dump(document), encoding="utf-8")
+    output = tmp_path / "rejected"
+    assert main(["inputs", "import-csv", str(configuration), str(output), "--json"]) == 2
+    error = json.loads(capsys.readouterr().err)
+    assert error["error_type"] == "ValueError"
+    assert "signed integer storage" in error["message"]
+    assert not output.exists()
+
+
 def test_receipt_write_failure_never_publishes_an_incomplete_input(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -246,10 +375,16 @@ def test_receipt_write_failure_never_publishes_an_incomplete_input(
     output = tmp_path / "complete-input"
     original = Path.write_text
 
-    def unavailable(path: Path, *args: object, **kwargs: object):
+    def unavailable(
+        path: Path,
+        data: str,
+        encoding: str | None = None,
+        errors: str | None = None,
+        newline: str | None = None,
+    ) -> int:
         if path.name == "report.json":
             raise OSError("receipt unavailable")
-        return original(path, *args, **kwargs)
+        return original(path, data, encoding=encoding, errors=errors, newline=newline)
 
     with monkeypatch.context() as patch:
         patch.setattr(Path, "write_text", unavailable)

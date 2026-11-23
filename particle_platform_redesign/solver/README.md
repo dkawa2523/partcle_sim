@@ -157,6 +157,11 @@ worker数は実行資源で、caseの数値設定に含めません。親が時�
 `open_result(...).read_context()`で読み、元caseなしで解析・geometry表示できます。
 旧結果の互換readerはなく、新版で再生成するか当時の環境でexportします。
 
+`analyze -o`は完成したJSONだけを新規公開し、既存fileを上書きしません。公開前の失敗では公開先を残さず再試行できます。
+同一filesystemのhard linkによる原子的公開を使い、非対応のfilesystemでは明示的に失敗します。
+公開後に一時fileの削除だけが失敗した場合は、完成JSONを保持し、公開済みであることと後処理の失敗をerrorに明示します。
+旧実行の不完全JSONが既にある場合は、新しい出力名を使うか、内容を確認して不要なfileを除いてから再実行してください。
+
 `analyze`は全選択粒子のfate、source別coverage、繰返し境界interaction、first hit、terminal結果、保存active曲線を区別します。
 `--source-ids`と`--particle-ids`でexact cohortを指定できます。histogramのbin edgesはSIで明示します。
 `export`はfinal、保存frames/probes、boundary interactionsとidentity receiptを出力します。

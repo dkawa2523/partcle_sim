@@ -1,0 +1,50 @@
+{
+  "status": "PASS_AFTER_COMMIT_BOUNDARY_CLARIFICATION",
+  "recorded_utc": "2026-11-23T10:00:09.993966+00:00",
+  "reviewer": "fix_source_inputs independent R07 reviewer",
+  "scope": "cli._write_derived_json, publication tests and README only; no source edits",
+  "source_sha256": {
+    "src/chamber_particles_tools/cli.py": "8edf32dc07e505087e0c3409428da604a81b7509d96f72820dc39a6e4efa9428",
+    "tests/scenarios/test_analysis_publication.py": "0b43d788d2bddfa40337c9f8da6560b74eb65ad6d1d56722412b41ee2e433082",
+    "README.md": "c01e4858364785bf3d1feea37c946522bd52aa3061cc3cccdddf594a95bc9d53"
+  },
+  "verified": [
+    "Complete serialization precedes creation of destination",
+    "Same-directory temp file is written, flushed and fsynced before publication",
+    "os.link creates a fresh destination atomically and never overwrites existing/concurrent destination",
+    "Prepublication errors remove temporary file and permit retry under tested IO conditions",
+    "Source-result destination/descendant guard is preserved before publication",
+    "Normal subprocess output equals semantic summary and source manifest is unchanged",
+    "No transaction/compatibility fallback or swallowed failure introduced"
+  ],
+  "fresh_tests": {
+    "command": "uv run --locked pytest tests/scenarios/test_analysis_publication.py -q",
+    "passed": 8,
+    "seconds": 3.49
+  },
+  "findings": [
+    {
+      "id": "R07_REVIEW01",
+      "severity": "P2 documentation/error semantics",
+      "source": "src/chamber_particles_tools/cli.py:_write_derived_json finally unlink; README analyze -o paragraph",
+      "reproduced": "Bounded PermissionError on temporary.unlink after successful hardlink; public analyze CLI returns2 and valid complete target exists",
+      "effect": "The current unconditional wording that failure leaves no destination and permits retry is stronger than the actual publication commit semantics. No partial data is published, but retry hits an existing complete file.",
+      "required_resolution": "Distinguish prepublication failures from postpublication cleanup failure in user guidance; preserve complete target and explicit error rather than unsafe rollback or swallowing cleanup error. If error context changes, cover actual published state in one minimal check.",
+      "evidence": "publication_review_cleanup_probe.json",
+      "resolved": true,
+      "resolution": "Source records publication commit before cleanup; a postcommit cleanup OSError explicitly states that complete JSON was published and retained. README narrows no-target/retry guarantee to prepublication failures; regression independently rerun."
+    }
+  ],
+  "remaining_mandatory_findings": [],
+  "not_done": [
+    "No source edits",
+    "No full suite/native/scale run"
+  ],
+  "final_recheck": {
+    "command": "uv run --locked pytest tests/scenarios/test_analysis_publication.py -q",
+    "passed": 9,
+    "result": "all passed; exact time recorded in parent-visible tool output",
+    "new_source_edits_by_reviewer": false,
+    "seconds": 3.66
+  }
+}

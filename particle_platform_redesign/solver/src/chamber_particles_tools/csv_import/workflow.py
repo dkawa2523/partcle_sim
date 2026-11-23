@@ -13,6 +13,7 @@ import json
 import math
 import re
 from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
 from importlib.metadata import version
 from pathlib import Path
 from typing import Final, Literal, cast
@@ -33,7 +34,7 @@ type _BoundaryOwner = tuple[int, tuple[int, int]]
 type _BoundaryRow = tuple[int, int, int, int, int, int]
 
 ADAPTER_FORMAT_VERSION: Final = 4
-ADAPTER_REVISION: Final = "selected_nodal_csv_adapter_v4"
+ADAPTER_REVISION: Final = "selected_nodal_csv_adapter_v5"
 FIELD_SEMANTICS_REVISION: Final = "explicit_selected_field_lineage_v1"
 PRODUCER_VERSION: Final = version("chamber-particles")
 _FINITE_NUMBER_TOKEN: Final = re.compile(r"[+-]?(?:(?:\d+(?:\.\d*)?)|(?:\.\d+))(?:[eE][+-]?\d+)?")
@@ -153,6 +154,14 @@ class _FieldResult:
     join_method: str
     axis_transformations: list[dict[str, object]]
     selected_field_lineage: list[dict[str, object]]
+    provider_row_count: int
+
+
+@dataclass(frozen=True, slots=True)
+class _ProviderFieldTable:
+    values: np.ndarray
+    column_index: dict[str, int]
+    node_external_id: np.ndarray | None
     provider_row_count: int
 
 
@@ -301,12 +310,14 @@ def _parse_domain(value: dict[str, object]) -> DomainSpecification:
     coordinates = _text(value["coordinate_system"], "domain.coordinate_system")
     if coordinates not in ("cartesian_xy", "axisymmetric_rz"):
         raise ValueError("domain.coordinate_system must be cartesian_xy or axisymmetric_rz")
-    excluded = _integer_tuple(value["excluded_boundary_ids"], "domain.excluded_boundary_ids")
+    excluded = _integer_tuple(
+        value["excluded_boundary_ids"], "domain.excluded_boundary_ids", dtype="<i4"
+    )
     if coordinates == "cartesian_xy" and excluded:
         raise ValueError("Cartesian XY cannot exclude axis boundaries")
     return DomainSpecification(
         coordinate_system=coordinates,
-        external_id=_integer(value["external_id"], "domain.external_id"),
+        external_id=_integer(value["external_id"], "domain.external_id", dtype="<i4"),
         layout_name=_name(value["layout_name"], "domain.layout_name"),
         quadrilateral_order=order,
         excluded_boundary_ids=excluded,
@@ -326,7 +337,7 @@ def _parse_boundary_groups(
         item = _mapping(raw, label)
         _exact_keys(item, {"name", "external_ids", "material_id"}, label)
         name = _name(item["name"], f"{label}.name")
-        ids = _integer_tuple(item["external_ids"], f"{label}.external_ids")
+        ids = _integer_tuple(item["external_ids"], f"{label}.external_ids", dtype="<i4")
         if not ids:
             raise ValueError(f"{label}.external_ids must not be empty")
         overlap = assigned.intersection(ids)
@@ -337,7 +348,9 @@ def _parse_boundary_groups(
         names.add(name)
         assigned.update(ids)
         groups.append(
-            BoundaryGroup(name, ids, _integer(item["material_id"], f"{label}.material_id"))
+            BoundaryGroup(
+                name, ids, _integer(item["material_id"], f"{label}.material_id", dtype="<i4")
+            )
         )
     return tuple(groups)
 
@@ -875,7 +888,7 @@ def _read_boundaries(path: Path, content: bytes, provider: str) -> list[_Boundar
                 external_id,
                 _csv_int(row["node1_id"], path, row_number, "node1_id"),
                 _csv_int(row["node2_id"], path, row_number, "node2_id"),
-                _csv_int(row[boundary_column], path, row_number, boundary_column),
+                _csv_int(row[boundary_column], path, row_number, boundary_column, dtype="<i4"),
             )
         )
     return records
@@ -895,13 +908,19 @@ def _read_fields(
         field_text = contents.field_values.decode("utf-8-sig")
     except UnicodeDecodeError as error:
         raise ValueError("field table is not valid UTF-8") from error
-    values = _numeric_csv_matrix(
-        field_text, expected_columns=len(names), label=str(specification.source.field_values)
+    table = _read_provider_field_table(
+        field_text,
+        fields,
+        index,
+        specification.domain.external_id,
+        label=str(specification.source.field_values),
     )
-    selected = _select_field_rows(values, fields, index, specification.domain.external_id)
-    coordinates = selected[:, [index[name] for name in fields.coordinate_columns]]
-    matched, distance = _match_field_rows(mesh, selected, coordinates, fields, index)
-    ordered = selected[matched]
+    index = table.column_index
+    coordinates = table.values[:, [index[name] for name in fields.coordinate_columns]]
+    matched, distance = _match_field_rows(
+        mesh, table.node_external_id, coordinates, fields.coordinate_match_tolerance_m
+    )
+    ordered = table.values[matched]
     _validate_selected_rows(ordered, fields, index)
     converted: list[FieldData] = []
     transforms: list[dict[str, object]] = []
@@ -932,7 +951,7 @@ def _read_fields(
         "scoped_node_id" if fields.node_id_column is not None else "coordinate_bijection",
         transforms,
         [_field_lineage(item, expressions) for item in fields.mappings],
-        values.shape[0],
+        table.provider_row_count,
     )
 
 
@@ -967,21 +986,12 @@ def _field_lineage(item: FieldMapping, expressions: dict[str, str]) -> dict[str,
 
 def _match_field_rows(
     mesh: _MeshResult,
-    selected: np.ndarray,
+    provider: np.ndarray | None,
     coordinates: np.ndarray,
-    fields: FieldSpecification,
-    index: dict[str, int],
+    tolerance_m: float,
 ) -> tuple[np.ndarray, float]:
-    if fields.node_id_column is None:
-        return _match_coordinates(mesh.nodes_m, coordinates, fields.coordinate_match_tolerance_m)
-    identifiers = selected[:, index[fields.node_id_column]]
-    if not bool(np.isfinite(identifiers).all()) or bool(
-        (identifiers != np.floor(identifiers)).any()
-    ):
-        raise ValueError("field node IDs must be finite integers")
-    if bool((np.abs(identifiers) > 2**53).any()):
-        raise ValueError("numeric field node IDs must be exactly representable integers")
-    provider = identifiers.astype(np.int64)
+    if provider is None:
+        return _match_coordinates(mesh.nodes_m, coordinates, tolerance_m)
     order = np.argsort(provider)
     sorted_ids = provider[order]
     if np.unique(sorted_ids).size != sorted_ids.size:
@@ -994,7 +1004,7 @@ def _match_field_rows(
         raise ValueError("field node IDs cannot form a bijection to selected mesh vertex IDs")
     distance = np.linalg.norm(coordinates[matched] - mesh.nodes_m, axis=1)
     maximum = float(np.max(distance, initial=0.0))
-    if maximum > fields.coordinate_match_tolerance_m:
+    if maximum > tolerance_m:
         raise ValueError("field node ID coordinates disagree with the mesh")
     return matched, maximum
 
@@ -1034,8 +1044,8 @@ def _apply_axis_transform(
     }
 
 
-def _numeric_csv_matrix(text: str, *, expected_columns: int, label: str) -> np.ndarray:
-    rows: list[list[float]] = []
+def _field_csv_rows(text: str, *, expected_columns: int, label: str) -> list[tuple[int, list[str]]]:
+    rows: list[tuple[int, list[str]]] = []
     reader = csv.reader(io.StringIO(text, newline=""), strict=True)
     try:
         numbered_rows = [(reader.line_num, row) for row in reader]
@@ -1050,24 +1060,121 @@ def _numeric_csv_matrix(text: str, *, expected_columns: int, label: str) -> np.n
             raise ValueError(
                 f"{label}: row {line_number} has {len(row)} columns; expected {expected_columns}"
             )
-        parsed: list[float] = []
+        parsed: list[str] = []
         for column, token in enumerate(row, start=1):
             value = token.strip()
             if not value:
                 raise ValueError(f"{label}: row {line_number} column {column} is empty")
             if value.casefold() in {"nan", "+nan", "-nan"}:
-                parsed.append(math.nan)
+                parsed.append(value)
                 continue
             if _FINITE_NUMBER_TOKEN.fullmatch(value) is None:
                 raise ValueError(f"{label}: row {line_number} column {column} is not numeric")
-            number = float(value)
-            if not math.isfinite(number):
-                raise ValueError(f"{label}: row {line_number} column {column} is not finite")
-            parsed.append(number)
-        rows.append(parsed)
+            parsed.append(value)
+        rows.append((line_number, parsed))
     if not rows:
         raise ValueError(f"{label}: numeric table has no data rows")
-    return np.ascontiguousarray(np.asarray(rows, dtype=np.float64))
+    return rows
+
+
+def _field_identifier(token: str, label: str) -> int | None:
+    try:
+        value = Decimal(token)
+    except InvalidOperation as error:
+        raise ValueError(f"{label} must be an exact int64 integer") from error
+    if value.is_nan():
+        return None
+    if (
+        not value.is_finite()
+        or value != value.to_integral_value()
+        or not -(2**63) <= value <= 2**63 - 1
+    ):
+        raise ValueError(f"{label} must be an exact int64 integer")
+    return int(value)
+
+
+def _field_float(token: str, label: str) -> float:
+    value = float(token)
+    if not math.isfinite(value) and not math.isnan(value):
+        raise ValueError(f"{label} is not finite")
+    return value
+
+
+def _read_provider_field_table(
+    text: str,
+    fields: FieldSpecification,
+    index: dict[str, int],
+    domain_id: int,
+    *,
+    label: str,
+) -> _ProviderFieldTable:
+    rows = _field_csv_rows(text, expected_columns=len(index), label=label)
+    identity = {fields.node_id_column}
+    if fields.scope_mode == "equals_domain_id":
+        identity.add(fields.scope_column)
+    physical = {fields.inside_column, *fields.coordinate_columns}
+    physical.update(name for item in fields.mappings for name in item.columns)
+    if fields.scope_mode == "finite" and fields.scope_column is not None:
+        physical.add(fields.scope_column)
+    names = [name for name in index if name not in identity or name in physical]
+    column_index = dict(zip(names, range(len(names)), strict=True))
+    values = np.asarray(
+        [
+            [_field_float(row[index[name]], f"{label}:{line}: {name}") for name in names]
+            for line, row in rows
+        ],
+        dtype=np.float64,
+    )
+    selected = np.isfinite(values[:, [column_index[n] for n in fields.coordinate_columns]]).all(
+        axis=1
+    )
+    selected &= _field_scope_mask(rows, values, fields, index, column_index, domain_id, label)
+    node_ids = _selected_node_ids(rows, selected, fields.node_id_column, index, label)
+    return _ProviderFieldTable(
+        np.ascontiguousarray(values[selected]), column_index, node_ids, len(rows)
+    )
+
+
+def _field_scope_mask(
+    rows: list[tuple[int, list[str]]],
+    values: np.ndarray,
+    fields: FieldSpecification,
+    index: dict[str, int],
+    column_index: dict[str, int],
+    domain_id: int,
+    label: str,
+) -> np.ndarray:
+    name = fields.scope_column
+    if name is None:
+        return np.ones(len(rows), dtype=np.bool_)
+    if fields.scope_mode == "finite":
+        return np.isfinite(values[:, column_index[name]])
+    return np.asarray(
+        [
+            _field_identifier(row[index[name]], f"{label}:{line}: {name}") == domain_id
+            for line, row in rows
+        ],
+        dtype=np.bool_,
+    )
+
+
+def _selected_node_ids(
+    rows: list[tuple[int, list[str]]],
+    selected: np.ndarray,
+    name: str | None,
+    index: dict[str, int],
+    label: str,
+) -> np.ndarray | None:
+    if name is None:
+        return None
+    identifiers: list[int] = []
+    for keep, (line, row) in zip(selected, rows, strict=True):
+        if keep:
+            value = _field_identifier(row[index[name]], f"{label}:{line}: field node ID {name}")
+            if value is None:
+                raise ValueError(f"{label}:{line}: selected field node IDs must be finite integers")
+            identifiers.append(value)
+    return np.asarray(identifiers, dtype=np.int64)
 
 
 def _field_column_indices(
@@ -1097,22 +1204,6 @@ def _field_column_indices(
     if wrong_units:
         raise ValueError(f"field column units disagree with selected input units: {wrong_units}")
     return index
-
-
-def _select_field_rows(
-    values: np.ndarray, fields: FieldSpecification, index: dict[str, int], domain_id: int
-) -> np.ndarray:
-    coordinates = values[:, [index[name] for name in fields.coordinate_columns]]
-    selected = np.isfinite(coordinates).all(axis=1)
-    if fields.scope_column is not None:
-        scope_values = values[:, index[fields.scope_column]]
-        scope_mask = (
-            np.isfinite(scope_values)
-            if fields.scope_mode == "finite"
-            else scope_values == domain_id
-        )
-        selected &= scope_mask
-    return values[selected]
 
 
 def _read_column_dictionary(
@@ -1315,11 +1406,12 @@ def _csv_rows(
     return result
 
 
-def _csv_int(value: str, path: Path, row: int, column: str) -> int:
+def _csv_int(value: str, path: Path, row: int, column: str, *, dtype: str = "<i8") -> int:
     try:
-        return int(value)
+        result = int(value)
     except ValueError as error:
         raise ValueError(f"{path}:{row}: {column} must be an integer") from error
+    return _integer(result, f"{path}:{row}: {column}", dtype=dtype)
 
 
 def _csv_float(value: str, path: Path, row: int, column: str) -> float:
@@ -1365,16 +1457,19 @@ def _name(value: object, label: str) -> str:
     return text
 
 
-def _integer(value: object, label: str) -> int:
+def _integer(value: object, label: str, *, dtype: str = "<i8") -> int:
     if isinstance(value, bool) or not isinstance(value, int):
         raise ValueError(f"{label} must be an integer")
+    bounds = np.iinfo(np.dtype(dtype))
+    if not bounds.min <= value <= bounds.max:
+        raise ValueError(f"{label} must fit {bounds.bits}-bit signed integer storage")
     return value
 
 
-def _integer_tuple(value: object, label: str) -> tuple[int, ...]:
+def _integer_tuple(value: object, label: str, *, dtype: str = "<i8") -> tuple[int, ...]:
     if not isinstance(value, list):
         raise ValueError(f"{label} must be a list")
-    result = tuple(_integer(item, f"{label}[]") for item in value)
+    result = tuple(_integer(item, f"{label}[]", dtype=dtype) for item in value)
     if len(set(result)) != len(result):
         raise ValueError(f"{label} must not contain duplicates")
     return result

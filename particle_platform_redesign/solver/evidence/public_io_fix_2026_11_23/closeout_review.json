@@ -1,0 +1,218 @@
+{
+  "status": "PASS_FINAL_CODE_NORMAL_FLOW_AND_FULL_EXECUTION_EVIDENCE",
+  "reviewer": "fix_static_builder independent whole-closeout reader",
+  "recorded_utc": "2026-11-23T10:13:17.787717+00:00",
+  "scope": "Read-only current four-fix/related-required-corrections integration, independent normal public result re-read, and final full execution receipt/source-map verification",
+  "final_source_map": {
+    "path": "final_code_map.json",
+    "sha256": "fe26a16bb7e084cff9f848a6fecbd0581027f859e53cebdd598093b7abce1ad9",
+    "files": 176,
+    "mismatches": []
+  },
+  "public_result_independent_recheck": {
+    "status": "passed",
+    "source_map_files": 176,
+    "source_map_mismatches": [],
+    "public_commands_rechecked": 9,
+    "oracle": "Decimal60digits, raw input e*Z*E/m and positive-root distance equation; no solver output fit",
+    "acceleration_m_s2": 0.4806529902,
+    "expected_hit_s": 0.017319770479845585,
+    "observed_hit_s": 0.017319770479845568,
+    "absolute_hit_error_s": 1.734723475976807e-17,
+    "maximum_frame_position_error_m": 6.938893903907228e-18,
+    "frames": 5,
+    "particle_id": 73,
+    "particles": 1,
+    "failure_events": 0,
+    "exact_mesh_node_id": 9007199254740993,
+    "model_weight": 2,
+    "derived_identity_matches": true,
+    "valid_svg_documents": 3,
+    "new_simulation": false,
+    "core_production_changed": false
+  },
+  "requirements": [
+    {
+      "requirement": "Reproduce public contract expected vs actual for R06/R07/R15/R16",
+      "evidence": [
+        "source.json",
+        "identity.json",
+        "builder.json",
+        "publication.json"
+      ],
+      "assessment": "baseline and after public paths recorded; unchanged-source assumptions distinguished from direct before isolation",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Fix input interpretation/transform/state/result handoff, not mask symptoms",
+      "evidence": [
+        "source_review.json",
+        "identity_review.json",
+        "builder_review.json",
+        "publication_review.json"
+      ],
+      "assessment": "typed source normalization before consumption; raw exact identity separate from physical float; shared static prepare; completed file publication commit distinguished from cleanup",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Investigate recurrence/past repair limits without invented causes",
+      "evidence": [
+        "identity.json",
+        "source.json",
+        "builder.json",
+        "evidence/public_io_fix_2026_11_23/README.md"
+      ],
+      "assessment": "past review was explicitly not implementation; prior external CSV owner fix differed from installed selected-field reader; no invented old bugfunction",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Retain meaningful old oracles and useful regression checks",
+      "evidence": [
+        "tests/verification/test_csv_adapter.py",
+        "tests/scenarios/test_source_input_errors.py",
+        "tests/scenarios/test_builder_static_inputs.py",
+        "tests/scenarios/test_analysis_publication.py"
+      ],
+      "assessment": "normal analytic field/axis/unit/inheritance/surface paths retained; error, exact ID, time prerequisite and atomicity boundaries covered; no whole-oracle deletion",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Exercise reproduced errors and affected normal user workflows",
+      "evidence": [
+        "closeout_public_read.json",
+        "public_flow.json",
+        "builder_review.json",
+        "source_review.json"
+      ],
+      "assessment": "nine public commands plus independent final read from raw own inputs, constant-acceleration Decimal oracle, exact odd mesh ID, stable source ID/mass/weight and derived identity",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Resolve peer-required related corrections and rerun impacted checks",
+      "evidence": [
+        "source_review.json",
+        "identity_review.json",
+        "publication_review.json",
+        "builder_review.json"
+      ],
+      "assessment": "numeric selector rounding, huge basis, conversion warning/finite rejection, canonical width, postcommit cleanup distinction all independently closed",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Avoid persistent one-off diagnostics, unrelated rewrite and unsupported qualification",
+      "evidence": [
+        "final_code_map.json",
+        "evidence/public_io_fix_2026_11_23/README.md"
+      ],
+      "assessment": "core numerical source unchanged; focused normal-client changes/tests, no new plugin/validator/diagnostic framework; no COMSOL/ensemble/scale qualification claimed",
+      "status": "PASS_SCOPED_REVIEW"
+    },
+    {
+      "requirement": "Update public guidance and policy only when design changes",
+      "evidence": [
+        "README.md",
+        "RELEASE_NOTES.md",
+        "src/chamber_particles_tools/csv_import/README.md",
+        "src/chamber_particles_tools/source_builder/README.md",
+        "src/chamber_particles_tools/electrostatic_builder/README.md"
+      ],
+      "assessment": "exact integer scopes, static input, structured failures and publication commit documented; stable architecture/AGENTS policy unchanged appropriately",
+      "status": "PASS_SCOPED_REVIEW"
+    }
+  ],
+  "peer_required_corrections_remaining": [],
+  "mandatory_code_or_documentation_findings": [],
+  "pending_checks": [],
+  "earlier_full_execution_scope": {
+    "intermediate_core": "Parent reported1291passed/601.36s; begun before final peer corrections, not substituted for final suite",
+    "external": {
+      "intermediate_correct_external_module": [
+        {
+          "name": "pytest",
+          "errors": "0",
+          "failures": "0",
+          "skipped": "0",
+          "tests": "156",
+          "time": "51.327",
+          "timestamp": "2026-11-23T18:56:19.913607+09:00",
+          "hostname": "DESKTOP-621T1UP"
+        }
+      ],
+      "initial_wrong_console_invocation_collection_errors": 13,
+      "interpretation": "The wrong console invocation is recorded separately; corrected python -m pytest run is actual external156pass evidence. It is not a production failure. Final post-review external execution is still parent-owned/pending."
+    }
+  },
+  "scientific_claim_limits": [
+    "Only one fresh deterministic own-input charge/electric transport flow independently reread here",
+    "No new simulation by reviewer",
+    "No full core/external suite run by reviewer in this closeout",
+    "No new native COMSOL, Brownian ensemble, field convergence or fullmaterial capability claim",
+    "Data/code hashes bind observed identity, not general scientific truth"
+  ],
+  "observer_precision_note": "Independent Decimal60frame oracle gives6.94e-18m max deviation; original flow float frame evaluation recorded5.20e-18m. Both are distinct numerical evaluations within1e-12 budget, not a changed solver outcome.",
+  "record_sha256": {
+    "public_flow.json": "c7e8571c5414c37e2dbb632020c80e7c93b1a1ebcd1821c876ce9ed0cc506dd1",
+    "closeout_public_read.json": "df4b11a244273f218339216b56dbb7a411a91b8eee9aa0331d009708d2d7116b",
+    "source_review.json": "465c4b98bbaeebe19ff37e6788ff2ad4858ce88c9bf471fc6aa86e61bc9350f7",
+    "identity_review.json": "0fcc414a861ada28c4ca791a833d27d3f8852797da5561a6dc82f9d2c2ab2b04",
+    "builder_review.json": "98c56ab7e3eb103f75d8c5594e9a6e3fece92bad07199b8e235506458f509d6e",
+    "publication_review.json": "827738ba978936d5e615db6d5b0ff71c8ca64b382a604319e8305eabba90c7bd"
+  },
+  "source_edits_by_reviewer": [],
+  "future_update_policy": "No required execution pending remains in this review: actual final1298core/156external JUnit receipts and frozen176-source map were checked. Later executable changes require affected revalidation.",
+  "final_external_execution": {
+    "path": "external_final.xml",
+    "sha256": "cdbbbdd1f7110a5d64d2daaf8fac17695fcfd41b67db5767f04c529dfd6da84e",
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "156",
+        "time": "51.263",
+        "timestamp": "2026-11-23T19:04:50.070006+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ],
+    "parent_reported_seconds": 51.43,
+    "reviewer_observed": "Actual final XML156tests,errors/failures/skipped0; final176codehash map still matches",
+    "command": "uv run --locked python -m pytest tools/vv/comsol/tests tools/vv/gas_collision/tests -q"
+  },
+  "path_basis": {
+    "observation_json_names": "Relative to original .artifacts/bugfix_20261123 working evidence directory",
+    "source_test_document_names": "Relative to locked solver project root",
+    "source_map": "final_code_map.json entries relative to solver root; only immutable hash observations, not a new verifier subsystem"
+  },
+  "final_core_execution": {
+    "path": "final_full.xml",
+    "sha256": "b4c4f7da4849d68063afa586c63424f671ae768842b0c0f2b5ab305944a9f853",
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1298",
+        "time": "619.749",
+        "timestamp": "2026-11-23T19:02:13.692672+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ],
+    "parent_observed_terminal": {
+      "session": 79353,
+      "exit_code": 0,
+      "passed": 1298,
+      "seconds": 619.77,
+      "warnings": 1
+    },
+    "warning_scope": {
+      "source": "Parent final pytest console observation; JUnit suite does not encode warning count",
+      "message": "Existing adversarial invalid scalar-budget(time) hits overflow warning at events.py:470",
+      "classification": "Current core production unchanged from1ab0ee9; no new warning suppression or numerical fix claimed"
+    },
+    "source_map_files": 176,
+    "source_map_mismatches": [],
+    "reviewer_scope": "Read actual final JUnit, hash and all176current source hashes; no new suite execution by reviewer"
+  }
+}
