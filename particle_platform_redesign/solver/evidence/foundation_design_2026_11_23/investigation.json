@@ -134,7 +134,7 @@
     "Prior77774binary cleanup complete; no oldasset deletion/source/envactivation in this investigation.",
     "Proposed signatures/types are not existing/public APIs; owner specs must change only when implementation is adopted."
   ],
-  "owning_design_sha256": "d0a7ddd630b7fdc04776d3f861331663b6f70ba6944879537f42cc660813dc96",
+  "owning_design_sha256": "00f4fdf0c62a2bc49bd5bdccce465f5b277c03ecd2483d9dd591484e2a88dd69",
   "independent_review": {
     "scope": "Cross-owner design review of the integrated proposal, not production implementation or scientific certification",
     "clients": {
@@ -220,5 +220,11 @@
     "git_diff_check": "passed",
     "tracked_production_changes": [],
     "proposal_lines": 1451
+  },
+  "completed_probe_retirement": {
+    "recorded_utc": "2026-11-23T09:25:05.248920+00:00",
+    "files": 4,
+    "role": "Bounded one-off research execution completed; compact observations and conditions retained",
+    "closure_record": "../current_only_2026_11_23/execution/reaudit.json"
   }
 }

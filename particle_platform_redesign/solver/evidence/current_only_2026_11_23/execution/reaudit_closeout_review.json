@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "recorded_utc": "2026-11-23T09:27:33.627060+00:00",
+  "reviewer": "/root/retirement_benchmark_evidence_audit",
+  "scope": "Final integration/read-only review, only this JSON written",
+  "requirement_matrix": {
+    "items": 14,
+    "all_proven_labels": true,
+    "evidence_paths_exist": true
+  },
+  "hashes": {
+    "completion_evidence_all_match": true,
+    "reaudit_evidence_all_match": true,
+    "proposal_and_investigation_match": true
+  },
+  "fresh_result_reread": {
+    "particles": 1,
+    "events": 1,
+    "frames": 5,
+    "failure_events": 0,
+    "hit_error_s": 3.469446951953614e-18,
+    "saved_position_error_m": 0.0,
+    "identity_matches": true,
+    "new_simulation": false
+  },
+  "retired_four_probe_absence": true,
+  "scope_review": {
+    "fresh5tests_command_present_in_residual_receipt": true,
+    "fresh8CLI_and_independent_oracle": true,
+    "past_fullsuite_and_benchmark_not_recounted": true,
+    "current67source76tests_bound": true,
+    "cbcfa3d_CI_only_observation_not_success_inferred": true,
+    "unimplemented20issues13packages_separate": true,
+    "historical_receipts_frozen": true
+  },
+  "mandatory_findings": [],
+  "new_tests_benchmark_native_browser_remote_calls": false,
+  "resolved_findings": [
+    {
+      "id": "CLOSE01",
+      "resolution": "The actually observed source9015de0 documentation run45139193932/job137572694133 is now recorded with source head, URL, completed/success and steps. README claim now has exact recorded support.",
+      "rechecked": true
+    }
+  ],
+  "fresh_additional_docs_report_test_scope": {
+    "command": "uv run --locked pytest tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q",
+    "passed": 7,
+    "seconds": 1.13
+  }
+}

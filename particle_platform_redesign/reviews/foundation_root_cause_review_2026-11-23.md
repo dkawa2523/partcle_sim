@@ -845,7 +845,7 @@ readerの`_buffer:764`はprivate rootをcopy、shared rootをmappingとして解
 | `schedule.release_time_s`、proposal/current/root/stageの実時刻 | particle-local release短縮、field sample、coefficient guard、dense state | workerに保持 |
 | `fields.numeric_context.time_s`、各snapshot値 | `fields.py:_prepare_numeric_field_context:624`のsnapshot列（`686`）、stage interpolation（`sample_prepared_fields_into:717`）、local time-range proof（`_local_field_snapshot_bounds_into:1126`）で使用 | **workerに必須**。親macro split tupleと異なる。全snapshot field knotsを親に隔離しない |
 
-bounded serialization witnessは`payload_probe.py`と`payload_probe.json`に保存した。
+bounded serialization witnessは一時probeで観測し、`payload_probe.json`へ保存した。観測後の一時実行器は役割終了で撤去し、結果JSONと以下の実験条件を保持した。
 公開C01をload/prepareし、実`ProcessArrayStore`とresident shared conversion/private-array指定を使用した。
 同じpreparedのhost tupleだけを`dataclasses.replace`し、他の配列・workspace・caseは同じである。
 frame/probe tupleを変えたcandidateはserialization測定専用であり、変更後scheduleの合法runを認定するものではない。

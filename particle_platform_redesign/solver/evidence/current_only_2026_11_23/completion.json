@@ -128,6 +128,22 @@
         "R14"
       ],
       "status": "Remaining proposals or capability boundaries, not claimed current wrong-physics cases or completed implementation"
+    },
+    {
+      "ids": [
+        "R15",
+        "R16"
+      ],
+      "status": "New confirmed current product input bugs, investigated and designed separately; no retired compatibility path or native certification claim"
+    },
+    {
+      "ids": [
+        "R17",
+        "R18",
+        "R19",
+        "R20"
+      ],
+      "status": "New structural/explanation/handoff improvement proposals, distinct from completed classified retirement"
     }
   ],
   "finished_task_helpers": {
@@ -137,7 +153,7 @@
     "new_report_qa_helper_sources": false
   },
   "historical_record_policy": "Pre-manual blocked_cleanup/impasse/final_execution/report_scope/report_verification remain frozen phase records. Current state is owned here and by post_manual_cleanup, not silently rewritten in old observations.",
-  "remote_ci_scope": "Production/test state08ac61b has successful Windows/Linux release CI. Last observed metadata-only92c7d79 and5badb0c release runs were still in progress; no claim of terminal success for those runs or the next metadata commit.",
+  "remote_ci_scope": "Read-only re-observation:9015de0 release Windows/Linux and documentation jobs completed successfully; cbcfa3d design-only release run was in_progress when observed. No claim for a later metadata-only commit; see execution/reaudit_ci.json.",
   "evidence_sha256": {
     "execution/post_manual_cleanup.json": "c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d",
     "execution/post_manual_preservation.json": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
@@ -145,7 +161,24 @@
     "execution/post_manual_final_review.json": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
     "execution/post_manual_p10.json": "eb87d416e4547c0938d8a2ad99c0af6257a57a3bde9e66bdf36a13798cfb048b",
     "execution/post_manual_report.json": "c0788bc27697b4e7b27d8d59f80d76178045e04cb9b63459fcbbed296be9ef11",
-    "../../../reviews/foundation_root_cause_review_2026-11-23.md": "6772535c4b062ab7293c5393defe1746deb62b4db4f21a00de9a557e47d7cea4"
+    "../../../reviews/foundation_root_cause_review_2026-11-23.md": "00f4fdf0c62a2bc49bd5bdccce465f5b277c03ecd2483d9dd591484e2a88dd69",
+    "execution/reaudit.json": "231653671c4901a0983b4ca048c2118f5a15bebec112ab58ea49ae3298a4c0ef",
+    "execution/reaudit_residual_review.json": "5d5e42fcec5feff0cf60c57e623e62e9ab341bba4fc43f5c33ee24f86f65d619",
+    "execution/reaudit_preservation_review.json": "99e990e84ff69ecea5810db4d8a3cc2ca6ea3cc5561c2d4e19d96272be9f24b5",
+    "execution/reaudit_benchmark_review.json": "7b7bf8d7723e57e2254c7ede62970a1c19b1983fe87b5a9bb3862011f1be97cf",
+    "execution/reaudit_user_flow.json": "4a553abf7087a675188c2bc5e519d8e7fe803e6703ea567b387044885e80faab",
+    "execution/reaudit_ci.json": "051dd694ae6e6864c3d5f8c87e298033d96eaf548a522ede71ef2212b7b9cb4f",
+    "execution/reaudit_closeout_review.json": "5ac1a54dfcccc4964a1e4910e1dcaa379b50cb3886d105706853453b23b5c706"
   },
-  "evidence_path_basis": "Relative to the directory containing completion.json."
+  "evidence_path_basis": "Relative to the directory containing completion.json.",
+  "revalidated_utc": "2026-11-23T09:25:05.248920+00:00",
+  "latest_reaudit": {
+    "source_head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+    "record": "execution/reaudit.json",
+    "fresh_public_flow": "execution/reaudit_user_flow.json",
+    "independent_reviews": 3,
+    "new_finished_helpers_removed": 4,
+    "mandatory_retirement_remaining": [],
+    "reason": "Reactivated goal current-state audit after intentional separate proposal update; current production unchanged"
+  }
 }

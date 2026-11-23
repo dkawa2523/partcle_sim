@@ -4,6 +4,26 @@
 コード撤去と下記の現行確認を実施した。利用者によるバイナリ削除後、記録済み撤去範囲の残存0件と保護対象の保持を確認した。
 新しい基盤課題・根因・改良案は[全体調査](../../../reviews/foundation_root_cause_review_2026-11-23.md)へ分けた。
 
+## 再開された目標の完了監査
+
+`cbcfa3d`の現在状態を原目標の14要件へ照合した[再監査](execution/reaudit.json)で、撤去範囲・公開経路・検証・benchmark・保全・説明の証拠を再確認した。
+残存、保全、benchmark/結果の三つの独立監査で、現在の必須撤去残件はない。
+追加で、全体調査に使い終えた一時probe実行器4件を撤去した。固定合成入力・故障注入・serializationの調査用であり、
+通常入口、production式、独立科学oracleからのconsumerがないことを内容と呼出側で確認した。
+compactな観測JSON、実験条件、調査記録は保持し、新しい常設cleanup runnerは作っていない。
+
+撤去後の[新しい公開操作](execution/reaudit_user_flow.json)は、自分のCSV/recipeからcreate/check/run、inspect/analyze/export/viewまで8 CLI全て成功。
+独立な距離/速度の解析式に対する壁到達誤差は3.47e-18 s、保存5点の位置差0、failure0、派生成果物のsource identityも一致した。
+対象5 testsも新たに成功した。全suiteと影響benchmarkは既存の実行済みraw receiptを確認し、
+現行67 source・76 testsのSHAが実行時と一致することを再確認した。今回それらを再実行したとは数えない。
+reportの入力/表示値・snapshot/dist・26 bindingも同一bytesであることを確認し、以前の公式build/表示検査の範囲を広げない。
+
+分類済み77,774件の不在、199空roots、native479 SHAと既知11環境の保持も現物で再確認した。
+完了記録の提案文書hashは、その後に意図して更新した全体調査の現在bytesへ更新し、過去の実行receiptは書換えていない。
+[remote CI観測](execution/reaudit_ci.json)では`9015de0`のWindows/Linux releaseと文書jobが成功。
+後続の文書のみのCIは観測時の状態を記録し、未完jobやさらに後のcommitを成功と推定しない。
+次段階の20課題・13改良単位は別の提案であり、本撤去で実装した機能には含めない。
+
 ## 利用者による削除後の確認
 
 現在の撤去範囲と検証・採点の集約は[完了記録](completion.json)、物理削除の確認は[削除後の確認](execution/post_manual_cleanup.json)を正本とする。

@@ -1,0 +1,216 @@
+{
+  "status": "PASS_SCOPED_RETIREMENT_BENCHMARK_AND_USER_EVIDENCE",
+  "recorded_utc": "2026-11-23T09:22:37.906258+00:00",
+  "head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+  "reviewer": "/root/retirement_benchmark_evidence_audit",
+  "scope": "Read-only audit of affected benchmark retirement, current public routes, independent oracles, source-bound execution and report data; only this audit JSON written",
+  "source_binding": {
+    "production_external_files": 67,
+    "mismatches": [],
+    "verification_scenario_files": 76,
+    "test_mismatches": [],
+    "code_test_tools_paths_changed_since_executed08ac61b": [],
+    "retained_receipts_checked": 32,
+    "receipt_mismatches": [],
+    "raw_benchmark_artifacts_checked": 7,
+    "raw_benchmark_mismatches": [],
+    "later_b03_source_matches_memory_retirement": true
+  },
+  "requirement_matrix": [
+    {
+      "requirement": "Retired benchmark alternative runner and its old generated reports removed",
+      "evidence": [
+        "tests/performance inventory eight current modules",
+        "p11_exponential.py absent",
+        "P10 _materialize_cases relaxation preserves C03 input, _driver/_launch_worker share current timed engine",
+        "retired report paths absent"
+      ],
+      "status": "proven for identified benchmark retirement"
+    },
+    {
+      "requirement": "Required physical workload preserved without alternate runtime",
+      "evidence": [
+        "P10 field/event/relaxation current scenarios",
+        "input_correspondence exact canonical hash/settings except display name",
+        "closed-form C03/scenario and variable-coefficient oracles in executed full JUnit"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "Affected benchmark execution really rerun after replacement",
+      "evidence": [
+        "P06 eight32-particle scenarios",
+        "P10 six observations256/32/256",
+        "P14 complete eight-row smoke",
+        "P19 global/local256",
+        "B03 four32-particle rows",
+        "later B03 rerun after private-layout cleanup",
+        "post-manual P10 all3workloads N8 cold/warm6observations"
+      ],
+      "status": "proven within stated smoke/measurement scopes"
+    },
+    {
+      "requirement": "Input/executor/reference/evaluator/output distinguished",
+      "evidence": [
+        "tests/performance README distinct purpose/oracle table",
+        "P10 input materialization outside timed child; load+simulate+open timed; identity/count checks separate; C03 oracle separately executed",
+        "process_workers retained editable input, independent absorbing target and separate P14-U refinement",
+        "B03 allocation reserve vs independent transient bound vs RSS distinct"
+      ],
+      "status": "proven"
+    },
+    {
+      "requirement": "Independent scientific properties remain checked",
+      "evidence": [
+        "1240 full JUnit hash verified",
+        "11 C03 selectors present and passed",
+        "workspace ownership/current slab budget and B03 independent646raw/648rounded transient bound retained"
+      ],
+      "status": "proven for retained executed state, not universal accuracy"
+    },
+    {
+      "requirement": "Current public entrypoints can produce and reuse own-input result",
+      "evidence": [
+        "post-manual8CLI commands plus2Python steps all0",
+        "one-particle independent decimal hit and saved positions",
+        "current ResultView reread performed in this audit",
+        "Windows/Linux installed13commands5examples fixtures-free fromoutsidecheckout"
+      ],
+      "status": "proven for documented small examples/routes; not all model combinations"
+    },
+    {
+      "requirement": "Explanations and displayed aggregates agree with actual execution",
+      "evidence": [
+        "current_only README distinguishes earlier runs, manual cleanup, scopes and proposal-only defects",
+        "quality10/performance7/assessment2+4 rows equal current snapshot",
+        "current snapshot and built snapshot/HTML hashes match",
+        "26authority/input bindings all current"
+      ],
+      "status": "proven for artifact data/content binding; visual QA retained prior scope"
+    },
+    {
+      "requirement": "Windows/Linux and scale claims honest",
+      "evidence": [
+        "Windows/Linux wheel49source bytes, README and lock bind unchanged current production",
+        "remote08ac61b recorded successful Windows/Linux; latest metadata HEAD CI not inferred",
+        "P10 N8 and other smoke explicitly not100k/1M qualification, inter-revision speedup or native parity"
+      ],
+      "status": "proven scope labels; no new remote CI/scale/native execution"
+    }
+  ],
+  "junit_rechecked": [
+    {
+      "path": ".artifacts\\current_only_memory_20261123\\final_full.xml",
+      "hash_matches": true,
+      "suite": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "1240",
+        "time": "473.507",
+        "timestamp": "2026-11-23T15:21:46.138848+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    },
+    {
+      "path": ".artifacts\\current_only_20261123\\external_final.xml",
+      "hash_matches": true,
+      "suite": {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "0",
+        "tests": "156",
+        "time": "39.064",
+        "timestamp": "2026-11-23T15:00:06.776541+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    }
+  ],
+  "independent_C03_cases": [
+    "test_exponential_midpoint_is_exact_for_c03_and_replay_keeps_endpoint_hint",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[0.0]",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[1e-16]",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[1e-10]",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[0.0001]",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[1.0]",
+    "test_exponential_midpoint_coefficients_cover_wide_relaxation_range[1000.0]",
+    "test_exponential_midpoint_has_second_order_for_variable_coefficients",
+    "test_exponential_midpoint_c03_matches_the_closed_form[0.75]",
+    "test_exponential_midpoint_c03_matches_the_closed_form[0.375]",
+    "test_exponential_midpoint_c03_matches_the_closed_form[0.125]"
+  ],
+  "current_public_result_recheck": {
+    "operation": "open_result/read_final/read_boundary_events/read_failure_events/iter_frames/source_identity",
+    "result": ".artifacts/current_only_20261123/post_manual_user_flow/result",
+    "new_simulation": false,
+    "particles": 1,
+    "events": 1,
+    "failure_events": 0,
+    "frame_count": 5,
+    "hit_error_s": 3.469446951953614e-18,
+    "max_saved_position_error_m": 0.0,
+    "source_identity_matches_retained_receipt": true
+  },
+  "report_current_bytes_recheck": {
+    "snapshot_sha256": "12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191",
+    "hash_matches_prior_build": true,
+    "dist_snapshot_matches": true,
+    "dist_html_matches": true,
+    "authority_input_bindings": 26,
+    "binding_mismatches": [],
+    "projection_rows": {
+      "quality": {
+        "quality_findings": {
+          "rows": 10,
+          "equal_snapshot": true
+        }
+      },
+      "performance": {
+        "implementation_work_packages": {
+          "rows": 7,
+          "equal_snapshot": true
+        }
+      },
+      "assessment": {
+        "case_audit": {
+          "rows": 2,
+          "equal_snapshot": true
+        },
+        "trajectory_divergence": {
+          "rows": 4,
+          "equal_snapshot": true
+        }
+      }
+    },
+    "new_browser_or_official_build": false,
+    "scope": "Current artifact bytes/projection equality; prior scoped official build and visual QA retained, not repeated or broadened"
+  },
+  "retired_source_exists": false,
+  "retired_reports": [
+    {
+      "path": "evidence\\retirement_2026_11_23\\performance\\exponential.json",
+      "exists": false
+    },
+    {
+      "path": "evidence\\resolved_semantics_2026_11_23\\performance\\p11.json",
+      "exists": false
+    }
+  ],
+  "mandatory_findings": [],
+  "advisory": [
+    {
+      "topic": "Frozen completion proposal-document digest",
+      "detail": "completion.json includes the earlier primary review digest. cbcfa3d intentionally rewrote that proposal only; current retirement audit should identify the archived binding scope or point latest design binding to foundation_design investigation. Do not rewrite historical raw execution receipts or recertify scientific runs."
+    }
+  ],
+  "not_run": [
+    "New benchmark simulation",
+    "New full suite",
+    "Clean install/release matrix",
+    "New native COMSOL solve or A/P ensemble",
+    "New browser QA or report build"
+  ],
+  "conclusion": "No required benchmark runner/result retirement or missing affected execution found. Existing source-bound runs remain valid for their original scopes. Do not convert the separate20-issue foundation proposal into required retirement implementation or use metadata-only HEAD to demand unchanged large reruns."
+}

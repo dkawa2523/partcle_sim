@@ -1,0 +1,209 @@
+{
+  "status": "passed",
+  "recorded_utc": "2026-11-23T09:21:27.580736+00:00",
+  "source_head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+  "scope": "Fresh own CSV/recipe public flow after four finished research helpers removed; no native solve or general qualification",
+  "commands": [
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "init",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\example",
+        "--example",
+        "xy-ballistic",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.717307599959895,
+      "operation": "init",
+      "status": "created"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "create",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\example\\own_recipe.yaml",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\input",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.71415260003414,
+      "operation": "create",
+      "status": "created"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "check",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\input\\case.yaml",
+        "--workers",
+        "1",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.7705825000302866,
+      "operation": "check",
+      "status": "ready"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "run",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\input\\case.yaml",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\result",
+        "--workers",
+        "1",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 2.5382363999960944,
+      "operation": "run",
+      "status": "complete"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "inspect",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\result",
+        "--full",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.5853078999789432,
+      "operation": "inspect",
+      "status": "complete"
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "analyze",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\summary.json",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.6551833000266925,
+      "operation": null,
+      "status": null
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "export",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\export",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.7002867000410333,
+      "operation": null,
+      "status": null
+    },
+    {
+      "command": [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "-m",
+        "chamber_particles",
+        "view",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\result",
+        "-o",
+        "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\.artifacts\\retirement_reaudit_20261123\\public_flow\\view",
+        "--detail",
+        "--json"
+      ],
+      "exit_code": 0,
+      "seconds": 1.4768296999391168,
+      "operation": null,
+      "status": null
+    }
+  ],
+  "analytic_oracle": {
+    "formula": "wall distance / initial velocity; x(t)=min(wall,x0+v0*t)",
+    "expected_hit_s": 0.0175,
+    "observed_hit_s": 0.017499999999999998,
+    "absolute_hit_error_s": 3.469446951953614e-18,
+    "absolute_tolerance_s": 1e-14,
+    "saved_rows": 5,
+    "max_position_error_m": 0.0,
+    "model_weight": 2,
+    "terminal": "stuck",
+    "boundary_id": 2,
+    "derived_identity_matches": true,
+    "valid_svg_documents": 3,
+    "failure_events": 0
+  },
+  "source_result": {
+    "case_file_hash": "sha256:7c8624d3da8742fc1523b294e53b725eeb47adc8c79edb60101c636d06243051",
+    "case_name": "retirement_reaudit_own_ballistic",
+    "context": {
+      "content_hash": "sha256:227d55a1eac7e5597de032ff51b80ee92dc18cc4e6d2bdc52feeb00f4689eb3d",
+      "file_sha256": "sha256:80ccd0b1c35b580c47d30902c0107631415c808c976aab6cc70b6a98daf92a04",
+      "path": "context.h5"
+    },
+    "data_content_hash": "sha256:5e0baec3eb7024e59ec5c6d289261f2f907d49dd886223e33f30d65d493ee214",
+    "manifest_sha256": "sha256:f5c66172fcb76605f2f19001b110d924b449fbde4cc0ba0ec127316bed7fb78b",
+    "result_algorithm_revision": "durable_context_segmented_result_v7",
+    "result_schema_version": 4
+  },
+  "run_summary": {
+    "counts": {
+      "boundary_events": 1,
+      "failure_events": 0,
+      "frame_rows": 5,
+      "frames": 5,
+      "macro_steps": 20,
+      "particles": 1,
+      "probe_rows": 0,
+      "probes": 0,
+      "release_events": 1,
+      "series": 20
+    },
+    "particles": 1,
+    "boundary_events": 1,
+    "failure_events": 0
+  },
+  "post_export_public_read": "open_result/read_final/read_boundary_events/read_failure_events/manifest_document.counts: passed",
+  "observer_note": "An initial record-extraction attempt used nonexistent manifest.summary and raised KeyError before writing; corrected to the actual public counts document. No simulation failure or source change."
+}

@@ -1,0 +1,291 @@
+{
+  "status": "COMPLETE_REAUDITED_CURRENT_ONLY_RETIREMENT",
+  "recorded_utc": "2026-11-23T09:25:05.248920+00:00",
+  "inspected_source_head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+  "goal": "Full original current-only retirement objective retained; this is a requirement-by-requirement current-state re-audit, not a narrower substituted objective",
+  "previous_goal_turn_classification": "progress: source-bound design and compact investigation evidence committed atcbcfa3d; current turn independently audited retirement scope and removed newly finished temporary runners",
+  "retired_finished_helpers": [
+    {
+      "path": ".artifacts/foundation_design_20261123/probe_clients.py",
+      "bytes": 7381,
+      "sha256": "ad44853b376709881f946c1b0698351e4cbdd0bf57585c9ce37f2f746b264e67",
+      "reason": "Finished bounded synthetic investigation runner; compact observed evidence and owning design retained; no installed or test consumer",
+      "status": "removed_exact_file_after_role_and_consumer_review",
+      "post_removal_verified": true
+    },
+    {
+      "path": ".artifacts/foundation_design_20261123/probe_field_identity.py",
+      "bytes": 2620,
+      "sha256": "c104c3b1b0f9b8f797ac9e997196e4e93f5efa7fff25fb08d06bd14fc8eeea52",
+      "reason": "Finished bounded synthetic investigation runner; compact observed evidence and owning design retained; no installed or test consumer",
+      "status": "removed_exact_file_after_role_and_consumer_review",
+      "post_removal_verified": true
+    },
+    {
+      "path": ".artifacts/foundation_design_20261123/probe_static_builder.py",
+      "bytes": 2206,
+      "sha256": "cd1feb384f7181655548be50eb57b169dd413dcca4abb218520344a10bf67551",
+      "reason": "Finished bounded synthetic investigation runner; compact observed evidence and owning design retained; no installed or test consumer",
+      "status": "removed_exact_file_after_role_and_consumer_review",
+      "post_removal_verified": true
+    },
+    {
+      "path": ".artifacts/foundation_design_20261123/payload_probe.py",
+      "bytes": 2674,
+      "sha256": "501b36c12281d95d2da572d304649bd36c4a69b8f5f2362c33459edb796304b4",
+      "reason": "Finished bounded synthetic investigation runner; compact observed evidence and owning design retained; no installed or test consumer",
+      "status": "removed_exact_file_after_role_and_consumer_review",
+      "post_removal_verified": true
+    }
+  ],
+  "preserved_probe_evidence": "foundation_design compact evidence JSON hashes unchanged, investigation conditions and drafting observations retained; no production or independent oracle removed",
+  "requirement_matrix": [
+    {
+      "id": "G01",
+      "requirement": "Confirm current purpose and major public/current ownership routes",
+      "evidence": [
+        "../README.md",
+        "reaudit_residual_review.json",
+        "../../../../product_specification.md",
+        "../../../../architecture_proposal.md"
+      ],
+      "result": "Current user input/check/simulation/result flow and active roles inspected; no alternative engine required",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G02",
+      "requirement": "Remove retired implementations, compatibility layers and duplicate replacement routes across related areas",
+      "evidence": [
+        "core_review.json",
+        "external_review.json",
+        "benchmark_review.json",
+        "reaudit_residual_review.json"
+      ],
+      "result": "Earlier replacement/removal verified against actual current callers and dynamic entrypoints; 160 retired campaign paths absent; no new mandatory runtime removal",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G03",
+      "requirement": "Migrate required roles before removing old routes and no alias resurrection",
+      "evidence": [
+        "reaudit_residual_review.json",
+        "reaudit_benchmark_review.json"
+      ],
+      "result": "P10 owns C03 relaxation; console/module share sole CLI; one current format/engine; needed adapters and independent oracle roles verified",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G04",
+      "requirement": "Remove retired-only settings/tests/fixtures/diagnostics/contracts/examples/docs/results and finished temporary helpers",
+      "evidence": [
+        "continuation_cleanup.json",
+        "memory_retirement.json",
+        "other_text_cleanup.json",
+        "post_manual_cleanup.json",
+        "reaudit_residual_review.json"
+      ],
+      "result": "Previous classified retirement retained; four newly finished research runners removed exactly; observed evidence and live examples remain",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G05",
+      "requirement": "Preserve needed user behavior and independent scientific checks while removing internal-layout tests",
+      "evidence": [
+        "final_core_full.json",
+        "reaudit_benchmark_review.json",
+        "reaudit_residual_review.json"
+      ],
+      "result": "1240 core/scenario JUnit rechecked at identical code/test bytes, independent C03/OU/wall/axis checks retained, five targeted checks freshly passed",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G06",
+      "requirement": "Distinguish benchmark execution, inputs/conditions, independent reference, evaluator and generated results",
+      "evidence": [
+        "reaudit_benchmark_review.json",
+        "../../../../solver/tests/performance/README.md"
+      ],
+      "result": "Eight current workload purposes mapped; historical names are not retired-runtime selectors; current input/reference/evaluation roles separated",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G07",
+      "requirement": "Actually rerun affected benchmarks after retirement and reflect measurements accurately",
+      "evidence": [
+        "benchmark_review.json",
+        "b03_current.json",
+        "b03_comparison.json",
+        "post_manual_p10.json",
+        "reaudit_benchmark_review.json"
+      ],
+      "result": "P06/P10/P14/P19/B03 reruns and later B03/P10 checks validated; scopes remain smoke/characterization, not scale or equal-accuracy speedup claims",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G08",
+      "requirement": "Remove old generated artifacts without inferring deletion of real inputs/trained assets/experiments/environments",
+      "evidence": [
+        "post_manual_cleanup.json",
+        "reaudit_preservation_review.json"
+      ],
+      "result": "77774 classified files remain absent; 199 roots empty; native479 SHA matches and known11 environment configurations/interpreters retained",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G09",
+      "requirement": "Inspect old names/APIs/settings/formats/arguments/dependencies through actual use",
+      "evidence": [
+        "reaudit_residual_review.json"
+      ],
+      "result": "Searched current src/tests/tools/scripts/examples and registration/config; required live numerical adapters and field fallback semantics retained",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G10",
+      "requirement": "Execute current public workflow from own input to reusable result",
+      "evidence": [
+        "reaudit_user_flow.json"
+      ],
+      "result": "Eight fresh CLI commands passed after helper removal; own CSV/recipe; wall-time error3.47e-18s, saved-position error0, failure0, matching analysis/export/view identity",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G11",
+      "requirement": "Independently inspect residuals and misdeletion; resolve mandatory findings and rerun affected checks",
+      "evidence": [
+        "reaudit_residual_review.json",
+        "reaudit_preservation_review.json",
+        "reaudit_benchmark_review.json",
+        "reaudit_user_flow.json"
+      ],
+      "result": "Three independent domain audits; four helpers removed and absence rechecked; stale latest-proposal binding corrected; no mandatory retirement findings remain",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G12",
+      "requirement": "Keep diagrams/tables/explanations consistent with executed result evidence",
+      "evidence": [
+        "post_manual_report.json",
+        "reaudit_benchmark_review.json"
+      ],
+      "result": "Current report snapshot/dist/projection values and26 bindings rechecked; unchanged prior official build/visual QA scope retained, no new browser/build claim",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G13",
+      "requirement": "Update user guidance/current responsibility/compatibility policy and keep history out of AGENTS accumulation",
+      "evidence": [
+        "../README.md",
+        "../../../../AGENTS.md",
+        "../../../../solver/README.md",
+        "../../../../solver/tests/performance/README.md"
+      ],
+      "result": "Current guidance remains one entry/strict current formats/one role owner; retirement history and re-audit stored here; no additional prohibitions appended",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    },
+    {
+      "id": "G14",
+      "requirement": "Resolve executable mandatory work and state true external limitations",
+      "evidence": [
+        "reaudit.json",
+        "reaudit_ci.json"
+      ],
+      "result": "No mandatory retirement task or external blocker remains; proposal capabilities and new numerical/native certification explicitly outside the retirement claim",
+      "status": "PROVEN_WITH_STATED_SCOPE"
+    }
+  ],
+  "remaining_required_cleanup_work": [],
+  "external_blockers": [],
+  "fresh_executions": {
+    "public_cli_commands": 8,
+    "targeted_tests_passed": 5,
+    "targeted_tests_seconds": 1.68,
+    "dependency_lock": "passed",
+    "documentation_checker": {
+      "documents": 33,
+      "skills": 4,
+      "errors": []
+    },
+    "git_diff_check": "passed",
+    "documentation_and_report_tests": {
+      "command": "uv run --locked pytest tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q",
+      "passed": 7,
+      "seconds": 1.13
+    }
+  },
+  "source_and_test_binding": {
+    "production_external_files": 67,
+    "mismatches": [],
+    "verification_scenario_files": 76,
+    "test_mismatches": [],
+    "code_test_tools_paths_changed_since_executed08ac61b": [],
+    "retained_receipts_checked": 32,
+    "receipt_mismatches": [],
+    "raw_benchmark_artifacts_checked": 7,
+    "raw_benchmark_mismatches": [],
+    "later_b03_source_matches_memory_retirement": true
+  },
+  "new_full_suite_or_benchmark_or_native_run": false,
+  "prior_run_scope": "Affected benchmarks/full suites/install matrices were actually executed in prior retirement stages; current production67 and verification/scenario76 hashes match executed state, verified directly. No repetition claimed for this re-audit.",
+  "proposal_binding_update": {
+    "prior_completion_document_sha256": "6772535c4b062ab7293c5393defe1746deb62b4db4f21a00de9a557e47d7cea4",
+    "prior_design_document_sha256": "d0a7ddd630b7fdc04776d3f861331663b6f70ba6944879537f42cc660813dc96",
+    "current_design_document_sha256": "00f4fdf0c62a2bc49bd5bdccce465f5b277c03ecd2483d9dd591484e2a88dd69",
+    "reason": "cbcfa3d expanded the separate investigation proposal; this turn corrects completed-helper presence wording. Old execution receipts remain frozen."
+  },
+  "report_scope": {
+    "snapshot_sha256": "12e75d3bc9d6e4bf515c6367e1d7b85e0b1fa2c7bf7351a28fe06d21b29fd191",
+    "hash_matches_prior_build": true,
+    "dist_snapshot_matches": true,
+    "dist_html_matches": true,
+    "authority_input_bindings": 26,
+    "binding_mismatches": [],
+    "projection_rows": {
+      "quality": {
+        "quality_findings": {
+          "rows": 10,
+          "equal_snapshot": true
+        }
+      },
+      "performance": {
+        "implementation_work_packages": {
+          "rows": 7,
+          "equal_snapshot": true
+        }
+      },
+      "assessment": {
+        "case_audit": {
+          "rows": 2,
+          "equal_snapshot": true
+        },
+        "trajectory_divergence": {
+          "rows": 4,
+          "equal_snapshot": true
+        }
+      }
+    },
+    "new_browser_or_official_build": false,
+    "scope": "Current artifact bytes/projection equality; prior scoped official build and visual QA retained, not repeated or broadened"
+  },
+  "evidence_sha256": {
+    "reaudit_residual_review.json": "5d5e42fcec5feff0cf60c57e623e62e9ab341bba4fc43f5c33ee24f86f65d619",
+    "reaudit_preservation_review.json": "99e990e84ff69ecea5810db4d8a3cc2ca6ea3cc5561c2d4e19d96272be9f24b5",
+    "reaudit_benchmark_review.json": "7b7bf8d7723e57e2254c7ede62970a1c19b1983fe87b5a9bb3862011f1be97cf",
+    "reaudit_user_flow.json": "4a553abf7087a675188c2bc5e519d8e7fe803e6703ea567b387044885e80faab",
+    "reaudit_ci.json": "051dd694ae6e6864c3d5f8c87e298033d96eaf548a522ede71ef2212b7b9cb4f",
+    "reaudit_closeout_review.json": "5ac1a54dfcccc4964a1e4910e1dcaa379b50cb3886d105706853453b23b5c706"
+  },
+  "path_basis": "evidence_sha256 names relative to this execution directory; requirement evidence is relative to this directory unless an explicitly named current source location",
+  "limitations": [
+    "No all-workspace binary purge or full environment-byte integrity claim",
+    "No new all-model/native/mesh/path/ensemble scientific certification",
+    "Separate20-issue13-package improvement design is not implemented by this retirement goal",
+    "Latest metadata commit CI not inferred from earlier source-bound successful Windows/Linux runs"
+  ],
+  "independent_closeout": {
+    "record": "reaudit_closeout_review.json",
+    "status": "PASS",
+    "remaining_mandatory_findings": [],
+    "last_correction": "Observed documentation CI job persisted, actual source/URL/success steps match README; all bindings rechecked"
+  }
+}

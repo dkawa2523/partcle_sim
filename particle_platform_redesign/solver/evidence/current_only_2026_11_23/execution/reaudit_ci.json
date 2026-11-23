@@ -1,0 +1,424 @@
+{
+  "recorded_as": "Read-only GitHub API observation, not inferred from local tests",
+  "source_9015de0": {
+    "head": "9015de024aabc145b6615ccc18bab486055bf894",
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45139193979",
+    "jobs": [
+      {
+        "id": 137572693846,
+        "name": "windows-latest / Python 3.12",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check out repository",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python 3.12",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up locked uv series",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Synchronize locked development environment",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check dependency lock",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check source formatting",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check source lint",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check types",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check import boundaries",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check numerical complexity",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify core and public scenarios",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify external workflows without COMSOL",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Generate producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Inspect producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Analyze producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Visualize producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run performance smoke",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build release wheel",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare clean runtime dependencies",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install verified wheel into clean runtime",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify clean-installed API and process CLI",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify installed workflow without checkout fixtures",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verification evidence",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verified release wheel",
+            "status": "completed",
+            "conclusion": "skipped"
+          },
+          {
+            "name": "Post Set up locked uv series",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python 3.12",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Check out repository",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 137572694014,
+        "name": "ubuntu-latest / Python 3.12",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check out repository",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up Python 3.12",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Set up locked uv series",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Synchronize locked development environment",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check dependency lock",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check source formatting",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check source lint",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check types",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check import boundaries",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check numerical complexity",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify core and public scenarios",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify external workflows without COMSOL",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Generate producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Inspect producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Analyze producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Visualize producer-neutral Quick Start",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run performance smoke",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Build release wheel",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Prepare clean runtime dependencies",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Install verified wheel into clean runtime",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify clean-installed API and process CLI",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify installed workflow without checkout fixtures",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verification evidence",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Retain verified release wheel",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up locked uv series",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Set up Python 3.12",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Check out repository",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      },
+      {
+        "id": 137591476820,
+        "name": "Publish GitHub release",
+        "status": "completed",
+        "conclusion": "skipped",
+        "steps": []
+      }
+    ]
+  },
+  "source_9015de0_documentation": {
+    "head": "9015de024aabc145b6615ccc18bab486055bf894",
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45139193932",
+    "jobs": [
+      {
+        "id": 137572694133,
+        "name": "documentation-and-report",
+        "status": "completed",
+        "conclusion": "success",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run actions/setup-python@v7",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Run uv sync --locked",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Check maintained links, skills and report bindings",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Test snapshot reproduction and document checks",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Verify the preserved report runtime",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/setup-python@v7",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Post Run actions/checkout@v7",
+            "status": "completed",
+            "conclusion": "success"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success"
+          }
+        ]
+      }
+    ]
+  },
+  "design_only_cbcfa3d": {
+    "id": 45144696454,
+    "head_sha": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+    "status": "in_progress",
+    "conclusion": null,
+    "url": "https://github.com/dkawa2523/partcle_sim/actions/runs/45144696454"
+  },
+  "claim_limit": "The cbcfa3d change is proposal/evidence only. Its observed status is not extrapolated to a later metadata-only commit. Current goal requires actual affected local executions and source binding, not release publication."
+}

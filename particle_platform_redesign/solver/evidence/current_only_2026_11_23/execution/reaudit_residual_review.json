@@ -1,0 +1,138 @@
+{
+  "reviewer": "retirement_current_residual_audit",
+  "recorded_utc": "2026-11-23T09:21:27.964839+00:00",
+  "inspected_head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+  "scope": "Independent current software/entrypoint/config/tests/external executor residual and preservation audit. No production edits or deletions by reviewer.",
+  "full_inherited_objective": "Current-only retirement, not automatic implementation of the separate 20-issue foundation design proposal.",
+  "read_authorities": [
+    "../../AGENTS.md",
+    "../AGENTS.md",
+    "evidence/retirement_2026_11_23/README.md",
+    "evidence/current_only_2026_11_23/README.md",
+    "evidence/retirement_2026_11_23/independent_review.json"
+  ],
+  "examined_files_sha256": {
+    "pyproject.toml": "5583abbde0d74c30620ed269a747defa86fcc4bdac55457cf8ffd5e5662706ae",
+    "src/chamber_particles/__init__.py": "fc02e67effff4c6f693806cb1ffa086d7c71c37d5856a3560ca414a247538160",
+    "src/chamber_particles/__main__.py": "9d14b4f4a5be3166b254e2060cfedf6a49b0e7126f203c66148bb8d0ac8982e3",
+    "src/chamber_particles/api.py": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a",
+    "src/chamber_particles/case.py": "887295525dcc2f4c7e4dca2aad10735817ba70dfef958a0c08235d5d2e00d4b6",
+    "src/chamber_particles/case_format.py": "125dfb6f75a1cb0bbbcfce6dd96348601fe089a0b85b8e0bf8c2e3ef7019fb3c",
+    "src/chamber_particles/output.py": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5",
+    "src/chamber_particles/engine.py": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d",
+    "src/chamber_particles/execution.py": "65e6ffb482788c91d8f5efc3fd089848677de2b06e529e7ce4db0797b0811309",
+    "src/chamber_particles/transport.py": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce",
+    "src/chamber_particles/events.py": "217fb30d8c93262603d6d3d473f9ca5556b0784984e2a2af066a3653f97ed3d8",
+    "src/chamber_particles/integrators.py": "e7aee73d89f8bf6ce7f7355d65da260812f9391cba2f0a44656f4cbf9376e334",
+    "src/chamber_particles/field_numerics.py": "473d6681eac861cd9f9eb98aa723cc8be7206a7aec1fc8622b54fb6458620d71",
+    "src/chamber_particles_tools/cli.py": "a60f6ec8f826ee43a6909e5c965431780b1ebcaac6a4f0b5ee995a695fb5c3de",
+    "src/chamber_particles_tools/inputs.py": "0bdc45a98bba68eab6f6fb73740ea7a8d8be1b95bfd8ceb57f6d3cf25d54bf7d",
+    "src/chamber_particles_tools/examples.py": "4c7f60b1ff9cbc68dde0483985825613497af701f548d7d299b62d847de8537c",
+    "src/chamber_particles_tools/source_builder/__init__.py": "330fcb0424c7c8d06bad5d9a78ff3e4d5768cf85a1caa66ed354dabce320e838",
+    "src/chamber_particles_tools/source_builder/README.md": "55f368f974d1685b1d367b18345ada9c09bdfb59b4ab2f92c1aafdc204cbfecd",
+    "src/chamber_particles_tools/source_builder/producer.py": "92648bd6d8d67b82f6361d5a608aaeab2b99aaf366b8ec0312f60d66970ce470",
+    "tests/verification/test_cpu.py": "8e81c56cc5817f38fe2fa4f95d59f9e19499823e7f1d53e42b99ea39c227a06e",
+    "tests/verification/test_events.py": "cfe33b2c8ba2f8e3a110c3841452500e7b293a9e294aa269f7ea9851437c089e",
+    "tests/performance/README.md": "d1c4d332499433e6c5e8ad2d3a7d5953b3d46067d3bd561e5ef7be8ca4e372c3",
+    "tests/performance/p09_memory.py": "44c95437f5db229cf856ae02a64a9ded8cae78d5b502d7f9d42472e799509bde",
+    "tests/performance/p19l_local_applicability.py": "81223e824a17c9ead48cbcf149fb51bea5872e1c6af37c921105ffaee5c1aa3d",
+    "tools/vv/comsol/README.md": "dd0e48204ce375ee5268b090ce3ddd06ad599d0a619aac7c952b8039ab6e41c0",
+    "tools/vv/comsol/cases/f02_selected_csv.yaml": "2155421e4b1f3d95d4045ed433fbc80fdc5bc8d3ddf2b37c0cf25607af41d8e2",
+    "tools/vv/comsol/references/README.md": "6e571070bf58f27af8eea4e31982ec52c580d74a69109bef8ad064cd72d10d04",
+    "evidence/current_only_2026_11_23/execution/core_review.json": "c9c4b96584e9d737db468216af25a6e5382f1c8611d510244455736b56c5caa9",
+    "evidence/current_only_2026_11_23/README.md": "5eb4826a77db9fb0cbb7c6f30052a6247e3a7f1441050ca90158fd112e5d00b7",
+    "evidence/retirement_2026_11_23/README.md": "3a2891aaf7f9440470980c4b1ca507585c015ccef734cf6d1a985630b5e7c7c5",
+    "evidence/retirement_2026_11_23/independent_review.json": "61b6040fbfda249cb7fcf91934a31cad1c0309608a0013cbe0742fcb2232052e"
+  },
+  "examined_routes": [
+    "pyproject console and package module dispatch to sole chamber_particles_tools.cli.main; four core operations call shared loaders/prepare/engine/output",
+    "format2 recipe declares complete sources and uses inputs.create_case; example initializes same publisher; source_builder __init__ is actual public-service exposure, not a retired source preparation facade",
+    "case YAML3, canonical data3, result4, checkpoint2 only current strict versions; unsupported versions rejected, no migration dispatch",
+    "run_simulation owns parent macro/release/writer and ProcessTeam; serial/process both use current transport, no archived engine",
+    "exact/curved allocating event entries allocate bounded arenas then invoke sole into kernels; tests and live transport use same current algorithms",
+    "Python evaluator adapters invoke compiled numerical bodies through py_func; retained for independent evaluator/oracle use, not a duplicate solver",
+    "fallback searches preserve exact supported field semantics; P19 local fallback is current bounded applicability proof, not hidden model substitution",
+    "performance clients have distinct current purposes, independent refs and conditions; P10 owns former redundant relaxation measurement; names do not choose old runtimes",
+    "external selected CSV configuration is a real adapter mapping to preserved model_dataset input; retained native Java snapshots establish observation origin"
+  ],
+  "retired_campaign_paths": {
+    "recorded": 160,
+    "present": []
+  },
+  "search_scope": [
+    "src",
+    "tests",
+    "tools",
+    "scripts",
+    "examples",
+    "pyproject.toml",
+    "current README and source client READMEs"
+  ],
+  "search_findings": {
+    "retired_compatibility_or_dynamic_loader_dispatch": "none found in inspected current software roots; metadata imports and dataclass attribute projections are current operations",
+    "source_prepare_case_alias": "absent",
+    "old_p11_measurement_or_fixed_64_guard": "absent",
+    "test_cpu_literal_bytes": "Synthetic per-row byte/capacity arguments explicitly supplied to plan_cpu_memory and checked in ledger; not old implementation size constants, retain",
+    "example_acceptance_literal_inventory": "Known extension seam R18, current five examples still exercised; not evidence of a retired supported example to delete"
+  },
+  "mandatory_additional_cleanup": [
+    {
+      "kind": "finished_temporary_helpers",
+      "targets": [
+        {
+          "path": ".artifacts\\foundation_design_20261123\\probe_clients.py",
+          "present_at_recording": false,
+          "sha256": null
+        },
+        {
+          "path": ".artifacts\\foundation_design_20261123\\probe_field_identity.py",
+          "present_at_recording": false,
+          "sha256": null
+        },
+        {
+          "path": ".artifacts\\foundation_design_20261123\\probe_static_builder.py",
+          "present_at_recording": false,
+          "sha256": null
+        },
+        {
+          "path": ".artifacts\\foundation_design_20261123\\payload_probe.py",
+          "present_at_recording": false,
+          "sha256": null
+        }
+      ],
+      "why": "One-off fixed research witnesses/fault injection/serialization-only experiment; no production or installed/test registration consumer; compact evidence is committed and preserves observed outcomes.",
+      "root_owns_deletion": true,
+      "documentation_followup": "Update proposal current-sounding payload_probe.py presence sentence, rebind owning design digest; preserve compact evidence and scientific observations.",
+      "resolution": "Root deleted the exact four helpers after prehash recording; reviewer independently verified all targets and their named orphan bytecode absent. Proposal no longer claims current helper presence.",
+      "target_absence_verified": true,
+      "named_orphan_bytecode_remaining": []
+    }
+  ],
+  "other_mandatory_retired_runtime_findings": [],
+  "retained_with_reason": [
+    "Current strict input/result/checkpoint versions and active scientific model revisions",
+    "Single numerical-body event allocation and evaluator adapters used by verification",
+    "Independent analytic, OU, Kramers, Gaussian and collision references; current memory allocation and transient-bound verification",
+    "Native observations, producer lineage snapshots and explicit external input mapping; read-only archive, model_dataset and execution environments",
+    "Historical execution receipts and current proposal document; source binding does not imply new numerical qualification"
+  ],
+  "fresh_execution": {
+    "models_cli": {
+      "command": "uv run --locked python -m chamber_particles models --json",
+      "exit_code": 0,
+      "status": "complete"
+    },
+    "targeted_tests": {
+      "command": "uv run --locked pytest tests/verification/test_events.py::test_exact_current_path_keeps_locality_and_requested_time_interval tests/verification/test_case_format.py::test_reader_rejects_an_unsupported_schema_version tests/scenarios/test_load_case.py::test_load_case_rejects_unsupported_format_and_unknown_resource_keys tests/verification/test_cpu.py::test_memory_plan_owns_one_bounded_slab -q",
+      "passed": 5,
+      "seconds": 1.68
+    }
+  },
+  "limitations": [
+    "No claim that every source line, unknown untracked artifact or all model combinations were executed",
+    "No full suite, installed wheel, benchmark rerun or native solve executed by this reviewer; root owns integration execution and other independent artifact/preservation reviews",
+    "No deletion by reviewer; temporary helper removal and evidence updates remain root-owned acceptance actions"
+  ],
+  "remaining_mandatory_retirement_findings": [],
+  "closeout": "PASS for inspected current callable routes and exact reviewed helper removal; root still owns full objective completion audit and other scopes."
+}

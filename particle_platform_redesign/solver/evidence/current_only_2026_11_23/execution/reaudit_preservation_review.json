@@ -1,0 +1,267 @@
+{
+  "audit": "Independent current-state classified retirement and preservation re-audit",
+  "recorded_utc": "2026-11-23T09:20:24.653192+00:00",
+  "inspected_head": "cbcfa3d87f97906e6ab0bae5b37385270084c20b",
+  "status": "PASS_CLASSIFIED_RETIREMENT_AND_KNOWN_PRESERVATION",
+  "role": "Read-only audit; no deletion, activation, source change or simulation",
+  "classified_retirement": {
+    "known_predeletion_files": 77774,
+    "known_predeletion_logical_bytes": 4554763321,
+    "roots_checked": 199,
+    "empty_existing_roots": 199,
+    "absent_roots": [],
+    "remaining_descendant_files": [],
+    "exact_guard_paths_checked": 29,
+    "remaining_guard_files": [],
+    "exact_orphan_paths_checked": 17,
+    "remaining_orphan_files": [],
+    "returned_retired_sources": [],
+    "unexpected_reparse_points": []
+  },
+  "native_preservation": {
+    "manifest_path": "evidence\\comsol_v0_2_0_release_requalification_v2\\publication_saved_native_closure.json",
+    "manifest_sha256_matches_prior": true,
+    "groups": {
+      "external_raw_inputs": 278,
+      "local_regenerated_metadata": 5,
+      "retained_git_authority": 196
+    },
+    "unique_files": 479,
+    "bytes_rehashed": 1126238222,
+    "missing": [],
+    "sha256_mismatches": []
+  },
+  "known_environments": [
+    {
+      "path": "old_code/.venv/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.venv/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/published-runtime-20261010/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/platform_restructure_20261123/runtime_windows/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/package-validation-20261006-5d6fc2/runtime/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/release-win-final2-cf56597edd1447f0974921fd9d661039/runtime/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/release-win-final-aeeb783969bb4ec5ad393c40145d6d1b/runtime/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/resolved_semantics_20261123/runtime_windows/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/release-win-495040ad8bae4b8fb486a9eff80b1909/runtime/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/release-index-20261010/particle_platform_redesign/solver/.venv/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    },
+    {
+      "path": "particle_platform_redesign/solver/.artifacts/release-runtime-20261010/pyvenv.cfg",
+      "config_present": true,
+      "config_sha256_match": true,
+      "interpreter_present": true
+    }
+  ],
+  "protected_tracked_areas": {
+    "diff_vs_8883e3a": [],
+    "worktree_diff": []
+  },
+  "finished_cleanup_helper_present": false,
+  "evidence_binding_checks": [
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_cleanup.json",
+      "exists": true,
+      "expected": "c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d",
+      "observed": "c04188a4f6e900b07c256e09fb0d39d43640700f46f2b68b438712572a6f303d",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_preservation.json",
+      "exists": true,
+      "expected": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+      "observed": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_user_flow.json",
+      "exists": true,
+      "expected": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+      "observed": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_final_review.json",
+      "exists": true,
+      "expected": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
+      "observed": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_p10.json",
+      "exists": true,
+      "expected": "eb87d416e4547c0938d8a2ad99c0af6257a57a3bde9e66bdf36a13798cfb048b",
+      "observed": "eb87d416e4547c0938d8a2ad99c0af6257a57a3bde9e66bdf36a13798cfb048b",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "execution/post_manual_report.json",
+      "exists": true,
+      "expected": "c0788bc27697b4e7b27d8d59f80d76178045e04cb9b63459fcbbed296be9ef11",
+      "observed": "c0788bc27697b4e7b27d8d59f80d76178045e04cb9b63459fcbbed296be9ef11",
+      "matches": true
+    },
+    {
+      "source": "completion.json",
+      "path": "../../../reviews/foundation_root_cause_review_2026-11-23.md",
+      "exists": true,
+      "expected": "6772535c4b062ab7293c5393defe1746deb62b4db4f21a00de9a557e47d7cea4",
+      "observed": "d0a7ddd630b7fdc04776d3f861331663b6f70ba6944879537f42cc660813dc96",
+      "matches": false
+    },
+    {
+      "source": "execution/post_manual_cleanup.json",
+      "path": "post_manual_preservation.json",
+      "exists": true,
+      "expected": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+      "observed": "62a6d18d6a1ced5e72f7e43ad9f8f13cb816e1f2d4831042e8c2d907ef5d004c",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_cleanup.json",
+      "path": "post_manual_user_flow.json",
+      "exists": true,
+      "expected": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+      "observed": "f388d43bb88e813f109e0e7b437d7b46fbe69239c15a21f0a401116326bf13d3",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_cleanup.json",
+      "path": "post_manual_final_review.json",
+      "exists": true,
+      "expected": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
+      "observed": "e30717000d4ad127b65e79a5126ba0b45d93e4d5b41e42125ceb96cdac22c0fd",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": "evidence/current_only_2026_11_23/blocked_cleanup.json",
+      "exists": true,
+      "expected": "fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb",
+      "observed": "fc9d552c5e4368fc427a790ddb63438df4ee2339c8e16db98fc62259c7f97bdb",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": "evidence/current_only_2026_11_23/execution/impasse_audit.json",
+      "exists": true,
+      "expected": "6403fb2cddab305e0a3e0cce3c5468e28e78458748237b71b5cd776d2e1d6170",
+      "observed": "6403fb2cddab305e0a3e0cce3c5468e28e78458748237b71b5cd776d2e1d6170",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": "evidence/current_only_2026_11_23/execution/orphan_bytecode_preflight.json",
+      "exists": true,
+      "expected": "5413c214db619ff0defea9e167715ca20f7873851e0e451265b55242f1207c87",
+      "observed": "5413c214db619ff0defea9e167715ca20f7873851e0e451265b55242f1207c87",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": "evidence/current_only_2026_11_23/execution/p11_artifact_preflight.json",
+      "exists": true,
+      "expected": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7",
+      "observed": "b45c1c7e2c669c9289b7ebacd859b6e4462c87f878a536eeb776a487ca7277d7",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": "evidence/current_only_2026_11_23/execution/p10_debug_artifact_preflight.json",
+      "exists": true,
+      "expected": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff",
+      "observed": "d3c9e0e8f054a450d39c808565c3616889d1001eb890ed4a115a1d2d0db9ffff",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": ".artifacts/current_only_20261123/final_assets_review.json",
+      "exists": true,
+      "expected": "f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79",
+      "observed": "f4ec421110d302b61bea4f35de31699e6690c310ba1fb9ecc2028817e6015c79",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": ".artifacts/current_only_20261123/old_result_text_postreview.json",
+      "exists": true,
+      "expected": "6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2",
+      "observed": "6df405d20fdb17a85e79a4390fc1862077e192fa62ef37a879aa0f9acfb400a2",
+      "matches": true
+    },
+    {
+      "source": "execution/post_manual_preservation.json",
+      "path": ".artifacts/current_only_20261123/guard_artifact_postreview.json",
+      "exists": true,
+      "expected": "dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e",
+      "observed": "dd76d7e6d48eb8221da84ae45fd171796e44807f096adae1114747a88b0e589e",
+      "matches": true
+    }
+  ],
+  "changed_design_document_reference": {
+    "path": "particle_platform_redesign/reviews/foundation_root_cause_review_2026-11-23.md",
+    "historical_9015de0_sha256": "6772535c4b062ab7293c5393defe1746deb62b4db4f21a00de9a557e47d7cea4",
+    "historical_matches_completion_binding": true,
+    "current_sha256": "d0a7ddd630b7fdc04776d3f861331663b6f70ba6944879537f42cc660813dc96",
+    "meaning": "Expected intentional proposal replacement in cbcfa3d, not corrupt immutable cleanup evidence. Current closure should cite the revised design as proposal-only and preserve original receipt scope; old completion design reference is stale against current file bytes."
+  },
+  "mandatory_deletion_or_preservation_findings": [],
+  "recommendation": "No remaining deletion demonstrated in exact classified scope. Retain native inputs, independent references and all known environments. Refresh latest completion audit binding/context to explain changed proposal; do not rewrite frozen raw receipts.",
+  "limits": [
+    "Root inventories establish all classified old result descendants absent; original77728 old result HDF5 had root/count/size inventory, not an exact per-file SHA roster.",
+    "Known479 authority and11 config/interpreter checks do not establish integrity of every unknown asset or every environment byte.",
+    "No new unclassified file was inferred to be deletable from age, name or static unreference."
+  ]
+}
