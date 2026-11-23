@@ -1,0 +1,12 @@
+{
+  "probe": "projection read/hash TOCTOU in-memory orchestration witness; no production file changed",
+  "source": "C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\analysis\\build_report_snapshot.py",
+  "scope": "controlled mutation of a new synthetic input between existing _reviewed_input and _record calls; not proof any historical report was wrong",
+  "changed_at_record_call": true,
+  "observed_finding": "A_read_rows",
+  "bound_hash": "sha256:a9785408c85039418330fbf535272bc9d900aa339d32936deeb6dea10e59d8ab",
+  "expected_hash_for_consumed_A": "sha256:bdaf537ad3580ecbd80429cafc8f672c60eb4285a5d698a2f5f412e44f0292a5",
+  "actual_B_hash": "sha256:a9785408c85039418330fbf535272bc9d900aa339d32936deeb6dea10e59d8ab",
+  "binding_matches_consumed_rows": false,
+  "binding_matches_later_B": true
+}

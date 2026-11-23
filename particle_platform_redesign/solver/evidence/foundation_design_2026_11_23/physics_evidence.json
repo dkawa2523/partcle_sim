@@ -1,0 +1,72 @@
+{
+  "source_head": "9015de024aabc145b6615ccc18bab486055bf894",
+  "inspected_on": "2026-11-23",
+  "scope": "Static physics design investigation; production read-only",
+  "numerical_runs": [],
+  "known_probes_reused": "Existing review evidence only; no repeated qualification claim",
+  "stage_order": [
+    "charge",
+    "drag",
+    "thermophoresis",
+    "ion_drag",
+    "dielectrophoresis",
+    "lift",
+    "electric",
+    "gravity_buoyancy"
+  ],
+  "stage_order_document_mismatch": "docs/physics_models.md:22 puts ion drag last; compiled.py:555 evaluates it before DEP",
+  "file_hashes": [
+    {
+      "path": "src/chamber_particles/physics/catalog.py",
+      "sha256": "8734d39e6c403289e42a4f6d8afc98f4b9aa10f7714ac184c085381a5074dc0b"
+    },
+    {
+      "path": "src/chamber_particles/physics/runtime.py",
+      "sha256": "61fc7d6c085fa86092adaff44742efeac162b9895e284b78c2f1b5e299709cca"
+    },
+    {
+      "path": "src/chamber_particles/physics/compiled.py",
+      "sha256": "9e6401b2d26c64c65faf682b6937d67f5d7402c83037e21b6344be89def70c8d"
+    },
+    {
+      "path": "src/chamber_particles/physics/forces.py",
+      "sha256": "00550a920077f9f09496f3ac715080d38672cef4be4dd057a947d118a388d7e7"
+    },
+    {
+      "path": "src/chamber_particles/physics/charge.py",
+      "sha256": "3078a2d9eedb1c49c188ee8f0a14d858f25814072a49064ace711c5523687c9c"
+    },
+    {
+      "path": "src/chamber_particles/api.py",
+      "sha256": "0625b08eb8e08b19fa2901a63a5e18cee8fd306b05b94dc37fe953ee5295873a"
+    },
+    {
+      "path": "src/chamber_particles/engine.py",
+      "sha256": "0d59d260bd813418b6ea21a6ddcaa72389b7435c4f41ab7ff7c5752db277557d"
+    },
+    {
+      "path": "src/chamber_particles/transport.py",
+      "sha256": "c452ddd75192bb7e6791d92643b241beb01e76c748403d6ef548c935e28477ce"
+    },
+    {
+      "path": "src/chamber_particles/output.py",
+      "sha256": "85d8130a9cafe50a85001d400bce17e4e456aab91c95cf98cc929fd6220214b5"
+    },
+    {
+      "path": "docs/physics_models.md",
+      "sha256": "f034afbff953e2adef5aa14f4d62ec79b33af8b6e81d989ec5f5291678b626a0"
+    },
+    {
+      "path": "docs/numerics.md",
+      "sha256": "641b2f0520466a8b3555e1e93e518e7e98b051def658b67ad5d2b2a7cf7a83dc"
+    },
+    {
+      "path": "src/chamber_particles_tools/electrostatic_builder/workflow.py",
+      "sha256": "34178dad4057a9a722d47fc65f5b381324b7c3172579c48c64d6355ff666dee8"
+    },
+    {
+      "path": "tools/vv/comsol/prepare_vigus_transport.py",
+      "sha256": "f9f17f57f593144a67e444b21ebc083128b4053aeea606c98c631994423bb90d"
+    }
+  ]
+}

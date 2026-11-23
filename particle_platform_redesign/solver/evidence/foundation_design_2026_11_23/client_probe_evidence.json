@@ -1,0 +1,132 @@
+{
+  "head": "9015de024aabc145b6615ccc18bab486055bf894",
+  "scope": "HEAD-bound read-only production investigation; malformed source public CLI; injected analysis publication failure; exact-ID selected-field public import; four-node static-builder check and tiny local build; no COMSOL solve",
+  "source_columns_null": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "    _configuration(config)",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 250, in _configuration",
+      "    if set(columns) - {\"particle_id\", \"release_time_s\", *location, *_PROPERTIES}:",
+      "       ^^^^^^^^^^^^",
+      "TypeError: 'NoneType' object is not iterable"
+    ],
+    "destination_exists": false
+  },
+  "source_filter_null": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "                                         ^^^^^^^^^^^^^^^^^^^^^^",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 215, in _matches",
+      "    for name, expected in filters.items():",
+      "                          ^^^^^^^^^^^^^",
+      "AttributeError: 'NoneType' object has no attribute 'items'"
+    ],
+    "destination_exists": false
+  },
+  "source_missing_filter_column": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "                                         ^^^^^^^^^^^^^^^^^^^^^^",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 216, in _matches",
+      "    value = row[name]",
+      "            ~~~^^^^^^",
+      "KeyError: 'missing'"
+    ],
+    "destination_exists": false
+  },
+  "source_invalid_exact_id": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\source_builder\\producer.py\", line 188, in _integer_column",
+      "    values = [Decimal(row[column]) for row in rows]",
+      "              ^^^^^^^^^^^^^^^^^^^^",
+      "decimal.InvalidOperation: [<class 'decimal.ConversionSyntax'>]"
+    ],
+    "destination_exists": false
+  },
+  "source_extra_cell": {
+    "exit_code": 0,
+    "stdout": "{\"case\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\foundation_design_20261123\\\\probe_inputs_v2\\\\extra_cell-output\\\\case.yaml\", \"content_hash\": \"sha256:a86bd14c67eb2d41fe92ed9a2a49a54f201dd8aa3745f108959e685dc5c67f0d\", \"data\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\foundation_design_20261123\\\\probe_inputs_v2\\\\extra_cell-output\\\\case.h5\", \"operation\": \"create\", \"status\": \"created\"}",
+    "stderr_tail": [],
+    "destination_exists": true
+  },
+  "analysis_write_interruption": {
+    "exit_code": 2,
+    "stderr": "{\"error_type\": \"OSError\", \"message\": \"bounded injected interruption\", \"operation\": \"analyze\", \"status\": \"error\"}",
+    "published_bytes": 28,
+    "valid_json": false
+  },
+  "report_projection_shape": {
+    "accepted_rows": [
+      17
+    ],
+    "accepted_files": [
+      "missing-evidence.json"
+    ],
+    "missing_file_exists": false,
+    "bound_projection_hash": "sha256:837aff58642060e9fb45df70b6df1fba15bffe40a6c3bef81895ff35ac1db77a",
+    "projection_hash_matches": true
+  },
+  "static_builder_linear_time_input": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "    velocity, temperature = _select_thermal_fields(data, specification.input, layout)",
+      "                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 482, in _select_thermal_fields",
+      "    if bool((velocity.values[axis, 0] != 0.0).any()):",
+      "             ~~~~~~~~~~~~~~~^^^^^^^^^",
+      "IndexError: boolean index did not match indexed array along axis 0; size of axis is 3 but size of corresponding boolean axis is 4"
+    ],
+    "canonical_write_succeeded": true,
+    "solve_executed": false
+  },
+  "static_builder_linear_temperature_input": {
+    "exit_code": 0,
+    "stdout": "{\"operation\": \"inputs electrostatic check\", \"report\": {\"builder_revision\": \"reduced_electrostatic_builder_v3\", \"cell_count\": 2, \"configuration_sha256\": \"sha256:4bbc72e8fd7f8ffa2d5b487566ae8059f2f9ec74d974e87c73c9b5825bbaa2e9\", \"fixed_node_count\": 4, \"input_content_hash\": \"sha256:08b3bbaff69758f755646bf7732f70627e26351d78282b9a0bf2fb68331d6594\", \"model_revision\": \"boltzmann_bohm_sheath_c2_v1\", \"node_count\": 4, \"status\": \"checked\"}, \"status\": \"ready\"}",
+    "stderr_tail": [],
+    "canonical_write_succeeded": true,
+    "solve_executed": false
+  },
+  "static_builder_linear_temperature_build": {
+    "exit_code": 1,
+    "stdout": "",
+    "stderr_tail": [
+      "    ion_velocity = _ion_velocity(",
+      "                   ^^^^^^^^^^^^^^",
+      "  File \"C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\src\\chamber_particles_tools\\electrostatic_builder\\workflow.py\", line 412, in _ion_velocity",
+      "    velocity[axis_nodes, 0] = 0.0",
+      "    ~~~~~~~~^^^^^^^^^^^^^^^",
+      "IndexError: boolean index did not match indexed array along axis 0; size of axis is 3 but size of corresponding boolean axis is 4"
+    ],
+    "destination_exists": false,
+    "scope": "same 4-node all-anchored problem; build calls solve then field-generation; no COMSOL solve"
+  },
+  "selected_csv_field_identity_rounding": {
+    "exit_code": 0,
+    "stdout": "{\"operation\": \"inputs import-csv\", \"report\": {\"adapter_revision\": \"selected_nodal_csv_adapter_v4\", \"axis_transformations\": [], \"boundary_group_facet_counts\": {\"bottom\": 1, \"left\": 1, \"right\": 1, \"top\": 1}, \"domain_external_id\": 1, \"excluded_boundary_facet_count\": 0, \"field_join_method\": \"scoped_node_id\", \"fields\": [\"electric_field\"], \"layout\": \"own_fields\", \"maximum_coordinate_match_distance_m\": 0.0, \"minimum_triangle_quality\": 0.8660254037844386, \"node_count\": 4, \"output_content_hash\": \"sha256:a46bfc52235999c12a3d604aba5c5ca96cf69a04844d369e77573dea0c20f802\", \"output_path\": \"C:\\\\Users\\\\user\\\\Desktop\\\\partcle_sim-sim_rev4\\\\particle_platform_redesign\\\\solver\\\\.artifacts\\\\foundation_design_20261123\\\\field_identity_probe\\\\converted\\\\bundle.h5\", \"p1_triangle_count\": 2, \"physical_boundary_facet_count\": 4, \"provider_field_row_count\": 4, \"scope\": \"selected-field conversion and canonical validation only\", \"selected_field_lineage\": [{\"association\": \"node\", \"columns\": [\"Ex\", \"Ey\"], \"components\": [\"x\", \"y\"], \"conversion\": {\"formula\": \"canonical = scale * input + offset\", \"offset\": 0.0, \"scale\": 1.0}, \"expressions\": [\"1+100*x\", \"0\"], \"input_unit\": \"V/m\", \"name\": \"electric_field\", \"producer_record\": {\"authority\": \"analytic primitive\", \"continuity\": \"continuous\", \"domain_ids\": [1], \"evidence\": \"E=(1+100*x,0) SI on a 10 mm square\", \"producer\": \"installed analytic CSV example\", \"recovery\": \"none\", \"side\": \"domain\", \"support\": \"full_selected_domain\", \"time\": {\"representation\": \"static\", \"selection\": \"analytic\"}, \"topology\": \"fixed\"}, \"stored_basis\": \"cartesian_xy\", \"unit\": \"V/m\"}], \"selected_field_row_count\": 4, \"source_quadrilateral_count\": 0, \"source_sha256\": \"sha256:97452158596c403be3cc76ee6a2d51ef2c6fb7607a8eed842ac63db987c118b6\", \"source_triangle_count\": 2, \"split_diagonal_03_count\": 0, \"split_diagonal_12_count\": 0, \"status\": \"complete\", \"unselected_provider_row_count\": 0}, \"status\": \"created\"}",
+    "stderr": "",
+    "declared_mesh_vertex_id": 9007199254740992,
+    "raw_field_vertex_id": 9007199254740993,
+    "float64_field_vertex_id": 9007199254740992,
+    "destination_exists": true,
+    "published_mesh_vertex_ids": [
+      2,
+      3,
+      4,
+      9007199254740992
+    ],
+    "published_field_join_method": "scoped_node_id"
+  },
+  "targeted_tests": {
+    "command": "uv run --locked pytest tests/scenarios/test_input_clients.py tests/scenarios/test_result_tools.py tests/scenarios/test_cli.py ../report_app/tests/test_reviewed_snapshot.py -q",
+    "passed": 51,
+    "seconds": 33.95,
+    "full_suite": false
+  }
+}

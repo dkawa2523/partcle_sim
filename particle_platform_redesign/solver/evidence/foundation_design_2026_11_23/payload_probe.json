@@ -1,0 +1,41 @@
+{
+  "source": "9015de024aabc145b6615ccc18bab486055bf894",
+  "kind": "serialization_only_no_child_no_advance",
+  "records": [
+    {
+      "field": "frame_times_s",
+      "count": 0,
+      "payload_bytes": 21905,
+      "shared_array_bytes": 950272,
+      "private_template_bytes": 315
+    },
+    {
+      "field": "frame_times_s",
+      "count": 64,
+      "payload_bytes": 22483,
+      "shared_array_bytes": 950272,
+      "private_template_bytes": 315
+    },
+    {
+      "field": "frame_times_s",
+      "count": 4096,
+      "payload_bytes": 58771,
+      "shared_array_bytes": 950272,
+      "private_template_bytes": 315
+    },
+    {
+      "field": "probe_times_s",
+      "count": 64,
+      "payload_bytes": 22483,
+      "shared_array_bytes": 950272,
+      "private_template_bytes": 315
+    },
+    {
+      "field": "probe_times_s",
+      "count": 4096,
+      "payload_bytes": 58771,
+      "shared_array_bytes": 950272,
+      "private_template_bytes": 315
+    }
+  ]
+}
