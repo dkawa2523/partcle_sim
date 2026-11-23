@@ -1,0 +1,61 @@
+{
+  "scope": "proposal only; current source 179 remains frozen; no production or wheel edits",
+  "source_before_sha256": "7b9b1e6e21aeb35d7b90026dc3ed4227bfc06ca0acc3cd2bf52116b2345fbabb",
+  "proposed_harness_sha256": "9c061ab64d9962d8e7ac992b02562943cecdecc5e423219f60b148887afc7cde",
+  "fault_test_sha256": "c23a1b1021fd10827e7fac432dcd42e74aa8ce85e575dc6e2b2a280b072b781f",
+  "checks": [
+    {
+      "check": "synthetic process-boundary fault tests through real driver/gate/specification/decode/publication/temp cleanup",
+      "result": "4 passed in 0.44 s after atomic publication and metadata additions",
+      "executed_by": "independent reviewer",
+      "solver_or_jit_executed": false,
+      "publication_observed": "final observation target absent at fsync; only same-directory temporary exists before atomic exclusive hardlink"
+    },
+    {
+      "check": "Ruff format proposal and fault test",
+      "result": "formatted"
+    },
+    {
+      "check": "Ruff lint using intended repository paths via --stdin-filename",
+      "result": "both passed"
+    },
+    {
+      "check": "frozen harness SHA256 before/after staging",
+      "result": "unchanged"
+    },
+    {
+      "check": "Windows normal/extended path filesystem boundary",
+      "result": "normal 258 succeeds; normal 261 FileNotFoundError; extended 261 succeeds",
+      "artifact": "windows_path_witness.json"
+    },
+    {
+      "check": "unaffected function ASTs",
+      "result": "45 functions identical, including the full performance identity validator; timed/profile workers differ only by case_identity dictionary attributes",
+      "excluded_modified_harness_functions": [
+        "_arguments",
+        "_driver",
+        "_launch_worker",
+        "_performance_gate",
+        "_profile_worker",
+        "_publish_json_text",
+        "_worker"
+      ]
+    },
+    {
+      "check": "git apply --check p14u_reporting_fix.patch",
+      "result": "revised atomic-publication/scenario-target patch passed; patch not applied"
+    },
+    {
+      "check": "worker/profile metadata-only AST control",
+      "result": "removing the sole case_identity dictionary entry from each restores exact original function AST; no new hashing or input reads, existing case attributes only; dict construction occurs after measured window/profile.disable"
+    }
+  ],
+  "not_executed": [
+    "real patched P14-U smoke or custom release",
+    "real patched 10k/100k/1M release",
+    "whole project quality gates or tests after application"
+  ],
+  "qualification": "Only a completed original-shape release report after successful profile and unchanged _validate_performance_identity can qualify; worker/profile JSON adds existing loaded-case identities after timing. Sidecars are returned worker observations, not partial PASS or restart state. The original failed baseline remains failed.",
+  "intended_test_owner": "tests/scenarios/test_performance_reporting.py; collected by normal verification/scenario CI",
+  "patch_sha256": "8fce10ca2384e337d709ed5b0dd0e5b3d307aa6cd5977899460fddc53b85e5e5"
+}

@@ -89,7 +89,12 @@ def _arguments() -> argparse.Namespace:
         help="override the suite's representative performance particle counts",
     )
     parser.add_argument("--memory-limit-mb", type=_positive_integer, default=8192)
-    parser.add_argument("--json", dest="json_path", type=Path)
+    parser.add_argument(
+        "--json",
+        dest="json_path",
+        type=Path,
+        help="fresh completed report; completed worker JSON is retained alongside on failure",
+    )
     parser.add_argument("--worker-spec", type=Path, help=argparse.SUPPRESS)
     return parser.parse_args()
 
@@ -124,7 +129,17 @@ def _driver(arguments: argparse.Namespace) -> None:
         and repeat_count == 3
     )
 
-    with tempfile.TemporaryDirectory(prefix="chamber-particles-p14u-") as temporary:
+    report_path = (
+        None if arguments.json_path is None else arguments.json_path.expanduser().resolve()
+    )
+    observation_directory = None
+    if report_path is not None:
+        if report_path.exists():
+            raise FileExistsError(report_path)
+        observation_directory = report_path.with_name(report_path.name + ".observations")
+        observation_directory.mkdir(parents=True, exist_ok=False)
+
+    with tempfile.TemporaryDirectory(prefix="p14u-") as temporary:
         root = Path(temporary)
         convergence = _convergence_gate(root / "convergence", suite, arguments.memory_limit_mb)
         rz = _rz_gate(root / "rz", suite, arguments.memory_limit_mb)
@@ -133,6 +148,7 @@ def _driver(arguments: argparse.Namespace) -> None:
             counts,
             repeat_count=repeat_count,
             memory_limit_mb=arguments.memory_limit_mb,
+            observation_directory=observation_directory,
         )
         _validate_performance_identity(performance)
         report = {
@@ -176,7 +192,9 @@ def _driver(arguments: argparse.Namespace) -> None:
                 ),
                 "profile_interpretation": (
                     "owner-specific optimization conclusions are withheld when "
-                    "runtime_or_dependency is the largest self-time owner"
+                    "runtime_or_dependency is the largest self-time owner. The untimed profile "
+                    "reuses the completed maximum-count none/r0 cache; timed repetitions "
+                    "use distinct fresh cache directories."
                 ),
                 "rz_parity": (
                     "radial zero and standard-gravity radial zero are solver invariants; "
@@ -196,10 +214,24 @@ def _driver(arguments: argparse.Namespace) -> None:
         )
         + "\n"
     )
-    if arguments.json_path is not None:
-        arguments.json_path.parent.mkdir(parents=True, exist_ok=True)
-        arguments.json_path.write_text(encoded, encoding="utf-8")
+    if report_path is not None:
+        _publish_json_text(report_path, encoded)
     print(encoded, end="")
+
+
+def _publish_json_text(path: Path, encoded: str) -> None:
+    """Publish complete JSON atomically without replacing a previous observation."""
+    descriptor, name = tempfile.mkstemp(prefix=".p14u-", suffix=".tmp", dir=path.parent)
+    os.close(descriptor)
+    temporary = Path(name)
+    try:
+        with temporary.open("w", encoding="utf-8", newline="") as stream:
+            stream.write(encoded)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.link(temporary, path)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _convergence_gate(root: Path, suite: _Suite, memory_limit_mb: int) -> dict[str, Any]:
@@ -379,6 +411,7 @@ def _performance_gate(
     *,
     repeat_count: int,
     memory_limit_mb: int,
+    observation_directory: Path | None = None,
 ) -> dict[str, Any]:
     root.mkdir(parents=True)
     warmup = _materialize_xy_case(
@@ -393,6 +426,8 @@ def _performance_gate(
         ny=4,
     )
     observations: list[dict[str, Any]] = []
+    profile_count = max(int(value) for value in particle_counts)
+    profile_cache: Path | None = None
     for count in particle_counts:
         for mode in ("none", "sample"):
             for repeat_index in range(repeat_count):
@@ -419,9 +454,15 @@ def _performance_gate(
                     output_mode=mode,
                     repeat_index=repeat_index,
                 )
-                observations.append(_launch_worker(worker_spec, root / "numba-cache" / stem))
+                cache = root / "c" / f"t{len(observations):02d}"
+                observations.append(
+                    _launch_worker(worker_spec, cache, observation_directory=observation_directory)
+                )
+                if count == profile_count and mode == "none" and repeat_index == 0:
+                    profile_cache = cache
 
-    profile_count = max(int(value) for value in particle_counts)
+    if profile_cache is None:
+        raise RuntimeError("P14-U profile requires a completed maximum-count none/r0 row")
     profile_stem = f"n-{profile_count}-none-profile"
     profile_case = _materialize_xy_case(
         root / "cases" / profile_stem,
@@ -445,7 +486,9 @@ def _performance_gate(
         output_mode="none",
         repeat_index=None,
     )
-    profile = _launch_worker(profile_spec, root / "numba-cache" / profile_stem)
+    profile = _launch_worker(
+        profile_spec, profile_cache, observation_directory=observation_directory
+    )
     return {
         "raw_observations": observations,
         "median_observations": _median_performance_observations(observations),
@@ -483,7 +526,9 @@ def _write_worker_spec(
     )
 
 
-def _launch_worker(specification: Path, cache_directory: Path) -> dict[str, Any]:
+def _launch_worker(
+    specification: Path, cache_directory: Path, *, observation_directory: Path | None = None
+) -> dict[str, Any]:
     command = [
         sys.executable,
         "-m",
@@ -509,6 +554,8 @@ def _launch_worker(specification: Path, cache_directory: Path) -> dict[str, Any]
         raise RuntimeError(f"P14-U worker {specification.stem} returned invalid JSON") from error
     if not isinstance(value, dict):
         raise RuntimeError("P14-U worker returned a non-object")
+    if observation_directory is not None:
+        _publish_json_text(observation_directory / f"{specification.stem}.json", completed.stdout)
     return value
 
 
@@ -558,6 +605,10 @@ def _worker(specification_path: Path) -> None:
         "particle_count": int(specification["particle_count"]),
         "output_mode": specification["output_mode"],
         "repeat_index": int(specification["repeat_index"]),
+        "case_identity": {
+            "case_file_hash": case.case_file_hash,
+            "data_content_hash": case.content_hash,
+        },
         "timing_s": {
             "load_case": load_seconds,
             "simulate": simulate_seconds,
@@ -613,6 +664,10 @@ def _profile_worker(specification: Mapping[str, Any]) -> None:
     manifest = result.manifest_document()
     profile = {
         "operation": "separate_untimed_profile",
+        "case_identity": {
+            "case_file_hash": case.case_file_hash,
+            "data_content_hash": case.content_hash,
+        },
         "particle_count": int(specification["particle_count"]),
         "output_mode": specification["output_mode"],
         "profile_owner_self_seconds": owners,

@@ -1,0 +1,18 @@
+{
+  "LongPathsEnabled": 0,
+  "scope": "ordinary file-open path witness on this host; no NumBa workload or registry/environment modification",
+  "rows": [
+    {
+      "normal_path_characters": 258,
+      "normal_write": "success",
+      "extended_path_write": "success"
+    },
+    {
+      "normal_path_characters": 261,
+      "normal_write": "FileNotFoundError",
+      "errno": 2,
+      "winerror": null,
+      "extended_path_write": "success"
+    }
+  ]
+}

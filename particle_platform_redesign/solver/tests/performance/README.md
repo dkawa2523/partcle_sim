@@ -79,6 +79,15 @@ P14-U release includes 10k/100k/1M, none/sample output, time/mesh convergence an
 RZ checks. Custom counts and smoke runs leave its complete-release flag false.
 A separate untimed profile is not throughput evidence.
 
+Use a new P14-U `--json REPORT` path. Each completed worker's original JSON,
+including the loaded case/data identity, is atomically retained in
+`REPORT.observations/` before the next worker starts. A later failure leaves
+these observations without publishing a completed report; they are not a partial
+release qualification or a resume format. Console-only runs have no durable
+observation archive. Timed repetitions use distinct fresh caches with short
+private labels. The untimed profile reuses the completed maximum-count
+`none`, repeat 0 cache, so profile preparation does not repeat cold compilation.
+
 Changing `dt` or Brownian tree depth changes numerical resolution. A faster run
 under changed resolution is not an equal-accuracy implementation speedup.
 Uniform maximum-depth Brownian paths are cost comparators rather than physical
@@ -96,5 +105,7 @@ counts concrete base/adaptive tree and pending-bank allocations against that
 reserve. B03 retains its separate conservative transient stage-array bound;
 prepared allocations and process RSS do not replace that check.
 
-Current cleanup execution and limits are recorded in
+Current foundation measurements and their execution-source limits are recorded in
+[`evidence/foundation_2026_11_23`](../../evidence/foundation_2026_11_23/README.md).
+The preceding cleanup execution and limits are recorded in
 [`evidence/current_only_2026_11_23`](../../evidence/current_only_2026_11_23/README.md).

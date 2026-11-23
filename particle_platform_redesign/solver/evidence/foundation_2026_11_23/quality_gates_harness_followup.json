@@ -1,0 +1,62 @@
+{
+  "scope": "Post-measurement P14-U harness publication/cache fix; production and wheel bytes unchanged",
+  "source_map": "evidence/foundation_2026_11_23/source_map_harness_followup.json",
+  "results": [
+    {
+      "command": "uv lock --check",
+      "chunk_id": "386d02",
+      "wall_time_seconds": 0.3574993,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "Resolved 24 packages in 1ms\n"
+    },
+    {
+      "command": "uv run --locked ruff format --check src tests tools scripts examples",
+      "chunk_id": "688bf5",
+      "wall_time_seconds": 0.4191236,
+      "exit_code": 0,
+      "original_token_count": 7,
+      "output": "189 files already formatted\n"
+    },
+    {
+      "command": "uv run --locked ruff check src tests tools scripts examples",
+      "chunk_id": "c7a28a",
+      "wall_time_seconds": 0.4090107,
+      "exit_code": 0,
+      "original_token_count": 5,
+      "output": "All checks passed!\n"
+    },
+    {
+      "command": "uv run --locked pyrefly check --summarize-errors",
+      "chunk_id": "e74d9a",
+      "wall_time_seconds": 2.3353901,
+      "exit_code": 0,
+      "original_token_count": 53,
+      "output": " INFO Checking project configured at `C:\\Users\\user\\Desktop\\partcle_sim-sim_rev4\\particle_platform_redesign\\solver\\pyproject.toml`\n=== Error Summary ===\nNo errors found!\n INFO 0 errors (170 warnings not shown)\n"
+    },
+    {
+      "command": "uv run --locked lint-imports",
+      "chunk_id": "5b4a07",
+      "wall_time_seconds": 0.935383,
+      "exit_code": 0,
+      "original_token_count": 152,
+      "output": "=============\r\nImport Linter\r\n=============\r\n\r\n\r\n---------\r\nContracts\r\n---------\r\n\r\nAnalyzed 51 files, 135 dependencies.\r\n------------------------------------\r\n\r\nLow-level numerics stay independent of orchestration and I/O KEPT\r\nIntegrator proposals stay independent of geometry and wall response KEPT\r\nPhysics models consume sampled primitives only KEPT\r\nComputational API stays independent of installed workflow clients KEPT\r\nParticle transport stays independent of coordinator and process management KEPT\r\nProcess execution stays independent of parent coordinator KEPT\r\n\r\nContracts: 6 kept, 0 broken.\r\n"
+    },
+    {
+      "command": "uv run --locked python scripts/check_complexity.py",
+      "chunk_id": "2d450a",
+      "wall_time_seconds": 1.3077755,
+      "exit_code": 0,
+      "original_token_count": 16,
+      "output": "Complexity gate passed: every function and method has CC < 16.\r\n"
+    },
+    {
+      "command": "uv run --locked python scripts/check_documentation.py",
+      "chunk_id": "19f2a5",
+      "wall_time_seconds": 1.9993081,
+      "exit_code": 0,
+      "original_token_count": 20,
+      "output": "{\r\n  \"status\": \"valid\",\r\n  \"documents\": 33,\r\n  \"skills\": 4,\r\n  \"errors\": []\r\n}\r\n"
+    }
+  ]
+}

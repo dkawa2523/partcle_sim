@@ -1,0 +1,92 @@
+{
+  "scope": "Post-measurement benchmark-only repair, not a numerical or wheel change",
+  "source_map": {
+    "path": "evidence/foundation_2026_11_23/source_map_harness_followup.json",
+    "sha256": "sha256:08f50a2ebe0f7eecf5a16ac3857c04a2b8dd576ad737107b8e1a85602f396496"
+  },
+  "original_large_run_map": {
+    "path": "evidence/foundation_2026_11_23/source_map.json",
+    "sha256": "sha256:81672c3f3846e7375a86f41134d4d2d661e78905c052516cb95d453a3373bd6a"
+  },
+  "files": 180,
+  "unchanged_production_files": 51,
+  "changed_existing_files": [
+    "tests/performance/p14u_representative.py"
+  ],
+  "added_test": "tests/scenarios/test_performance_reporting.py",
+  "quality_gates": {
+    "path": "evidence/foundation_2026_11_23/quality_gates_harness_followup.json",
+    "sha256": "sha256:86d74724ad7d62813bd6e7d6ddb3258ed957a123c80d4e7324be555a92d70061"
+  },
+  "core": {
+    "native_exit": 0,
+    "junit": {
+      "path": ".artifacts/foundation_20261123/core_harness_followup.xml",
+      "sha256": "sha256:fa2876e91416912ff4fb3ee422014900e92acb846adeaca820cb582dd1c06d96"
+    },
+    "suites": [
+      {
+        "name": "pytest",
+        "errors": "0",
+        "failures": "0",
+        "skipped": "1",
+        "tests": "1338",
+        "time": "523.017",
+        "timestamp": "2026-11-23T23:02:38.659724+09:00",
+        "hostname": "DESKTOP-621T1UP"
+      }
+    ],
+    "command": "uv run --locked python -m pytest tests/verification tests/scenarios -q"
+  },
+  "fault_regressions": {
+    "passed": 4,
+    "seconds": 1.11,
+    "independent_reviewer_passed": 4,
+    "independent_seconds": 1.45
+  },
+  "real_smoke": {
+    "native_exit": 0,
+    "command": "uv run --locked python -m tests.performance.p14u_representative --suite smoke --memory-limit-mb 8192 --json .artifacts/foundation_20261123/harness_followup_smoke.json",
+    "report": {
+      "path": ".artifacts/foundation_20261123/harness_followup_smoke.json",
+      "sha256": "sha256:d009bdea27358244d2661f630dc154b783d97ef2dbb4342f7a8f2eb61d6ec84c"
+    },
+    "observations": 2,
+    "particle_count": 256,
+    "profile_particles": 256,
+    "sidecars": [
+      {
+        "path": ".artifacts/foundation_20261123/harness_followup_smoke.json.observations/n-256-none-profile.json",
+        "sha256": "sha256:53c579d22c1530160776267aae69151cafe3ce355eb8b427ecf3b748e123cd36"
+      },
+      {
+        "path": ".artifacts/foundation_20261123/harness_followup_smoke.json.observations/n-256-none-r0.json",
+        "sha256": "sha256:66d871c381b2565b598870094353ace543a0df227df998c031f52f82d3780831"
+      },
+      {
+        "path": ".artifacts/foundation_20261123/harness_followup_smoke.json.observations/n-256-sample-r0.json",
+        "sha256": "sha256:4035874d3d3f41f9dbc97def2046135ea4a90b042c4945d519726ace6ec8fb7f"
+      }
+    ],
+    "sidecars_equal_returned_objects": true,
+    "loaded_case_identity_bound": true,
+    "release_gate_complete": false
+  },
+  "source_equivalence": {
+    "unchanged_function_asts": 45,
+    "timed_and_profile_worker": "AST identical after removal of one post-measurement case_identity dictionary entry each; no extra hashing/read",
+    "modified_driver_functions": "argument help, output reservation/publication, cache resource names and profile cache reuse",
+    "production_and_wheel": "51 source bytes unchanged; previously accepted wheel remains f0f5092409396791e21529e2f1a9d9b1ee9c903077896d85402b712b88a50fdb"
+  },
+  "independent_review": {
+    "reviewer": "causality_audit",
+    "mandatory_open": 0,
+    "basis": "Read-only map/current production byte comparison, 45 unchanged function ASTs, two metadata-only worker differences, four independently rerun fault tests",
+    "qualification": "Actual patched smoke and fault regressions are proportionate to this operational change. Prior full-scale runs remain evidence of the same production code, not an assertion of full 1M rerun using the final harness client"
+  },
+  "limits": [
+    "The archived 87 timed observations were executed with the original measurement-client SHA and exact 179-file before/after binding",
+    "No full 1M matrix has been rerun using the modified 180-file measurement client",
+    "Native parity and experimental physical validation are not inferred"
+  ]
+}
