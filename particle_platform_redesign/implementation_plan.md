@@ -4,7 +4,7 @@
 
 0.5.0はcoreと通常clientを一つのwheelへ収録し、CLI/Pythonで入力から結果再利用までを提供する。
 契約は[製品仕様](product_specification.md)、[architecture](architecture_proposal.md)、solver/docsの各ownerが所有する。
-全体変更の調査・実行・未確認は[全体対応表](solver/evidence/retirement_2026_11_23/README.md)へ残す。
+初期撤去時点の調査・実行・未確認は[初期撤去の履歴](solver/evidence/retirement_2026_11_23/README.md)へ保持する。
 その後の意味・状態・公開境界の根因改良は[再構成記録](solver/evidence/resolved_semantics_2026_11_23/README.md)へ残す。
 過去sourceの完了記録は、そのsourceだけの証拠である。
 現行入口への追加撤去と、実行済み・外部条件による未実行の区分は[撤去記録](solver/evidence/current_only_2026_11_23/README.md)へ残す。
