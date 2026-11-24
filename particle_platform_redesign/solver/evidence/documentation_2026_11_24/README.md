@@ -31,6 +31,7 @@ hashに束縛されたreview、元の実行receipt、native観測、参照datase
 installed wheelの13 CLI経路・5例題と、READMEの11 console/Python例を確認しました。
 三観点の独立通読と実表示確認で見つかった必須指摘は全て修正し、再確認しました。
 公式split/offline build、desktop/mobileの8表・Source・Copy・再生成手順、offline全10 datasetを確認済みです。
+Git追跡fileだけを展開した隔離treeでも、外部datasetなしで44文書・4技能と23 testsが成功しました。
 条件、保全確認、以前のsourceに限定する資格は[実行receipt](verification.json)を参照してください。
 
 ## 保存計測値と削除完了の扱い
@@ -39,3 +40,11 @@ installed wheelの13 CLI経路・5例題と、READMEの11 console/Python例を�
 既存の[利用者による削除完了記録](../foundation_2026_11_23/baseline_reference_removal.json)から状態を更新しています。
 それ以外の11行、assessment/performanceの値、実行source・条件を変更せず、新しい計測とは数えません。
 以前の自動承認拒否と保持記録は当時の証拠として残します。
+
+## 外部参照と再実行の限界
+
+拡張した文書CIが、workspace内にだけ存在するdataset/監査snapshotへのリンクを検出しました。
+[data quality](../../../data_quality_assessment.md)で別管理の所在と保存bytesのSHAを明示し、clone同梱の参照先と区別しました。
+検査は弱めていません。元の固定dataset監査script2件は現在取得できず、完全な元監査の再実行にはそのsourceと
+別管理dataset/snapshotの引渡しが必要です。保存された観測値を変更せず、再測定したとは扱いません。
+初回の文書CI失敗と、修正後のtracked-only確認はreceiptへ別々に残しています。

@@ -20,28 +20,45 @@
 
 ## 2. 評価範囲と証拠の区分
 
-対象は [データセット本体](../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/) のうち、2 種類の ion-drag 定義 × Case P/A × 粒径 10/30/100 nm、計 12 ケースである。MPH 内部の Solution ベクトルを再計算・再監査したものではなく、公開された CSV、`mphtxt`、設定表、説明文書を対象とした静的監査である。
+対象は データセット本体（`../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/`） のうち、2 種類の ion-drag 定義 × Case P/A × 粒径 10/30/100 nm、計 12 ケースである。MPH 内部の Solution ベクトルを再計算・再監査したものではなく、公開された CSV、`mphtxt`、設定表、説明文書を対象とした静的監査である。
 
 この文書では、証拠を次のように区別する。
 
-- **測定事実**: 監査スクリプトが CSV/接続表を直接読み、件数、キー、値、式の恒等関係、ハッシュを再計算した結果。
+- **保存された測定事実**: 当時の監査snapshotが、CSV/接続表の件数、キー、値、式の恒等関係、ハッシュとして報告した結果。今回の文書改訂で再測定した値ではない。
 - **データセット宣言**: COMSOL 設定表、manifest、付属文書に記載されている内容。宣言だけでは保存済み解と一致する証明にはしない。
 - **推論**: 測定事実から考えられる原因。原因が COMSOL 内部状態まで追跡できない場合は断定しない。
 - **品質判定**: 新しい粒子計算基盤の入力または V&V 基準として採用できるかという本評価の判断。
 
-主な保存観測は以下である。固定12ケースを調べた一度限りのscriptは現行入口から撤去し、当時のsourceをGit履歴へ保存した。
+以下のdataset本体・付属説明・監査snapshotは、このworkspaceでは別管理の参照資料として存在するが、
+Git cloneには同梱していない。本文中の相対pathはこの文書を基準とする外部資料の所在であり、配布リンクではない。
+監査値の再確認に必要なら該当datasetとsnapshotの引渡しを受け、下記のidentityを照合する。
+資料がない環境では本書の監査結果を再測定済みとせず、新しい入力の検査や保存結果の実用評価とは区別する。
+現行solverの通常実行・文書検査に、この外部datasetを要求しない。
+
+| 別管理の監査snapshot | SHA-256（今回確認した保存bytes） |
+|---|---|
+| `evidence/dataset_audit.json` | `89f0ad4298200dcbfac1a197e454f47a30b9b49b5640f8e3c37e3d28e8410df6` |
+| `evidence/case_audit_summary.csv` | `65114fbe2774a2145c862225a412da8df01771fea3dc351b9b90eca7d197dad1` |
+| `evidence/field_redundancy_audit.json` | `6255ed3f5ba14fed402fbe1c72bd21d67250a924bb8748138561624e559117e0` |
+| `evidence/population_time_series.csv` | `112ef7cd459a057f1e96492852a061060449119b48099322cece800fe6b5c2e1` |
+| `evidence/variant_divergence_time_series.csv` | `6fce87e5659ba2cb3014b2d4a70b063d7c66c9ecbde5a74672eecce9ac01453f` |
+| `evidence/variant_particle_divergence_summary.csv` | `60289925159392d7bd8c5238373e012e46c2540c844cba0a022a25b7957f3caa` |
+
+主な保存観測は以下である。固定12ケースを調べた一度限りのscriptは現行の実行入口ではなく、
+元の2 scriptの実体は現在のcheckoutと既掲のGit参照から確認できなかった。
+監査値と保存snapshotのidentityは保持するが、元scriptの完全な再実行可能性は未確認である。
 この資料は対象datasetの調査記録であり、新しいモデルには[inspection](../.agents/skills/inspect-comsol-model/SKILL.md)と現行の入力producerを使う。
 
-- [当時の全ケース監査source](https://github.com/dkawa2523/partcle_sim/blob/75100e74f1243b527e065c9e6a68121221408b39/particle_platform_redesign/analysis/audit_model_dataset.py)
-- [全ケース監査 JSON](evidence/dataset_audit.json)
-- [ケース別要約](evidence/case_audit_summary.csv)
-- [当時の背景場冗長性監査source](https://github.com/dkawa2523/partcle_sim/blob/75100e74f1243b527e065c9e6a68121221408b39/particle_platform_redesign/analysis/audit_field_redundancy.py)
-- [背景場の比較結果](evidence/field_redundancy_audit.json)
-- [集団状態の時系列](evidence/population_time_series.csv)
-- [ion-drag 2 方式の時系列乖離](evidence/variant_divergence_time_series.csv)
-- [粒子別乖離要約](evidence/variant_particle_divergence_summary.csv)
+- 当時の全ケース監査source名：`analysis/audit_model_dataset.py`（現行配布物では未取得）
+- 全ケース監査 JSON（`evidence/dataset_audit.json`）
+- ケース別要約（`evidence/case_audit_summary.csv`）
+- 当時の背景場監査source名：`analysis/audit_field_redundancy.py`（現行配布物では未取得）
+- 背景場の比較結果（`evidence/field_redundancy_audit.json`）
+- 集団状態の時系列（`evidence/population_time_series.csv`）
+- ion-drag 2 方式の時系列乖離（`evidence/variant_divergence_time_series.csv`）
+- 粒子別乖離要約（`evidence/variant_particle_divergence_summary.csv`）
 
-付属説明のうち、特に [物理・数値手法](../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/PHYSICS_AND_NUMERICAL_METHODS.md)、[ジオメトリー・境界](../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/GEOMETRY_DOMAINS_AND_BOUNDARIES.md)、[外部再現手順](../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/EXTERNAL_REPRODUCTION_WORKFLOW.md) を宣言情報として参照した。
+付属説明のうち、特に 物理・数値手法（`../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/PHYSICS_AND_NUMERICAL_METHODS.md`）、ジオメトリー・境界（`../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/GEOMETRY_DOMAINS_AND_BOUNDARIES.md`）、外部再現手順（`../model_dataset/cf4_o2_etch_caseA_nonlinear_sass/doc/EXTERNAL_REPRODUCTION_WORKFLOW.md`） を宣言情報として参照した。
 
 ## 3. インベントリー
 
@@ -140,7 +157,7 @@ node ID は 0 始まりで連続し、接続表の node はすべて 0–7,731 �
 - `Epstein_response_time_s = rho_p × d0^2 / (18 × viscosity)`
 - `Brownian_diffusivity_m2_per_s = k_B × T / (3 × pi × viscosity × d0)`
 
-しかし [背景場比較結果](evidence/field_redundancy_audit.json) では、同じ Case の規則格子版が 10/30/100 nm の間で全数値列完全一致となった。実データの最初の有限点では、P/A と粒径表示によらず
+しかし 背景場比較結果（`evidence/field_redundancy_audit.json`） では、同じ Case の規則格子版が 10/30/100 nm の間で全数値列完全一致となった。実データの最初の有限点では、P/A と粒径表示によらず
 
 ```text
 gas_mean_free_path / particle_Knudsen_number ~= 1.0e-8 m
@@ -314,7 +331,7 @@ COMSOL と同じ乱数生成器・粒子/component への割当・step 更新順
 6. schema、単位、来歴、イベント出力の新しい canonical case 形式を設計する反例。
 7. 既知の最終状態集計と時系列人口の回帰確認。
 
-特に ion-drag variant の比較では、最終状態が同じでも途中軌道は大きく離れうる。[variant の時系列乖離](evidence/variant_divergence_time_series.csv) を使い、終点だけでなく最初に乖離する時刻とその直前の場・力・電荷を調べる必要がある。
+特に ion-drag variant の比較では、最終状態が同じでも途中軌道は大きく離れうる。variant の時系列乖離（`evidence/variant_divergence_time_series.csv`） を使い、終点だけでなく最初に乖離する時刻とその直前の場・力・電荷を調べる必要がある。
 
 ### 7.2 禁止する用途
 
@@ -422,7 +439,8 @@ post_vr, post_vz, outcome, random_u, state_before, state_after
 ## 10. 保存観測の確認と再利用
 
 本書の数値は監査時点のsnapshotであり、この文書改訂でdatasetを再解析した値ではない。
-監査方法は第2節のGit固定source、対象と観測値は保存済みJSON/CSVへたどれる。
+対象と観測値は第2節の別管理JSON/CSVへたどれる。元監査scriptは未取得であり、
+方法の説明と保存値の再確認を、元scriptの再実行と区別する。
 旧root環境と一度限りの監査scriptは現行の実行入口ではなく、P00の再実施やarchive環境の起動を要求しない。
 
 保存された観測を読む際は、`dataset_audit.json`の12 case、各34,727行・287粒子・121時刻・duplicate key 0、

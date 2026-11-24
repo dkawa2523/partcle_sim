@@ -1,6 +1,6 @@
 {
   "status": "complete",
-  "verified_at_utc": "2026-11-24T00:10:02.174169+00:00",
+  "verified_at_utc": "2026-11-24T00:18:19.179066+00:00",
   "baseline_commit": "ec646c07a35d9f51fdb5ed7f3a6d9772751fe668",
   "branch": "refactor/foundation-usability",
   "scope": "Documentation, references, authored report and existing documentation tooling; no numerical core/model/product-setting changes or new scientific analyses",
@@ -55,7 +55,16 @@
     "pyrefly": "0 errors for 4 changed tooling/test files",
     "changed_tooling_and_tests_max_cc": 14,
     "uv_lock_check": "passed",
-    "git_diff_check": "passed"
+    "git_diff_check": "passed",
+    "tracked_files_only": {
+      "status": "passed",
+      "documents": 44,
+      "skills": 4,
+      "tests_passed": 23,
+      "seconds": 1.78,
+      "external_dataset_absent": true,
+      "scope": "Exported staged Git files only; no workspace-only reference inputs or audit snapshots present"
+    }
   },
   "public_usage": {
     "installed_commands": [
@@ -115,24 +124,16 @@
   },
   "report": {
     "final": {
-      "html_sha256": "3d1270ddae38173e2428a69b1904881dd8d570e5667e52f29e69a74a96502d5e",
-      "snapshot_sha256": "fa1e2b7c6dd71ee43fd984013d151747ca5e7492ffc7d3960cfe5acf3d4bbd0c",
-      "offline_sha256": "141bf170bff1293683c4074e2172605397bc0ff201ac65f6884de9ff45592d8a",
+      "html_sha256": "5b165dad08a867dac08bb265b9e52c987c312bb8370fa96734e6b6bc8cebde95",
+      "snapshot_sha256": "8ab0a9d55d186b58ae90932aa0300abfb5baea2a84c2e679298332861cb9007d",
+      "html_snapshot_meta": "8ab0a9d55d186b58ae90932aa0300abfb5baea2a84c2e679298332861cb9007d",
+      "offline_sha256": "192a9d66a2662c9d618709b2b6e1c14bdcc93b1660979e00c7782f7df7351484",
       "offline_bytes": 2678431,
       "buildStatus": "complete",
       "query_count": 10,
-      "offline_all_queries_and_snapshot_exact": true,
-      "identity_preserved": {
-        "id": true,
-        "title": true,
-        "presentation": true,
-        "filters": true,
-        "queryIDs": true
-      },
-      "only_changed_query_rows": [
-        "quality_findings"
-      ],
-      "scientific_and_performance_rows_unchanged": true
+      "offline_all10queries_and_entire_snapshot_exact": true,
+      "updating_text_count": 0,
+      "page_errors": []
     },
     "rendered_checks": {
       "desktop_viewport": [
@@ -175,7 +176,15 @@
     },
     "app_open_request": "queued by Codex app; actual rendered verification performed independently in Chrome",
     "official_runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
-    "protected_runtime_changes": false
+    "protected_runtime_changes": false,
+    "identity_preserved": {
+      "id": true,
+      "title": true,
+      "presentation": true,
+      "filters": true,
+      "queryIDs": true
+    },
+    "final_refresh_scope": "Metadata-only final refresh: HTTP/source/offline hash and snapshot parity, complete status, no Updating or pageerrors. Prior rendered layout/source/control/copy checks reused; no UI sweep or scientific execution repeated."
   },
   "preservation": {
     "baseline_hashed_files": 288,
@@ -189,7 +198,8 @@
     },
     "original_foundation_projections_unchanged": true,
     "hash_bound_final_review_sha256": "9d83e752f558c02f1ce112632ad1ab854409cf602057feee4bb7a14000e345a7",
-    "data_archives_and_native_observations": "not modified or deleted"
+    "data_archives_and_native_observations": "not modified or deleted",
+    "non_authored_report_files_equal_baseline_git": 236
   },
   "independent_reviews": [
     {
@@ -239,13 +249,20 @@
       "finding": "Paragraph whitespace made the displayed Python non-runnable",
       "resolution": "Single-line visible Python; displayed code executed with safe subprocess stub",
       "status": "closed"
+    },
+    {
+      "perspective": "clone portability and developer",
+      "finding": "Workspace-only dataset/audit references presented as clone-local links; two old source URLs have no available source",
+      "resolution": "External locations and six saved-file SHA values explicit; original scripts marked unavailable and historical reexecution unconfirmed; checker unchanged; clean tracked-only docs/tests passed; independent SHA review passed",
+      "status": "closed"
     }
   ],
   "mandatory_open": [],
   "unqualified_by_this_document_change": [
     "Existing conditional implementation backlog remains owned by implementation_plan.md",
     "No native numerical-parity or experimental physical-validity certification",
-    "No full solver/performance/native campaign rerun; historical run observations retain original sources and conditions"
+    "No full solver/performance/native campaign rerun; historical run observations retain original sources and conditions",
+    "Original fixed-dataset audit scripts are unavailable; exact historical audit reexecution requires original source plus separately supplied dataset/snapshots. Saved observations are identified, not newly measured."
   ],
   "execution_references": [
     {
@@ -282,7 +299,32 @@
       "path": ".artifacts/documentation_20261124_01/rendered_review_final.json",
       "sha256": "54d546e422b6d9b0a0e65e71b1d40604abe83d9bb28bf7a805822e56c6dad55a",
       "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/external_reference_scope.json",
+      "sha256": "ede46bfb4a140928f1e37b5446f85236bdd42825e17d6b096435e7e6a2ee1444",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/tracked_only_check.json",
+      "sha256": "6fd0f3cbdfbdda4fef5c5d039449a6353acc2d46b4cbbf7e08d91f2e9873cb40",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/rendered_review_metadata_refresh.json",
+      "sha256": "f5550857dcf91446c332885b10e660de6ea772584b7069291e058db695ba6140",
+      "availability": "task-local generated artifact, not included in clone"
     }
   ],
-  "remote_ci": "Push CI is recorded separately after commit; local checks do not imply remote success"
+  "remote_ci": {
+    "initial_attempt": {
+      "commit": "9361ea500356429b61b6181c37898e88100ab101",
+      "run_id": 45295005021,
+      "workflow": "platform-docs",
+      "conclusion": "failure",
+      "reason": "Workspace-only dataset and audit-snapshot links absent in clean Git checkout"
+    },
+    "correction": "Explicit external-reference availability; no checker relaxation or raw-data publication",
+    "final_push": "Recorded separately after commit; no success inferred from local checks"
+  }
 }
