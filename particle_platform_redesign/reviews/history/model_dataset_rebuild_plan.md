@@ -1,4 +1,6 @@
-# `model_dataset` 外部V&V再構築計画
+# model_dataset再構築の監査・計画（履歴）
+
+本書は初期dataset監査と旧M3工程の計画・到達点を保持する履歴です。記載のinventory、tool tree、case matrix、再実行順序、完了判定は当時のsourceと資産に限定し、現在の必須作業や提供入口を定義しません。現在の資料用途は[data quality](../../data_quality_assessment.md)、外部比較の判断は[V&V methodology](../../vv_methodology.md)、実行入口は[COMSOL tools](../../solver/tools/vv/comsol/README.md)を参照してください。追加の実装・評価が必要な場合は[implementation plan](../../implementation_plan.md)の条件から選びます。
 
 ## 1. 目的
 

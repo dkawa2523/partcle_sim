@@ -13,28 +13,24 @@
 COMSOLは入力producerまたは外部V&Vの一つです。solver coreの実行には不要であり、本表の「対応」は
 任意のCOMSOL設定との一般同等性を意味しません。
 
-## 用途別検証の範囲
+## 実装と確認の範囲
 
-保証するのは、登録した入力・方程式・解像度について、下表の判定基準を満たすことです。
-対応selectorの全組合せや、任意のチャンバーの予測精度を一括して認定しません。個別profileの入力、SI誤差budget、
-粒子数・seed・刻み・depth、独立reference、適用域は
-[0.2.0の用途別受入条件（当時の記録）](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/reviews/v0_2_release_use_case_acceptance_2026-10-10.json)に固定されています。
-その証拠は元のsourceに限定して保持します。0.3.0の科学出力・用途性能・配布履歴は
-[並列実行・性能](parallel_execution_plan.md)、現行COMSOL回帰は[評価方法](../../vv_methodology.md)が所有します。
+機能が選択できること、独立referenceで性質を検査したこと、ある装置・用途の精度が認定されたことは別です。
+現在の実装は以下の確認経路を持ちます。実行件数、入力・source・環境と未実施範囲はリンク先の記録に固定し、
+旧版のPASSを文書更新だけで再認定しません。
 
-| 用途 | 保証の範囲と判定 |
-|---|---|
-| 決定論運動・反復鏡面壁 | A01/A02：指定した調和運動の位置・速度、20回平面鏡面反射のevent時刻・最終状態を独立解析解の絶対SI budgetで評価 |
-| 可変係数・連成Brownian | B01/B02/B03：時間線形drag/flow、位置affine flow、一様stationary OML＋Coulombの指定ensembleで平均・共分散・電荷を独立Green/scalar referenceと比較。境界の一般first-passageや一般SDE次数へ拡張しない |
-| Brownian吸収・反復反射・RZ到達 | C01–C04：一定係数・point particleの登録h/depthごとにCDF誤差、MC幅、経験的reference幅を分離して判定。RZの元N16k D2判定未達は保持し、別登録N64k追試のPASSと区別 |
-| 物理式とmodel適用域 | D01/D02：Talbot/Saffman原著式、drag/charge/ion drag等の独立極限・解析運動・pure/compiled・適用外拒否。model-form感度の数値確認であり、species混合・付着・発生源の実験的validationではない |
-| 限定COMSOL比較 | 履歴v62の共通P1・100nm・BrownianありCase A/P各32 seedで、保存native参照に対する登録位置・終端人口分布を再評価。以前の決定論三電流caseの証拠は元sourceに限定する。新しい独立cohortや一般native右辺・境界応答の認証ではない |
-| 規模・性能・再現性 | 登録P14、B03、P14-U等でprocess数別の科学payload、failure、memory plan、時間・実メモリを評価。小粒子数や早期終端では遅化も記録し、未指定のSLAやOS hard RSS capを保証しない |
-| 配布 | 同一tagのWindows/Linux CIで品質gate、Quick Start、wheel、runtime-only installを検査。source/wheel/install全Python bytesとREADME由来METADATA、四API・CLI・time-field・接触modeを照合 |
+| 対象 | 確認する性質と根拠 | 結論の限界 |
+|---|---|---|
+| 運動・連成・field・event | 解析/製造解、独立force/G/J、OU共分散・条件付きsplit、適用域・support・壁・axisの[verification](../tests/verification/README.md)と公開scenario | 全selectorの直積や任意の場の精度を認定しない |
+| 入力から結果再利用 | 公開API/CLI、source identity、破損/失敗/再開、installed wheelの[基盤確認記録](../evidence/foundation_2026_11_23/README.md) | 過去のOS/環境での実行範囲へ限定する。準備成功は精度認定ではない |
+| 保存COMSOLのA/P集団 | 各287粒子・40候補実現、5 msの[保存比較](../evidence/foundation_2026_11_23/ap_population_readout.md) | 大局的輸送は実用的対応。境界33のcaptureと100 µs own-active速度に局所留保。乱数path・native全方程式・実機付着は未認定 |
+| 規模・性能 | [性能の実行条件とreceipt](parallel_execution_plan.md)。入力・出力・科学payload・owned memory・実測時間を区別 | 共有hostの時間比から因果的speedupを認定しない。1M serialを大規模process scalingへ外挿しない |
+| 以前の用途profile | [0.2時点の受入条件](https://github.com/dkawa2523/partcle_sim/blob/e9529fc024d2591d018b5809cd8c86a8f9b89f0f/particle_platform_redesign/reviews/v0_2_release_use_case_acceptance_2026-10-10.json)と当時の実行記録 | A/B/C/D profile、N16k未達と別N64k追試等は元sourceの資格。現行版の一括保証へ移さない |
 
-背景場のmesh/time解像度、回復gradient/curl、source・wall parameter、実験的製造KPI、追加modelの精度は、
-実際の用途入力と独立referenceを伴って別途評価します。有限depth Hermite pathの連続OU exact first-passageや
-zero-miss probabilityは保証に含めません。
+背景場のmesh/time解像度、gradient回復、source・wall条件は実際の用途ごとに確認します。
+有限depth Hermite pathは連続OUのexact first-passageやzero-miss probabilityを保証しません。
+数値stick/hold、computational count、物理的な付着・fluxは区別します。
+比較の判断方法は[V&V方法論](../../vv_methodology.md)、今後の拡張条件は[実装計画](../../implementation_plan.md)を参照してください。
 
 ## 公開する実行境界
 
@@ -107,7 +103,7 @@ XY disk / RZ sphereの中心とmaterial `line2`のfinite-radius first contactで
 | `probabilistic_stick` | 定数付着確率。非付着時はspecular、restitution、maxwell_thermal、またはisotropic |
 
 同時hitは`priority_then_combined_normal_v1`だけを使用します。最小priorityの候補で応答が一意にならない場合は、
-任意の法線を選ばず粒子単位failureにします。B04以降のBrownian runもterminal lawに加えて`specular`、
+任意の法線を選ばず粒子単位failureにします。Brownian runもterminal lawに加えて`specular`、
 `restitution`、`maxwell_thermal`、`isotropic`、`probabilistic_stick`を受理します。active hitでは使用済みOU rootのtailを
 継続せず、hit prefixとwall応答をcommitして残時間をfresh stochastic rootから進めます。
 surface sourceのvelocityはcanonical HDF5の粒子rowに明示します。Brownianはsurface contactを係数midpoint評価より

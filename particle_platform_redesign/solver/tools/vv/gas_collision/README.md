@@ -51,7 +51,7 @@ input is not a species-resolved mixture. A three-component collision moment is
 not a qualification of a meridional two-DOF trajectory engine.
 
 The source derivation and model limits are owned by
-[technical research §12](../../../../technical_research.md) and the associated
+[technical research](../../../../technical_research.md) and the associated
 physics design note. The distinction between collision moments and diffusion
 trajectory validity is also treated in
 [Trigger et al., §III](https://arxiv.org/pdf/cond-mat/0401327).

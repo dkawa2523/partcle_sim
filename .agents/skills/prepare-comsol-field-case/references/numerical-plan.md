@@ -4,8 +4,9 @@ Read the selected solver revision in
 [numerics.md](../../../../particle_platform_redesign/solver/docs/numerics.md),
 [engine.py](../../../../particle_platform_redesign/solver/src/chamber_particles/engine.py),
 and [integrators.py](../../../../particle_platform_redesign/solver/src/chamber_particles/integrators.py).
-Some document sections are historical. The currently checked method gate and
-resolved `run.json` are the evidence for the executed numerical policy.
+The method specification owns the accepted numerical rules. The actual
+preparation result and resolved `run.json` bind the executed numerical policy;
+historical receipts retain the source and conditions of their own execution.
 
 Apply only the requested scope. Planning/preparation records the proposed method,
 pilot step, scales and unmeasured budgets. A smoke records actual preparation,
@@ -48,7 +49,7 @@ times from row order.
 | Integrator | Appropriate use and limits |
 |---|---|
 | `rk4_fixed` | Smooth nonstochastic coupled motion/charge with acceptable explicit stability cost. Fields, force, and charge are evaluated at the actual stage positions/times. Ballistic or proven constant-acceleration cases can resolve to an exact specialization internally. |
-| `exponential_midpoint` | Linear relaxation or locally frozen relaxation dominates. The drag update is exact for frozen coefficients; source/midpoint evaluation controls the error when coefficients or additive force vary. Current charge-stable affine exponential coupling handles continuous charge in the same proposal; do not apply an obsolete charge-only prohibition from historical P11 text. |
+| `exponential_midpoint` | Linear relaxation or locally frozen relaxation dominates. The drag update is exact for frozen coefficients; source/midpoint evaluation controls the error when coefficients or additive force vary. Charge-stable affine exponential coupling handles continuous charge in the same proposal. |
 | `ou_langevin` | Only with a supported inertial-noise/linear-friction pairing in the [model owner](../../../../particle_platform_redesign/solver/docs/physics_models.md). Midpoint-frozen joint OU position/velocity plus coupled charge uses a finite-depth Hermite numerical path. The selected model determines FDT or independently prescribed diffusion; noise is a stochastic model choice, not a stabilizer for deterministic physics. |
 
 Never substitute adaptive stepping, an unregistered integrator, charge-only
@@ -56,21 +57,16 @@ subcycling, frozen-charge history replay, or an equilibrium charge replacement
 without registering the resulting physical/numerical change. The production
 engine remains the same.
 
-The following source preparation gates were checked for this skill revision.
-Verify them against the active engine/runtime and selected model before use;
-they are not portable constants to impose on another solver revision:
-
-- RK4: `dt * drag_velocity_lipschitz < 2.5` and, when charge evolves,
-  `dt * charge_lipschitz <= 0.5`.
-- Exponential midpoint: these explicit drag/charge gates are not its stability
-  constraints. Invariant, finite arithmetic, support, applicability, and
-  midpoint approximation checks still apply.
-- OU: `gamma * dt <= 1e6` and every root uses positive finite `gamma*h`; valid
-  coefficient/charge invariants and compatible physics are also required.
-
-These are acceptance/stability gates, not desired accuracy, default steps,
-or permission to use their limiting value. For finite-speed drag the velocity
-Jacobian bound is not merely the frozen linear relaxation coefficient.
+Use the accepted method's prepare gates from
+[RK4](../../../../particle_platform_redesign/solver/docs/numerics.md#classical-rk4),
+[exponential midpoint](../../../../particle_platform_redesign/solver/docs/numerics.md#deterministic-exponential-midpoint)
+or [inertial Brownian](../../../../particle_platform_redesign/solver/docs/numerics.md#inertial-brownian-integration),
+and bind the actual `check` result. This reference does not keep a second
+threshold roster. Exponential methods still need invariant, finite arithmetic,
+support and applicability evidence even where explicit stability restrictions
+do not apply. Acceptance/stability gates are not desired accuracy, default
+steps or permission to use their limiting value. For finite-speed drag the
+velocity Jacobian bound is not merely the frozen relaxation coefficient.
 
 For a fixed-step accuracy problem, compare an existing supported integrator
 when its stability/cost permits before adding a controller or reducing h without
@@ -141,12 +137,11 @@ size of the discrepancy. Define near-zero handling with an absolute SI scale.
    Brownian experiments also record the generated root intervals and numerical
    tree policy where available. Treat a missing diagnostic as unavailable;
    do not invent a readback or infer root count from output frame count.
-   The current pre-event evaluator also requires a reviewed deterministic
-   execution policy and all-zero run-wide refinement/depth, axis, residual,
-   boundary/topology and failure counters as a sufficient no-reintegration
-   condition. A positive global counter cannot locate work within a selected
-   cohort/window. Without more evidence, retain raw changes and leave its
-   fixed-root prerequisite and observed-order interpretation unqualified.
+   For the current pre-event evaluator, consume the
+   [fixed-root prerequisite](../../../../particle_platform_redesign/solver/tools/vv/comsol/README.md#fixed-root-execution-prerequisite).
+   This is a sufficient condition for that evaluator, not a general restriction
+   on independent numerical verification. Without the required evidence,
+   retain raw changes and leave its resolution and order claims unqualified.
 3. Compare aligned states at fixed physical times in the same lifecycle
    domain. Separate pre-event motion from event timing/response. Do not
    evaluate active velocity against a source's held/frozen/undefined velocity.
@@ -256,8 +251,8 @@ the selected window's time/field-knot partition. More steps outside that window
 cannot supply its refinement evidence. Missing/unknown clock policy leaves the
 current evaluator's macro prerequisite unqualified. A reconstructed macro grid
 does not establish coefficient-root, event/safety or stochastic-path resolution.
-The evaluator's separate `fixed_root_execution` prerequisite uses only the
-reviewed global-zero sufficient condition above. Physically reintegrated
+The evaluator's separate `fixed_root_execution` prerequisite uses the
+[tool-owned sufficient condition](../../../../particle_platform_redesign/solver/tools/vv/comsol/README.md#fixed-root-execution-prerequisite). Physically reintegrated
 RK4 or exponential paths can saturate at the same accepted partition despite
 different macro counts; their tiny self changes alone do not establish accuracy.
 Distinct labels or files cannot supply this evidence.

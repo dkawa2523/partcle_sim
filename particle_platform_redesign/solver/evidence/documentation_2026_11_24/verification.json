@@ -1,0 +1,288 @@
+{
+  "status": "complete",
+  "verified_at_utc": "2026-11-24T00:10:02.174169+00:00",
+  "baseline_commit": "ec646c07a35d9f51fdb5ed7f3a6d9772751fe668",
+  "branch": "refactor/foundation-usability",
+  "scope": "Documentation, references, authored report and existing documentation tooling; no numerical core/model/product-setting changes or new scientific analyses",
+  "environment": {
+    "os": "Windows-11-10.0.26200-SP0",
+    "usage_python": "3.12.13",
+    "locked_runtime_install": true,
+    "compiler_runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02"
+  },
+  "coverage": [
+    {
+      "route": "Purpose/navigation/development policy",
+      "inspected": true,
+      "implementation": "rewritten; ownership and workflow each consolidated",
+      "verified": "Three independent reader/developer/science reviews and current links"
+    },
+    {
+      "route": "Physics/numerics/derivation",
+      "inspected": true,
+      "implementation": "Current methods integrated; obsolete stage gates removed; adopted unimplemented directions retained",
+      "verified": "Independent code/evidence static review; equations and code unchanged"
+    },
+    {
+      "route": "Input/config/result/client examples",
+      "inspected": true,
+      "implementation": "Input reference organized by model/settings role, lifecycle/reader owner links, corrected examples",
+      "verified": "21 YAML example blocks unchanged; public CLI/Python and analytic hit"
+    },
+    {
+      "route": "External V&V/skills/reference data",
+      "inspected": true,
+      "implementation": "Comparison prerequisites have one tool owner; scope/verdict meaning preserved; dataset audit distinguished from current workflow",
+      "verified": "44 maintained docs/4skills links/fragments; 2 edited skills metadata passed"
+    },
+    {
+      "route": "Report/provenance/generation",
+      "inspected": true,
+      "implementation": "Narrative reorganized; exact current authority+producer binding; actual optional-input reconstruction; historical values preserved",
+      "verified": "Official split/offline builds and rendered source/data/copy checks"
+    }
+  ],
+  "checks": {
+    "maintained_documents": 44,
+    "project_skills": 4,
+    "local_paths_and_fragments": "passed",
+    "documentation_and_snapshot_tests": {
+      "passed": 23,
+      "seconds": 1.85
+    },
+    "ruff_lint": "passed",
+    "ruff_format": "4 files passed",
+    "pyrefly": "0 errors for 4 changed tooling/test files",
+    "changed_tooling_and_tests_max_cc": 14,
+    "uv_lock_check": "passed",
+    "git_diff_check": "passed"
+  },
+  "public_usage": {
+    "installed_commands": [
+      "models",
+      "init",
+      "inputs import-csv",
+      "inputs cache",
+      "create",
+      "check",
+      "run",
+      "inspect",
+      "analyze",
+      "export",
+      "view",
+      "inputs electrostatic check",
+      "inputs electrostatic build"
+    ],
+    "console": "passed",
+    "examples": [
+      {
+        "name": "xy-ballistic",
+        "status": "passed"
+      },
+      {
+        "name": "rz-charged",
+        "status": "passed"
+      },
+      {
+        "name": "xy-time-field",
+        "status": "passed"
+      },
+      {
+        "name": "brownian-wall",
+        "status": "passed"
+      },
+      {
+        "name": "reduced-electrostatic",
+        "status": "passed"
+      }
+    ],
+    "outside_checkout_cwd": true,
+    "own_csv_and_surface_and_cache": true,
+    "readme_commands": 11,
+    "analytic_check": {
+      "particle_count": 1,
+      "boundary_events": 1,
+      "failed": 0,
+      "outcome": "stuck",
+      "hit_time_s": 0.015,
+      "final_position_m": [
+        0.01,
+        0.005
+      ]
+    },
+    "wheel_scope": "Delivery documentation/README metadata changed; all production Python bytes equal the wheel executed in both usage checks",
+    "production_python_bytes_equal_between_source_wheel_install": 51
+  },
+  "report": {
+    "final": {
+      "html_sha256": "3d1270ddae38173e2428a69b1904881dd8d570e5667e52f29e69a74a96502d5e",
+      "snapshot_sha256": "fa1e2b7c6dd71ee43fd984013d151747ca5e7492ffc7d3960cfe5acf3d4bbd0c",
+      "offline_sha256": "141bf170bff1293683c4074e2172605397bc0ff201ac65f6884de9ff45592d8a",
+      "offline_bytes": 2678431,
+      "buildStatus": "complete",
+      "query_count": 10,
+      "offline_all_queries_and_snapshot_exact": true,
+      "identity_preserved": {
+        "id": true,
+        "title": true,
+        "presentation": true,
+        "filters": true,
+        "queryIDs": true
+      },
+      "only_changed_query_rows": [
+        "quality_findings"
+      ],
+      "scientific_and_performance_rows_unchanged": true
+    },
+    "rendered_checks": {
+      "desktop_viewport": [
+        1280,
+        900
+      ],
+      "mobile_viewport": [
+        390,
+        844
+      ],
+      "table_components": 8,
+      "all27_model_rows_exact": true,
+      "quality_copy_all12rows_exact": true,
+      "cards": [
+        4,
+        6,
+        3,
+        5
+      ],
+      "source_overview_data_preview_search": true,
+      "case_audit_rows": 2,
+      "trajectory_divergence_rows": 4,
+      "source_reproduction_visible_once": true,
+      "visible_python_command": "import subprocess; subprocess.run(['uv', 'run', '--locked', 'python', '../analysis/build_report_snapshot.py', '--existing', '../report_app/src/data.json', '--output', '../report_app/src/data.json', '--assessment', 'evidence/foundation_2026_11_23/assessment_projection.json', '--quality', 'evidence/documentation_2026_11_24/quality_projection.json', '--performance', 'evidence/foundation_2026_11_23/performance_projection.json', '--build-status', 'complete'], check=True)",
+      "visible_python_safe_execution_check": "visible Python syntax and exact safe argv verified",
+      "markdown_pipe_tables_in_prose": 0,
+      "document_overflow": false,
+      "table_horizontal_scroll_contained": true,
+      "offline": {
+        "tableCount": 8,
+        "componentCount": 23,
+        "documentWidth": 375,
+        "viewport": 390,
+        "updating": false
+      },
+      "offline_render_method": "Exact exported HTML fulfilled at an isolated localhost navigation; every other network request aborted; no server assets required",
+      "offline_external_requests": [],
+      "page_errors": [],
+      "offline_page_errors": []
+    },
+    "app_open_request": "queued by Codex app; actual rendered verification performed independently in Chrome",
+    "official_runtime_sha256": "916b94ce943116be361cec379e4d341661a4f1f18fee2be142cab27bacd2fa02",
+    "protected_runtime_changes": false
+  },
+  "preservation": {
+    "baseline_hashed_files": 288,
+    "changed_baseline_protected_files": [],
+    "numerical_python_files_unchanged": 51,
+    "original_scientific_and_performance_query_rows_unchanged": true,
+    "quality_rows": {
+      "total": 12,
+      "only_changed": "cleanup disposition from retained to resolved using existing removal receipt",
+      "other_11_equal": true
+    },
+    "original_foundation_projections_unchanged": true,
+    "hash_bound_final_review_sha256": "9d83e752f558c02f1ce112632ad1ab854409cf602057feee4bb7a14000e345a7",
+    "data_archives_and_native_observations": "not modified or deleted"
+  },
+  "independent_reviews": [
+    {
+      "perspective": "user",
+      "finding": "Quickstart working directory omitted",
+      "resolution": "Explicit repository-root cd and ongoing solver cwd; final README commands executed",
+      "status": "closed"
+    },
+    {
+      "perspective": "user",
+      "finding": "Cache examples reused a forbidden existing output",
+      "resolution": "Distinct fresh output paths; input/public routes checked",
+      "status": "closed"
+    },
+    {
+      "perspective": "user",
+      "finding": "Report generation/build working directories differed implicitly",
+      "resolution": "Explicit solver cwd and absolute build path variables",
+      "status": "closed"
+    },
+    {
+      "perspective": "developer",
+      "finding": "High-drift unmet wording also excluded implemented mean drag",
+      "resolution": "Limited unmet scope to nonlinear stochastic transport",
+      "status": "closed"
+    },
+    {
+      "perspective": "science",
+      "finding": "Stage decomposition described as exponential-only",
+      "resolution": "Corresponding joint OU consumer included",
+      "status": "closed"
+    },
+    {
+      "perspective": "science",
+      "finding": "Uniform fields read as sufficient constant-acceleration proof",
+      "resolution": "All selected contributions must be proven constant",
+      "status": "closed"
+    },
+    {
+      "perspective": "rendered",
+      "finding": "Single-query Source omitted reproduction instructions",
+      "resolution": "Supported Evidence flow projection; actual display and exact flags checked",
+      "status": "closed"
+    },
+    {
+      "perspective": "rendered",
+      "finding": "Paragraph whitespace made the displayed Python non-runnable",
+      "resolution": "Single-line visible Python; displayed code executed with safe subprocess stub",
+      "status": "closed"
+    }
+  ],
+  "mandatory_open": [],
+  "unqualified_by_this_document_change": [
+    "Existing conditional implementation backlog remains owned by implementation_plan.md",
+    "No native numerical-parity or experimental physical-validity certification",
+    "No full solver/performance/native campaign rerun; historical run observations retain original sources and conditions"
+  ],
+  "execution_references": [
+    {
+      "path": ".artifacts/documentation_20261124_01/baseline.json",
+      "sha256": "c2eacd6671eb4aa751b1c298a9cbfa3313ca6648aee925765990817f6e1f929d",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/source_preservation.json",
+      "sha256": "eea2b5a287801f48266eed8399aa62bdfd29f5a13c0a4345a2c0969bbaf28e7d",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/installed_workflow_outside.json",
+      "sha256": "62ebcbaa7c037924e56e56ff11fb20d720a824bdc3f5c16ba6950c75c9510cbe",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/readme_execution_final.json",
+      "sha256": "a748b6c68d96d3faea82e330332e8d5b0915f68ca4aa863b2bb0c62ce08205e8",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/case_examples_preserved.json",
+      "sha256": "180d411e1eb4b04a185cb367eaab0f652be4560196fbca5804bfaaf1b563199d",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/cleanup_projection_change.json",
+      "sha256": "0d3286077a461693816db7acc8d3a5909086df2c6f8c962767f43a15b2962fd9",
+      "availability": "task-local generated artifact, not included in clone"
+    },
+    {
+      "path": ".artifacts/documentation_20261124_01/rendered_review_final.json",
+      "sha256": "54d546e422b6d9b0a0e65e71b1d40604abe83d9bb28bf7a805822e56c6dad55a",
+      "availability": "task-local generated artifact, not included in clone"
+    }
+  ],
+  "remote_ci": "Push CI is recorded separately after commit; local checks do not imply remote success"
+}

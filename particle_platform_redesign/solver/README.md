@@ -6,9 +6,11 @@
 
 ## 例題を実行する
 
-source checkoutでは、この独立uv projectから実行します。再実行時は新しい出力先を指定してください。
+source checkoutでは、repository rootから`particle_platform_redesign/solver/`へ移動して実行します。
+この節以降の`uv run --locked`も同じdirectoryを作業場所とします。再実行時は新しい出力先を指定してください。
 
 ```console
+cd particle_platform_redesign/solver
 uv sync --locked
 uv run --locked python -m chamber_particles models --category electric
 uv run --locked python -m chamber_particles init .artifacts/quickstart/input --example xy-ballistic
@@ -227,18 +229,9 @@ live COMSOLと開発V&Vは`tools/vv/`へ分離します。保存COMSOLとの実�
 同一Brownian path、native全方程式の数値的認定、装置予測の実験妥当性へ広げません。
 [COMSOL評価方法](../vv_methodology.md)が判定の意味を所有します。
 
-開発はuvのlocked環境で行います。
+開発はこの独立projectのlocked uv環境で行います。変更に応じた品質・科学・配布確認のコマンドと
+完了条件は[品質手順](../quality_tooling_plan.md)が所有します。文書変更の確認と新しい数値方式の認定を区別します。
 
-```console
-uv lock --check
-uv run --locked ruff format --check src tests tools examples scripts
-uv run --locked ruff check src tests tools examples scripts
-uv run --locked pyrefly check --summarize-errors
-uv run --locked lint-imports
-uv run --locked python scripts/check_complexity.py
-uv run --locked pytest tests/verification tests/scenarios -q
-```
-
-責務と変更規則は[AGENTS.md](../AGENTS.md)、実装工程は[implementation plan](../implementation_plan.md)、
-変更と配布状況は[release notes](RELEASE_NOTES.md)、現在の撤去範囲・保持理由・実行状況は[作業記録](evidence/current_only_2026_11_23/README.md)を参照してください。
+責務と変更規則は[AGENTS.md](../AGENTS.md)、未達事項と拡張条件は[implementation plan](../implementation_plan.md)、
+変更と配布状況は[release notes](RELEASE_NOTES.md)、実装・実行・保持資料の範囲は[基盤確認記録](evidence/foundation_2026_11_23/README.md)を参照してください。
 現在の仕様だけを受理します。過去の科学・性能・Release資格は当時のsourceへ限定します。

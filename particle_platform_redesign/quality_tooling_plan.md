@@ -1,9 +1,59 @@
-# 品質と配布の確認
+# 変更・品質・配布の確認
 
-## 環境と標準gate
+本書は変更作業と確認手順のownerです。安い確認から必要な範囲へ進み、実装・文書の変更を科学的資格の更新と混同しません。
+安定した実装制約は[AGENTS](AGENTS.md)、責務と影響先は[architecture](architecture_proposal.md)、
+数値比較の前提は[numerics](solver/docs/numerics.md)と[V&V methodology](vv_methodology.md)が所有します。
 
-solverの独立uv projectとlocked依存を使う。Ruffはformat/lint、Pyreflyは型、import-linterは依存、Radonはcomplexityを所有する。
-root環境、重複lint/type/architecture suite、品質runner frameworkを追加しない。
+## 一つの変更workflow
+
+1. 利用目的、変更する事実のowner、影響する公開経路、置換・削除対象を確定する。
+2. 現行実装と未実装案を区別する。新model/state/methodの採否には、必要field・状態・適用域、独立reference、容量影響を[判断履歴](solver/docs/decisions.md)へ簡潔に残す。
+3. 既存の一つのproduction経路へ実装し、呼出側・例題・設定・説明を合わせる。旧経路と専用確認を同時撤去し、独立oracleは残す。
+4. 下表で影響する確認を選び、原因を表す最小caseから実行する。数値変更には解析解・manufactured case・独立referenceと明示したbudgetを使う。
+5. hot pathの変更は同じ科学条件で時間・memory・科学identityを測る。source、入力、環境、時計、seed、出力・worker条件を記録する。
+6. 利用者・実装者・科学的妥当性の観点で独立に確認し、根拠のある必須指摘を直して影響する確認をやり直す。
+7. owner文書と実行receiptを整合させる。実行済み・未実行・外部条件と再開条件を分け、過去のPASSを新sourceへ付け替えない。
+
+新しい品質runner、承認framework、広い診断/契約suiteをこのworkflowのために追加しません。
+既存の確認で足りる場合は再利用し、testを書いたことと実行したことを区別します。
+
+## 環境とtool
+
+`solver/pyproject.toml`と`uv.lock`をauthorityとし、独立uv projectから実行します。
+通常は`uv run --locked`、CI同期は`uv sync --locked`です。`--frozen`で鮮度確認を省略せず、
+依存upgradeとfeature変更を混ぜません。root環境、pip/Poetry/Conda、手書きrequirementsや`uvx`の都度取得を並存させません。
+
+Ruffがformat/lint/import整形、Pyreflyが型、import-linterが依存方向、Radonがcomplexityを所有します。
+重複toolや同じ依存規則のpytest suiteを増やしません。通常clientと性能clientも既存の設定対象に含めます。
+変更関数は原則CC10以下、数値上の理由がある場合も15以下とし、既存checkerは16以上を拒否します。
+MIは参考値です。薄いhelper、blanket ignore、baseline、empty facadeでgateを通しません。
+
+## 変更に応じた確認
+
+| 変更 | 必要な性質と確認範囲 |
+|---|---|
+| 文書・技能・reviewed reportのみ | 現行リンク、role/handoff、用語・単位・分母・source/scope/hash、snapshot再現、必要なら公式buildと影響するUI。数値再計算やnative campaignは追加しない |
+| 入力・公開client | 自分のCSV/源→create/check/runと結果再利用、不正入力・実I/O中断、exact ID、完成物の公開。元caseなしのanalysis/export/viewも確認 |
+| 物理・積分・field/event | 独立式/極限/保存則、support/適用域、連成rate/Jacobian、解析/製造解、OU共分散、時間・場・event/pathの独立resolution |
+| state・出力・並列 | 固定ID/RNG、accepted commit、prefix/late error、slab/workers/output/resume identity、bounded容量、途中死と実I/O障害 |
+| 外部V&V | native asset不要のproducer/正規化/比較試験。live生成・保存値比較・数値資格・実験validationを分離 |
+| 性能・配布 | 科学条件を保持したcold/warm/end-to-end、owned planとRSS、clean wheel bytes・resource・metadata、空cwdでの通常一巡 |
+
+`verification / scenarios / performance`の三層で、数学的性質、公開利用、測定を分けます。
+件数・coverage率は成功条件ではありません。private名・呼出順・directory構造の固定や旧入口だけのassertは更新し、
+独立式/RNG golden/未知revision拒否/resume/bounded出力/実I/O障害を確認する能力は維持します。
+同じwindow partition、窓外だけの細分、非一様grid、未知clockと不足coverageを、小さい差だけで収束認定しません。
+
+## 実行コマンド
+
+以下は`solver/`から実行します。文書・技能・snapshotのみの変更には既存の軽い入口を使います。
+
+```console
+uv run --locked python scripts/check_documentation.py
+uv run --locked python -m pytest tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q
+```
+
+数値・通常client・検証実装を変更した場合の標準gateは次です。関連する小型確認を先に通し、必要な全体確認へ進みます。
 
 ```console
 uv lock --check
@@ -15,39 +65,21 @@ uv run --locked python scripts/check_complexity.py
 uv run --locked python -m pytest tests/verification tests/scenarios -q
 ```
 
-変更関数は原則CC10以下、数値上の理由がある場合も15以下。薄いhelper、blanket ignore、baselineで失敗を隠さない。
-通常clientをsrc全体のgateへ入れ、既存依存契約でcore/APIからclient/nativeへの逆依存を禁止する。
-現行性能clientも同じPyrefly対象に含め、prepare/state/metadataの変更による入口の陳腐化を検出する。
+reportの公式buildとUI確認は[report README](report_app/README.md)と専用AGENTS、測定入口は
+[performance README](solver/tests/performance/README.md)、外部試験は[V&V tools](solver/tools/vv/README.md)を使います。
+全performance suiteや100万粒子を通常変更ごとに繰り返しません。新しい変更、失敗、未解決の懸念がない限り、合格済み確認を拡大・反復しません。
 
-## 確認する性質
+## 配布とCI
 
-| 層 | 必須の確認 |
-|---|---|
-| verification | 解析/製造解、保存則/極限、独立force/G/J、OU full covariance、support/適用域、geometry/event、source identity |
-| scenarios | 公開API/CLI、全現行機能の代表組合せ、failure/coverage、保存/slab/workers/resumeの科学identity |
-| portable V&V | 合成入力の正規化/比較/producer/viewer。native asset/ライセンス不要 |
-| 性能 | 同科学条件のcold/warm/end-to-end、solver-owned planとOS RSS、process/出力/早期終端を区別 |
-| 配布 | source/wheel/installed bytes/METADATA/resources、空cwdで通常一巡、console/module/Python |
-| report/説明 | 実行値/単位/分母/scope/hash、missingと0、同reviewed入力の再構築 |
+`uv build --wheel`とlocked runtime-only依存へそのwheelを入れ、source/wheel/installed bytes、METADATAと同梱resourceを照合します。
+既存のrelease smokeとinstalled workflowで、checkout/PYTHONPATHなしのconsole/module/Python、全配布例、
+自分のCSV geometry/field・最初のinternal/surface源、check/run、結果だけの解析/export/view、processとcleanupを確認します。
+旧形式・欠損context・改変・不完全partialを成功扱いにせず、上書きやmigrationはしません。
 
-件数は成功条件ではない。構造固定/旧入口/重複assertは置換し、独立oracle/RNG golden/未知revision拒否/resume/bounded出力/実I/O障害注入は維持する。
-数値評価は判定前提の反例も扱う。nominal dtだけ異なる同一window partition、窓外だけの細分、
-非一様gridの次数、未知clock revisionと不足coverageを、数値差が小さいだけで認定しない。
-ResultViewの不変性とJSON用documentの意味を確認し、内部dict/list型を固定するassertへ戻さない。
+[solver CI](../.github/workflows/solver-release.yml)と[docs CI](../.github/workflows/platform-docs.yml)の実際のtrigger/stepを確認します。
+現行のsolver CIは`solver/**`へ広く反応するため、文書変更でも起動し得ます。上表の必要確認とCIのtrigger範囲は別です。
+Windows/Linux、clean install、cold JIT、障害注入、規模matrixは変更・release/manualの目的に対応付けます。
+host policyによる拒否を成功にも数値失敗にも読み替えません。
 
-## installed wheel
-
-`uv build --wheel`とlocked runtime-only依存＋そのwheelを使う。
-既存core smokeに加え、空cwd・checkout/PYTHONPATHなしで配布例と公開clientだけから一巡する。
-新CSV geometry/field→最初のinternal/surface source→create→check→run→inspect→JSON/CSV→形状付きSVGを要する。
-XY/RZ、cache、縮約電場、pending/zero-event/escaped suffix、元caseなしcontext、worker変更resumeを含める。
-context欠落/改変、旧result3/partialを拒否し、上書き/migrationをしない。
-Windows/Linuxで実console/module/Pythonを確認し、host policy拒否は成功にも数値失敗にも読み替えない。
-
-## CIと証拠
-
-solver変更は全品質/科学/配布、portable V&V変更はasset不要検査へ、docs/skills/reportは軽い参照/metadata/data接続検査へ接続する。
-文書変更へ重いnative campaignを強制しない。
-source SHA/dirty map、case/data/result identity、command/環境、実行/未実行を保存し、巨大trace/raw MPHをGitへ入れない。
-過去資格は元source/条件に限定する。schemaだけでnativeを再計算せず、候補再生成は元seed/window/clockを保持する。
-利用者/実装者/科学的妥当性の独立レビューで必須指摘を修正し、影響確認をやり直す。
+source SHA/dirty map、case/data/result identity、command/環境、実行と未実行をreceiptへ残します。
+巨大trace/raw MPHをGitへ足さず、元native観測・実験資料は保持します。Git push、remote CI、tag、Release/registry公開は別の実施事項であり、local passから推定しません。

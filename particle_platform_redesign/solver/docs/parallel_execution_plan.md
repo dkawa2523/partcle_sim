@@ -82,21 +82,20 @@ lifecycle、全frame/probeを確認し、unsaved軌道やcontainer byteの一致
 output、host、cache条件で行い、実測scopeを超えるCPU数比例やportable SLAを推定しない。
 数値resolutionを粗くした速さを同一精度の実装speedupへ置き換えない。
 
-現行0.5 productionの実行条件、全行の時間・memory・入力／science identity、scopeは
-[`foundation performance acceptance`](../evidence/foundation_2026_11_23/performance_acceptance.md)と
+## 保存測定と変更後の資格
+
+実行条件、全行の時間・memory・入力/science identityとsource scopeは
+[foundation performance acceptance](../evidence/foundation_2026_11_23/performance_acceptance.md)・
 [機械可読receipt](../evidence/foundation_2026_11_23/performance_acceptance.json)が所有する。
-P14はbaseline各行1回／current各行3回、P14-Uは両versionとも各count/modeを3回、
-processは10k・1/4 worker・none/sampleを各3回実行した。processの10k観測を大規模process matrixへ拡張しない。
+本書にそのsample数、revision roster、時間比を複製して現在のSLAへしない。
 
-これらは共有host上で他のbenchmark、A/P、wheelや検証が一部重なった観測であり、
-host scheduling/loadを隔離したmatched timing実験ではない。入力・数値設定・sourceの対応と
-saved scienceの一致を確認したが、時間比だけから因果的なspeedupやregressionは認定しない。
-owned-array plan、単一processのhigh-water RSS、whole-team memoryを区別する。
+既存の大規模測定、変更後clientのsmoke/fault検査、installed wheel/OSのfunctional確認は別の証拠である。
+同じproduction bytesを使った実測はそのsourceと条件に束縛して再利用できるが、
+harnessだけを修正した後の全matrix再実行や、別sourceの資格を実施済みとは扱わない。
+文書だけの整理で数式・入力・数値policy・production sourceが変わらなければ、新しい性能campaignを要求しない。
 
-currentの87 timed observationsは、全実行前／実行後に確認した59-file runtime/helper/configへ束縛する。
-51 production sourceを含む全59値はarchived 179-file inventoryと一致し、そのinventoryの実行後値も一致する。
-179-file inventory自体の採取は最初のprocess W1計時中であり、全実行前のsnapshotとは扱わない。
-後続のWindows cache path／observation保存修正は180-file clientの実smoke・fault検査で確認し、
-51 production sourceとwheel実装の同一byteを保持する。修正後clientでfull 1M matrixを再実行したとは扱わない。
-以前の[`resolved_semantics`](../evidence/resolved_semantics_2026_11_23/README.md)は過去sourceの記録として保持し、
-その実測値・資格を現行の性能保証へ転用しない。
+共有host上で別benchmarkや検証と重なった時間比から、因果的なspeedup/regressionを認定しない。
+入力・resolution・source・cache・負荷を対応させ、owned-array plan、単一process high-water RSS、
+whole-team memoryを区別する。過去の
+[resolved semantics記録](../evidence/resolved_semantics_2026_11_23/README.md)も元sourceの証拠に限定し、
+現在の用途保証へ自動転用しない。

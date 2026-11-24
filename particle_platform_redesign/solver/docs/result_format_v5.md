@@ -78,7 +78,7 @@ root attributeは次のとおりです。
 | `segment_index` | zero-based integer `N` |
 | `closed` | uint8 `1` |
 
-release eventは物理時刻、次に`particle_id`の順で格納します。P04でevent typeはgroup名`release`が
+release eventは物理時刻、次に`particle_id`の順で格納します。event typeはgroup名`release`が
 表し、各粒子の最初のeventなので`event_ordinal`は0です。
 
 ```text
@@ -181,11 +181,9 @@ activeな反射はhit位置・反射後速度を持ち、escape/failed粒子はt
 heldはinactiveな終端状態であり、hit後の位置、速度、電荷を時間発展させるpaused-particle modelではありません。
 surface上のzero-time active応答も同じpost-state jumpを使います。
 terminal時刻より前はaccepted path上のactive stateです。
-要求出力時刻のためにmacro stepを分割せず、受理した`StepProposal`をその時刻で評価します。無力場は
-release原点からの解析的ballistic、証明済み一定加速度は解析的`quadratic_exact`で評価します。revision 3aの
-boundaryless general RK4は、full macro proposalと全短縮`state_at()`評価の内部stage・endpointを覆う外向き
-support enclosureと、Epsteinの連続applicabilityを先に証明した`rk4_reintegrated`で評価します。frameは
-受理済みproposalを読み出すだけで、新しいvalidity判定、production step、resident stateを作りません。
+要求出力時刻のためにmacro stepを分割せず、受理した`StepProposal`をその時刻で評価します。
+frameは受理済みproposalを読み出すだけで、新しいproduction stepやresident stateを作りません。
+method別のdense state、support・連続適用域証明、hitと観測の処理順は[数値規則](numerics.md)が所有します。
 
 probeはtrajectoryと同じragged state列と右連続event意味論を使いますが、caseで明示したparticle IDだけを保存します。
 probe時刻もproduction macro-stepを分割しません。
@@ -294,7 +292,7 @@ active/stuck/heldの`kinematics_valid`は1です。heldはhit位置・hit時速�
 非deposition終端で、以後の物理更新を行いません。escaped/failedは0で、有限なposition/velocity payloadには最後のhitまたは
 局在できたfailure状態を保持しますが科学値として使用できません。NaNをlogical nullやfailure sentinelとして
 使わず、escaped粒子の最後の有効な位置・入射/応答速度はboundary eventをauthorityとします。
-`failure_reason_code`はfailedだけ非zeroで、他状態は0です。P19-Lのcode 9
+`failure_reason_code`はfailedだけ非zeroで、他状態は0です。code 9
 `indeterminate_applicability_certificate`は有限budget内で局所証明が閉じなかった数値statusであり、実際に確認した
 `field_support`または`model_applicability`違反へ畳み込みません。新datasetや診断traceは追加せず、既存mapping/countだけで
 区別します。

@@ -1,9 +1,14 @@
-# 粒子輸送基盤の責務と受渡し
+# 現行アーキテクチャ：責務と受渡し
+
+本書は採用済みのmodule構成、依存、事実と状態の受渡しを定義します。
+ファイル名は継続していますが、未採用proposalや過去レビューではありません。
+提供範囲は[製品仕様](product_specification.md)、未実装拡張は[implementation plan](implementation_plan.md)、
+式・method・永続形式はsolver/docs、変更手順と確認は[quality tooling](quality_tooling_plan.md)を参照します。
 
 ## 依存と公開境界
 
-数値coreと通常clientは同じ独立uv project/distributionに収録する。数値core/APIはclient、COMSOL、V&V、reportをimportしない。
-consoleとmoduleの入口だけが唯一のclient dispatcherへ接続する。
+数値coreと通常clientは同じ独立uv project/distributionに収録します。
+core/APIはclient、COMSOL、V&V、reportをimportしません。consoleとmodule入口だけが唯一のclient dispatcherへ接続します。
 
 ```text
 外部CSV/解析/計測 → 入力publisher・場builder・cache → canonical SI bundle/case
@@ -14,23 +19,40 @@ consoleとmoduleの入口だけが唯一のclient dispatcherへ接続する。
                          ↓ result + immutable context → analysis/export/view/V&V/report
 ```
 
-| owner | 所有する事実 | 所有しないもの |
+計算APIの四操作は`load_case`、`check_case`、`simulate`、`open_result`です。
+通常clientの公開操作は`chamber_particles_tools`が所有します。数値coreを再実装するCLI経路は持ちません。
+
+## module所有表
+
+この表がmodule責務の所有者です。別の文書へ同じ表を持たず、必要な行・受渡しへリンクします。
+
+| owner | 所有する事実・処理 | 所有しないもの |
 |---|---|---|
-| case/case_format/yaml_input | 設定、SIデータ、hash/schema、構文/静的参照 | producer式、実行能力の別validator |
-| catalog/runtime/compiled | model契約・必要field・適用域・stage合成 | mesh/I/O/native tag |
-| sources/coordinates/topology | realized schedule、基底/axis、periodic seam | sampling、材料wall law |
-| fields/geometry | 補間/support、containment/first-hit候補 | cache/CAD修復、物理式、付着 |
-| integrators/stochastic | 連成proposal/dense state、joint OU/条件付きtree | BVH/wall/output時計 |
-| events/boundaries | earliest prefix・残時間、hit後の応答 | endpoint押戻し、親時計/writer |
-| cpu | typed resident state、workspace容量、phase峰値/slab fit | physics policy、I/O |
-| transport | serial/process共通slab数値更新 | process起動、親時計、writer |
-| execution | spawn/shared transport/bounded IPC/ACK | engine import、第二数値loop、worker writer |
-| engine | prepare、親macro/release/accepted commit/checkpoint | importer/plot/COMSOL比較 |
-| time_grid/lifecycle | macro境界・丸めの規則、状態wire codeと基本分類 | 粒子path精度、表示、物理的adhesion |
-| output | durable result/context/publication/recovery、readonly ResultView | 科学集計、再sampling |
-| errors | APIと遅延readerで共有する公開例外三分類 | I/O実装、広いcatchによる不正入力の隠蔽 |
-| 通常client | 入力作成・変換・生成、解析/export/表示、唯一CLI | 数値core再実装 |
-| 外部V&V/report | 対応問題の比較とreviewed結果の説明 | 物理authority、精度の一括認定 |
+| `api` / `errors` | 四つの公開計算操作、公開例外三分類と遅延readerの同じ境界 | 数値式、client別error体系 |
+| `case` / `yaml_input` | 設定の構文・正規化、SimulationCase、静的参照 | producer固有解釈、別実行validator |
+| `case_format` | canonical read/write、SI schema、logical identity、layout/sourceのデータ表現 | 場生成・軌道計算 |
+| `physics/catalog` | 選択model identity、scalar/field role、値制約、対応・proof要件 | mesh探索・式の複製 |
+| `physics/forces` / `charge` | 局所の力・rate/Jacobian、固有の適用域・独立bounds | field locate、I/O、lifecycle |
+| `physics/runtime` / `compiled` | role結線、連成準備、global/local証明、固定numeric stage recordと評価 | 親の説明・出力選択、第二model registry |
+| `coordinates` | XY/RZの基底とaxis意味 | field検索、wall law |
+| `sources` | canonical realized internal/surface schedule、release位置・時刻・weight | 分布sampling、source RNG、再飛散 |
+| `rng` | 物理identityを持つcounter key、stream、uniform/normal | 壁や源のpolicy |
+| `topology` | 静的XY translation periodicの対応とtransfer | 材料wall law、一般periodic framework |
+| `fields` / `field_numerics` | locate、補間、support、同じ数値field owner | cache生成、mesh修復 |
+| `geometry` | containment、BVH、first-hit候補 | 付着・反射、field値 |
+| `integrators` / `stochastic` | 連成StepProposalとdense state、joint OU、条件付きtree | BVH、wall law、観測時計、I/O |
+| `events` / `boundaries` | earliest hitと残時間work / hit後の物理応答とRNG | 親時計、writer、endpoint押戻し |
+| `time_grid` / `lifecycle` | macro/knot併合・丸め・window照会 / wire code・名称・基本分類 | path精度認定、表示、物理付着の認定 |
+| `cpu` | typed resident/persistent列、bounded workspace、容量とslab fit | 物理policy、永続file形式 |
+| `transport` | serial/process共通のslab数値更新、accepted状態の反映 | process起動、親時計、writer |
+| `execution` | worker起動・監視、共有transport、bounded IPC/ACK、cleanup | engine import、第二数値loop、worker writer |
+| `engine` | prepare、親macro/release、accepted commit/checkpoint、single writer調停 | importer、plot、native比較 |
+| `output` | durable result/context/checkpoint、publication/recovery、readonly ResultViewとidentity | 科学集計、表示、再sampling |
+| 通常入力client / `inputs` | CSV/source/cache/縮約電場の変換・生成、完成case出版 | 物理validator、数値engineの複製 |
+| `field_generation` | 明示した派生field群の依存・全output freshness | 依存の推測、物理係数の自動再生成 |
+| `selection` / `analysis` / `visualization` | 束縛cohort、分母・coverage、解析/export/形状付き表示 | 元caseへのprivate依存、暗黙の再計算 |
+| 唯一のclient CLI | console/moduleから同じ公開操作へのdispatchとI/O | 数値式、独立した検査経路 |
+| 外部V&V / report | native観測・対応問題の評価 / reviewed結果の説明 | coreの物理定義、資格の一括認定 |
 
 ## 入力と検査
 
@@ -38,6 +60,7 @@ DataBundleがgeometry/layout/field/実現source、SimulationSpecが選択model�
 単一publisherがcanonical書込みとYAML hash結線を行い、新sourceに仮table/既存caseを要求しない。
 load_caseは構文/hash/静的参照、check_caseはsimulateと同じprepareを使う。
 prepareはgeometry/topology/required field/source/physics/event/数値path/workers依存memoryを解決する。
+geometryとfield layoutは別のauthorityであり、同一meshを一般前提にしない。特定のpathを受理するためのmesh/support条件は[support and errors](solver/docs/support_and_errors.md)へ明示する。
 CheckReportは小さいimmutable結果で、PreparedRun/worker/writer/workspaceを公開しない。
 model metadataはcatalogを一度定義し、key検査・能力表示・manifestへ使う。stageでmetadataを生成しない。
 fieldの値制約はfinite/positive/nonnegativeとして同じ宣言からfield準備・runtime・能力表示へ投影する。
@@ -64,7 +87,13 @@ Brownianの条件付きsplitとwall/axis後fresh root、ID/物理interval/stream
 
 workspace ownerがallocationと同じshape/dtype/capacityからbytes/private/shared区分を得る。
 plannerはload/prepare/run同時live峰値とslab fitを所有し、context読込・writer transientも含める。OS RSS capとは異なる。
-汎用allocator/DI/registryを作らない。親が毎macroで全task/outputを消費してcommitし、workerは一batch ACK後にbufferを再利用する。
+親coordinatorは全workerのconnection/sentinelを監視し、空いたworkerへ排他的slabを渡す。
+workerは高々一batchのevent/failureを送り、親single writerの同期消費・ACK後にbufferを再利用する。
+storageは到着順を許し、公開canonical順はoutput readerが解決する。macro全量の並べ替えbufferは置かない。
+private scratch templateは全workerのcopy完了ready barrier後に解放し、transportをsealする。
+非空replayはrun所有のshared rootとworkerのreaderを使い、全task/output消費後にviewを解放する。
+曲線/exact eventの残時間workは数値配列に持ち、各rowのtarget、residual、refinement、物理ordinalを保持する。
+汎用allocator/DI/registryや別schedulerを作らない。具体的な資源計画と測定は[parallel execution](solver/docs/parallel_execution_plan.md)が所有する。
 
 ## 結果と変更単位
 

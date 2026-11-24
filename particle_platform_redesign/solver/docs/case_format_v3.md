@@ -23,7 +23,7 @@ input/data schema3、static/固定topology linear-time、realized internal/surfa
 - `read()`は検証済みDataBundle、`read_with_info()`は同じ単一読込経路からDataBundleと
   `CaseFileInfo(schema_version, content_hash)`を返す。`load_case`は後者を使い、大規模配列のschema検査を
   hash照合のために重複実行しない。
-- P09の`load_case`はYAML全体と`resources.memory_limit_mb`を先にparseし、HDF5のdataset metadataから
+- `load_case`はYAML全体と`resources.memory_limit_mb`を先にparseし、HDF5のdataset metadataから
   canonical numeric array bytesを求める。上限超過はnumeric payloadをmaterializeする前に`CaseError`とする。
   このmetadata scanは完全なprepareや別のpreflight subsystemではない。
 - `case_format.read`はindex範囲、局所node順、boundary rowと宣言owner edgeの整合までを所有する。
@@ -31,83 +31,30 @@ input/data schema3、static/固定topology linear-time、realized internal/surfa
 
 ## 現行の設定境界
 
-- `/meta/coordinate_system`はgeometry/fieldのdata表現、必須`motion.mode`は粒子状態の運動座標を所有する。
-  P05の有効組合せは`cartesian_xy + cartesian_xy`と
-  `axisymmetric_rz + axisymmetric_rz_meridional`だけである。
-- `output.trajectories`は`null`、または`selection: all`と
-  `schedule.explicit_times_s`からなる小さいtyped設定である。`output.probes`は省略または`null`、あるいは
-  strictly increasingな明示`particle_ids`と`schedule.explicit_times_s`からなる。probeは粒子stateだけを保存し、
-  全force/RK stage/debug traceを常時記録しない。
-- final particle表とrelease eventは必須resultであり、enable flagを持たない。
-- table release timeはfiniteかつ`[start_s,end_s]`内とし、時刻原点を0へ固定しない。
-- engineはtable/surface source、fixed charge、`plasma_continuous`または明示reference charge、CPU固定stepを受理する。
-  無力場は厳密なballistic退化形、
-  dragなし・空間的に一定な加速度は証明済み`quadratic_exact` pathを使う。P06 revision 3a以降は、
-  全cell supportedな`RegularLayout`に限り、`epstein_linear_v1`、
-  `epstein_finite_speed_maxwell_mixed_equal_temperature_v1`、`epstein_linear_effective_gas_sensitivity_v1`、
-  `electric_coulomb_v1`、`gravity_buoyancy_standard_v1`、明示されたP15-F/P18-I ion drag、P16/P18-R thermophoresis、
-  P18-D quasistatic spherical DEP、P18-L RZ rarefied-vorticity lift sensitivityを合成した
-  一般`rk4_reintegrated` runも、全短縮RK4評価の
-  continuous support/applicability enclosureを証明して受理する。revision 3bはtopology-completeな材料boundary、
-  parameterなしの`stick`/`escape`とこの経路を連成する。P06-Uは材料domain meshと完全一致するfully-supported
-  P1/Q1にもCartesian XYの同じ一般RK4経路を許可する。P06-RZはregular fieldおよびtopology-completeな材料domainで
-  RZ一般RK4を同じ経路へ追加する。boundaryless一般RK4は引き続きregular support boxを必須とする。model固有mappingは
-  [`physics_models.md`](physics_models.md)が所有する。
-   B01の数値primitiveをproductionへ接続したBrownian経路は、`physics.noise`と
-  `solver.integrator: ou_langevin`を同時に選ぶ場合だけ受理する。現行revision
-  `inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`はCartesian XYとRZ meridional、native/effective-gas
-  線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを一つのengineで扱う。
-  `prescribed_force_diffusion_midpoint_2d_v1`は物性bindingを持つprescribed linear frictionと独立Dを使う。
-  一様base-depth
-  interval treeの各leafはcubic Hermite numerical pathとしてevent/replayへ渡すが、連続OU first-passageの厳密解とは
-  扱わない。係数はdeterministic half-stepで得たroot midpointだけで評価し、support/applicabilityをRNG draw前に
-  fail-closedで確定する。B04はこのnoise revisionへ既存terminal `stick`/`escape`/`hold`とactiveな
-  `specular`/`restitution`/`maxwell_thermal`/`isotropic`/`probabilistic_stick`を接続する。active hitでは認証済みprefixだけを
-  commitし、post-wall stateからmacro残時間を新しい`root_stochastic_interval`として再開する。元rootのcubic tailを
-  fold/restrictせず、連続OU exact first-passageを主張しない。
-  B05では一様base depthを全rootの精度authorityとして維持し、wall、RZ axis、証明不能候補だけを
-  `adaptive_max_depth`まで条件付き二分する。base=maxは従来固定depthへ退化し、continuous OU exact first-passageや
-  uniform max-depthと同じglobal解像度は主張しない。係数評価policy、root内線形charge、axis hit後の新root ordinalはengine/proposal/RNGの内部数値契約であり、
-  YAML/HDF5へ選択keyを追加しない。旧XY frozen-start / 旧RZ projected revisionは現行入力として受理しない。
-   再利用可能なDataBundleに未参照のlayout/fieldが含まれることは許すが、有効なphysicsや未対応modelを
-  黙って無視しない。P07の静止壁lawはforce-freeな`linear_exact`、証明済み一定加速度の`quadratic_exact`、
-  およびXY/RZの一般`rk4_reintegrated`で利用できる。一般RK4のsingle-facet active応答はhit後stateから
-  残時間を継続する。surface departureはexact pathに加え、一般RK4ではfacet interiorにあり初速度が明確に
-  domain内向きの場合だけ受理する。
-- required fieldはすべて同じlayoutのnode fieldとし、unit、component、basisをmodel要求と
-  完全一致させる。regularは全cell supportとgeometry全nodeのaxis box内包、P1/Q1はgeometryとの
-  nodes/connectivity完全一致と全cell supportをprepareで要求する。vector fieldはXYなら
-  `components=(x,y), stored_basis=cartesian_xy`、RZなら`components=(r,z), stored_basis=axisymmetric_rz`である。
-  `fields.py`は、RZ geometryが`r=0`へ接する場合、またはboundaryless fully-supported regular support boxの
-  `r_min=0`である場合を`axis_accessible`と一度だけ判定する。この時はrequired vectorの全layout-axis node radial成分を
-  厳密に0とする。これはvector fieldのaxis regularityだけの判定である。`gravity_buoyancy_standard_v1`は
-  `axis_accessible`と無関係に、annular domainを含む全RZ caseで`gravity_m_s2[0]`を厳密に0とする。
-- fixed charge、dragなし、`cartesian_xy`で、参照するfieldの全canonical node値が厳密に一致する時だけ、
-  粒子別一定加速度の`quadratic_exact` pathを使う。一様性に入力toleranceを設けない。材料boundaryを
-  使うならtopology-completeを必須とし、boundarylessならrequired fieldが共有するfully-supported regular
-  layoutのaxis boxをsupport domainとして必須とする。後者は各proposalの各座標極値を解析評価する。
-- revision 3b/P06-U/P06-RZ/P06-Sのenclosure/material-boundary subsetに入らないstage-evaluated runと
-  boundaryless unstructuredは、それぞれの包含証明またはmodel固有gateが完了するまでprepareで拒否する。
-  P15 continuous chargeも新しいfield/layout経路を作らず、この既存subsetとsupport certificateを再利用する。
-  catalog planは`has_force`、`evolves_continuous_state`、`requires_stage_evaluation`を別々に解決する。
-  `plasma_continuous`だけを選んだplanは`false/true/true`であり、動的`Z`をlinear/quadratic exact pathへ送らない。
-- boundaryを有効にするcaseは、volume cellから導いた全材料外周edgeを`line2`にちょうど1回含める。
-  RZの両端`r=0`のaxis seamは材料壁ではなく`line2`へ登録しない。boundary rowを0件とした
-  collision-free解析caseも同じengineのno-hit profileとして許可するが、stage評価が必要なら上記regular-box
-  certificateを必須とする。
-- `translation_periodic_xy_v1`のpaired groupはgeometryの外周facetとして残すが材料wallではないため、
-  `boundaries`へlawを設定しない。その他の全boundary groupには従来どおりlawをちょうど一つ設定する。
-- 材料boundaryを持つtable sourceの初期位置はstrict interiorに限る。surface sourceだけが境界上releaseを
-  明示し、位置とcanonical facet IDをrealized scheduleへ保持する。ownerと法線はprepared geometryが所有する。
-  固定距離nudgeやresident local-coordinate authorityは作らない。
-- RZ axis seamはwall eventにしない。linear/quadratic pathと一般RK4のいずれも、最初の材料hitより前の軸到達で
-  meridional座標をfoldして残時間を継続する。一般RK4はsigned radial trial chartからcanonical field basisへ
-  stageごとに写し、axis event prefixを再積分してからfoldする。axis crossingはboundary event/RNG ordinalを作らない。
-  wallとaxisの双方を局在できた時だけ認証時間を比較し、不確かさが重なる場合はwallを優先する。一方が未決定なら
-  refineし、axis端点とmaterial cornerの完全tieは一般RK4 cornerとしてfail-closedにする。
-- 同時hitは`priority_then_combined_normal_v1`で解決する。最小priority subsetのresolved response signatureが
-  一致しなければfailureとする。決定論的な`specular`と`restitution`は解決済み反発係数が同じ場合に限り互換で、
-  入射中法線の正規化合成法線へ応答を一回だけ適用する。
+geometry/fieldの表現は`/meta/coordinate_system`、運動自由度は必須の`motion.mode`が所有します。
+受理する組合せは`cartesian_xy + cartesian_xy`、または
+`axisymmetric_rz + axisymmetric_rz_meridional`です。RZ入力を3-D軌道として解釈しません。
+
+設定はcase名、入力path/hash、motion、time、solver、resources、physics、sources、boundaries、outputに分かれます。
+HDF5のrealized tableが初期位置・速度・電荷・独立物性を持ち、YAMLのsource設定は使うtableとrelease名を選びます。
+release時刻はfiniteかつ`[start_s,end_s]`内に置きます。runの時刻原点は0に限定しません。
+worker数は`check_case`/`simulate`またはCLIの`--workers`で指定する実行資源で、caseの数値設定ではありません。
+
+`output.trajectories`は`null`、または`selection: all`と`schedule.explicit_times_s`を持ちます。
+`output.probes`は省略/`null`、または厳密に昇順の`particle_ids`と`schedule.explicit_times_s`を持ちます。
+final stateとrelease ledgerは必須で、無効化flagを持ちません。保存時刻は観測要求であり、production stepの指定ではありません。
+結果列・lifecycle・観測の連続性と復旧は[result形式](result_format_v5.md)を参照してください。
+
+以下の設定例は構文と参照関係を示します。selectorの組合せ、field support、物理適用域、charge invariant、
+数値条件、geometry/topology、memoryは`check_case`が実行と同じprepareで解決します。
+設定の受理を数値精度や実験妥当性の認定に読み替えません。
+
+| 確認する内容 | 正本 |
+|---|---|
+| modelの式、required primitive、物性authority、適用域・連成 | [物理model](physics_models.md) |
+| stage、exact specialization、field支持、first hit、axis、corner、OUと残時間 | [数値規則](numerics.md) |
+| 対応機能と失敗時の確認先 | [support and errors](support_and_errors.md) |
+| process資源・容量と性能の解釈 | [並列実行](parallel_execution_plan.md) |
 
 ## `case.yaml`
 
@@ -179,6 +126,8 @@ topology:
   回避しません。材料facetと周期facetが同時候補になるcorner、または異なるtranslationが同時候補になるcornerは
   任意の一方を選ばずfail-closedにします。
 
+### Drag and inertial noise
+
 2-D inertial Brownianを選ぶ最小mappingは次です。`noise`は独自の温度fieldを持たず、FDT温度は
 `drag.gas_temperature_field`が唯一のauthorityです。`interval_tree_depth`は必ず生成する一様精度depthを定める
 必須整数で、既定値を持ちません。`adaptive_max_depth`は壁・axis候補だけを条件付き二分する上限で、省略時は
@@ -219,7 +168,9 @@ macro-root midpointで凍結し、固定電荷は連続帯電のaffine式で`G=J
 base/max depth、noise revision、Brownian RNG/OU/split/tree-policy revision、coefficient policyはresult/checkpoint resume identityへ
 必要なprovenanceとして使われます。
 
-P18-R effective-gas linear Epsteinは次の正確なmappingを使います。上記noiseとの併用も、全field authorityと
+### Effective-gas drag
+
+有効気体の線形Epsteinは次の正確なmappingを使います。上記noiseとの併用も、全field authorityと
 model applicabilityが一致する場合に同じmidpoint経路で受理します。
 
 ```yaml
@@ -243,7 +194,9 @@ producerはこれらを一つの有効Maxwellian/pseudogasとして認証する�
 `<=1`、全stage・連続pathの適用域であって速度clampではない。`epstein_linear_v1`はこのkeyを受けず、従来どおり
 上限`0.1`を使う。species配列、mixture rule、COMSOL名をYAMLへ追加しない。
 
-P15 continuous chargeを選ぶ場合、`charge` mappingは次のkeyを正確に持ちます。field名は`case.h5`内の
+### Stationary OML charge
+
+静止Maxwellianのcontinuous chargeを選ぶ場合、`charge` mappingは次のkeyを正確に持ちます。field名は`case.h5`内の
 canonical fieldを参照し、alias、既定値、追加optionを許可しません。
 
 ```yaml
@@ -260,7 +213,9 @@ physics:
     applicability: error
 ```
 
-P18-Cの集約二電流revisionはP15のmappingへkeyを足さず、次の独立した正確なmappingを使います。
+### Aggregate charge
+
+集約二電流revisionは静止OMLのmappingへkeyを足さず、次の独立した正確なmappingを使います。
 
 ```yaml
 physics:
@@ -282,7 +237,7 @@ physics:
 速度clipではありません。電子・正イオンthermal voltageは`unit=V`、有効正イオン質量は`unit=kg`、screening長は
 `unit=m`の正値scalar fieldです。集約revisionはこれらを単一の背景authorityとして使い、uniform値もparameterでなく
 定数fieldとして保存します。single-species mass/temperature authorityを持つ既存Barnes ion dragとの併用は拒否し、
-P18-Iのaggregate ion-drag revisionだけが完全一致する背景authorityを共有できます。
+集約ion-drag revisionだけが完全一致する背景authorityを共有できます。
 
 P21の集約三電流revisionは二電流mappingを暗黙に変更せず、次の独立した正確なmappingを使います。
 
@@ -317,7 +272,9 @@ producer provenanceに保存します。負イオン密度が0ならrate、Jacob
 `|negative_ion_velocity-particle_velocity|` applicabilityは密度0でも省略しないため、public run全体の同一性には両revisionの
 適用域条件が成立する必要があります。
 
-P18-Iの二つのion-drag revisionは排他的に一つだけ選びます。relative-flow revisionは次の正確なmappingを使います。
+### Aggregate ion drag
+
+二つの集約ion-drag revisionは排他的に一つだけ選びます。relative-flow revisionは次の正確なmappingを使います。
 
 ```yaml
 physics:
@@ -357,11 +314,13 @@ physics:
 
 image revisionは`electron_thermal_voltage`と`positive_ion_number_density`からimage screeningを内部で一意に構成し、
 producer由来のscalar ion speedやderived screeningを受けません。Coulomb electric categoryも選ぶ場合、その
-`electric_field`名はimage revisionと一致しなければなりません。P18-C continuous chargeと併用する時は、各mappingの
+`electric_field`名はimage revisionと一致しなければなりません。集約continuous chargeと併用する時は、各mappingの
 共通field名を完全一致させ、relative-flowでは`maximum_relative_ion_speed_m_s`、imageでは
 `electron_thermal_voltage_field`も共有します。
 
-P18-D DEPは独立categoryとして次の正確なmappingを使います。
+### Dielectrophoresis
+
+DEPは独立categoryとして次の正確なmappingを使います。
 
 ```yaml
 physics:
@@ -388,7 +347,9 @@ DC/RF区分、solution/frequency、peak/RMSと時間平均の規約、gradient r
 Eからgradientを再構成せず、YAMLへCOMSOL tagや回復optionを重複記載しません。現行Brownian revisionとの併用は、
 線形EpsteinとDEPのfield authority / applicabilityが一致する場合に受理します。
 
-P18-L liftはRZ/no-swirl専用の独立categoryとして、次の正確なmappingを使います。
+### RZ vorticity lift
+
+rarefied-vorticity liftはRZ/no-swirl専用の独立categoryとして、次の正確なmappingを使います。
 
 ```yaml
 physics:
@@ -447,8 +408,10 @@ Stokes--Cunninghamと併用する場合は`gas_velocity/density/dynamic_viscosit
 現行Brownian revisionはlinear Epstein必須なので、Stokes--Cunninghamまたはdragなしを要求するこのSaffman revisionとは
 併用できません。
 
-P15-F ion dragはcharge categoryと独立に明示する。`charge: fixed`と併用する場合も各粒子の実際の
-`charge_number`を使う。P15/P15-Dのcontinuous chargeと併用する場合は、両mappingのdensity、temperature、positive-ion velocity、
+### Single-species ion drag
+
+単一正イオンのion dragはcharge categoryと独立に明示する。`charge: fixed`と併用する場合も各粒子の実際の
+`charge_number`を使う。stationary/shifted OML chargeと併用する場合は、両mappingのdensity、temperature、positive-ion velocity、
 positive-ion massが完全一致しなければprepareのplan解決時、粒子配列を確保する前に拒否する。mean free pathは
 ion-neutral collisionless gate専用である。
 
@@ -477,7 +440,9 @@ free pathが`unit=m`・scalarでなければならない。このrevisionのscal
 `|positive_ion_velocity-particle_velocity| / sqrt(8*k_B*T_i/(pi*m_i))`の連続path上限で、速度clampではない。
 `applicability`は`error`だけを許し、適用外で別ion-drag modelへ切り替えない。
 
-P16 thermophoresisも独立categoryとして明示する。`qtr`は中性気体の局所mass-average frameにおける
+### Thermophoresis
+
+熱泳動も独立categoryとして明示する。`qtr`は中性気体の局所mass-average frameにおける
 translational conductive heat fluxだけを表す。XYではvector fieldが`components: [x,y]` / `cartesian_xy`、
 RZでは`[r,z]` / `axisymmetric_rz`で、unitは`W/m^2`である。他のgas fieldも既存basis規則を使う。
 
@@ -502,7 +467,7 @@ field名とmolecular massを完全一致させる。Stokes--Cunninghamとの併�
 fallbackは拒否する。Fourier熱流束の生成とgradient品質はcanonical producerの責務であり、このYAMLへgradientや
 conductivityの隠れた既定値を持たせない。
 
-P18-R effective-gas thermophoresisは同じcategory/modelと既存field形を使い、revisionと必須速度比だけを明示的に
+有効気体の熱泳動は同じcategory/modelと既存field形を使い、revisionと必須速度比だけを明示的に
 分けます。
 
 ```yaml
@@ -523,7 +488,7 @@ physics:
 
 `gas_translational_heat_flux_field`はproducer-owned `q_eff [W/m^2]`であり、total/convective/radiative/electron/ion heat
 fluxではない。producerはone-effective-Maxwellian/pseudogas reductionをprovenanceへ保存し、coreはtemperature gradient、
-species配列、mixture ruleを回復しない。`maximum_speed_ratio`は有限正値かつ`<=1`で省略不可、P16 single-species
+species配列、mixture ruleを回復しない。`maximum_speed_ratio`は有限正値かつ`<=1`で省略不可、single-species Waldmann
 revisionはこのkeyを受けず上限`0.1`を維持する。両effective-gas revisionは`lambda/a>=10`も全stage/pathで要求する。
 
 P22 Talbot thermophoresisは同じ`thermophoresis` categoryで、次のmappingを選びます。
@@ -561,7 +526,9 @@ Stokes--Cunninghamと併用する場合は`density/dynamic_viscosity/mean_free_p
 上記field authorityが一致する構成だけをcatalogが受理します。これはXY/RZ共通のmidpoint合成経路で検証し、
 P22の単独受入試験だけからBrownian coverageを推論しません。
 
-単一正イオン種の有限相対driftを扱うP15-D revisionは、同じfield契約に明示的なrun-wide drift上限を一つだけ
+### Shifted-Maxwellian charge
+
+単一正イオン種の有限相対driftを扱うOML revisionは、同じfield契約に明示的なrun-wide drift上限を一つだけ
 追加します。この値は
 `|positive_ion_velocity-particle_velocity| / sqrt(8*k_B*T_i/(pi*m_i))`の上限であり、速度を変更する
 clampではありません。
@@ -591,6 +558,8 @@ output:
       explicit_times_s: [0.0, 0.25, 1.0]
 ```
 
+### Observation schedules
+
 選択粒子だけのstate probeを保存する場合は次のmappingにします。particle IDと時刻はいずれもstrictly increasing、
 時刻は閉run区間内でなければならず、IDはrealized sourceに存在するものへprepare時に解決します。
 
@@ -602,6 +571,8 @@ output:
     schedule:
       explicit_times_s: [0.0, 0.25, 1.0]
 ```
+
+### Surface release and boundary settings
 
 surface sourceも内部sourceと同様にHDF5へ粒子ごとの条件を実体化する。YAMLは分布を生成せず、
 canonical tableを一度だけ選択する。
@@ -627,6 +598,8 @@ boundaries:
 
 一様面積、粒径、角度、Maxwellian、時刻分布などは外部source builderが粒子列へ実体化する。
 coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度、時刻、物性をそのまま実行する。
+
+### Configuration validation
 
 共通構造の規則は次のとおりです。
 
@@ -654,10 +627,10 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   再分割のrefinement上限、method別の境界interaction閾値、corner policy revisionを明示する。
   決定論exact/RK4/exponentialでは各residual-work intervalの再分割triggerであり、子intervalではinteraction countを
   0へ戻すがrefinement depthを引き継ぐため、`max_interactions_per_step`はmacro step全体のhard hit総数ではない。
-  Brownianではmacro内のfresh-root restartを累積して上限判定する。詳細は[`numerics.md`](numerics.md#222-b04-brownian-active-wall-restart完了)の22.2節に従う。
+  Brownianではmacro内のfresh-root restartを累積して上限判定する。詳細は[数値規則のevent budget](numerics.md#event-budgets-and-bounded-work)に従う。
   絶対的な長さ・時間budgetは
   後続の単一numerics resolverがgeometry、速度、時刻scaleから導く。`geometry_rtol`は局所facet長に対する
-  相対値であり、例の`1e-12`は製品defaultではない。scale選定は[`numerics.md`](numerics.md)の第5節に従う。
+  相対値であり、例の`1e-12`は製品defaultではない。scale選定は[数値規則のevent budget](numerics.md#event-budgets-and-bounded-work)に従う。
 - `0 < geometry_rtol < 1`とし、`roundoff_ulps`、`max_refinements`、
   `max_interactions_per_step`は正整数とする。`corner_policy`は非空revision IDとしてloadし、対応可否は
   event algorithmを所有する`engine.prepare`が粒子配列を確保する前に拒否する。
@@ -665,7 +638,7 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   `charge: {model: fixed}`は`dZ/dt=0`だけを意味し、初期`charge_number`を所有しない。
 - fixed chargeのmappingは正確に`{model: fixed}`だけを許す。model固有parameterを追加して第二の初期値や
   hidden optionを作らない。
-- P18-Rの二revisionだけが`maximum_speed_ratio`を必須とし、有限正値かつ`<=1`を要求する。既存linear/P16 mappingへ
+- 有効気体のdrag/熱泳動revisionだけが`maximum_speed_ratio`を必須とし、有限正値かつ`<=1`を要求する。native線形Epstein/single-species Waldmann mappingへ
   このkeyを追加して上限`0.1`を変更することも、省略時の既定値も許可しない。producer-certified pseudogasは入力provenanceで
   あり、solver caseへspecies array、gradient recovery option、COMSOL profileを追加しない。
 - 有効なdrag、thermophoresis、lift、gravity/buoyancyが共通に宣言する中性気体primitiveは、同じfield名または
@@ -677,7 +650,7 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   `interval_tree_depth`とoptional `adaptive_max_depth`だけを持つ。modelは`inertial_langevin_fdt`、base depthは
   整数`0..10`、max depthは省略時base、指定時は整数`base..10`とする。
   FDT revisionは`inertial_langevin_fdt_epstein_linear_midpoint_2d_v2`を受理し、Cartesian XY / RZ meridional、
-  native/effective-gas線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを許す。B04により、全boundary
+  native/effective-gas線形Epstein、fixed/continuous charge、適用域が交わる既存additive forceを許す。全boundary
   groupへ`stick`、`escape`、`hold`、`specular`、`restitution`、`maxwell_thermal`、または
   `probabilistic_stick`、`isotropic`を設定できる。reference noiseの追加係数と物性bindingは
   [`physics_models.md`](physics_models.md#explicit-coefficient-reference-revisions)が所有する。
@@ -688,7 +661,7 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   標準のcontinuous chargeは`model=plasma_continuous`、対応する明示`revision`、`applicability=error`を必須とする。
   shifted-Maxwellian revisionだけが正かつfiniteな
   `maximum_ion_drift_ratio`を必須とし、stationary revisionへこのkeyを追加することも、省略時の既定値も許可しない。
-  P15二式の`positive_ion_mass_kg`は正かつfiniteである。4本のscalar fieldはそれぞれ
+  stationary/shifted OMLの`positive_ion_mass_kg`は正かつfiniteである。4本のscalar fieldはそれぞれ
   electron/positive-ion number densityが`unit=1/m^3`、temperatureが`unit=K`で、
   `components=(value), stored_basis=scalar`かつ全nodeで正とする。positive-ion velocityは`unit=m/s`で、
   XYなら`components=(x,y), stored_basis=cartesian_xy`、RZなら
@@ -696,7 +669,7 @@ coreは同じ分布を再生成せず、`facet_id`、`facet_parameter`、速度�
   選択された全source粒子の`electrostatic_radius_m`は正でなければならない。shifted-Maxwellian revisionは
   初期`charge_number<=0`、全宣言rangeで非正平衡を認証可能、全pathで宣言drift比以下であることも要求する。
   aggregate revisionだけは、2本のdensity fieldに加えてthermal voltage `V`、有効正イオン質量`kg`、screening長`m`の
-  正値scalar fieldと、正かつfiniteな`maximum_relative_ion_speed_m_s`を必須とする。P15用のtemperature key、scalar mass
+  正値scalar fieldと、正かつfiniteな`maximum_relative_ion_speed_m_s`を必須とする。OML用のtemperature key、scalar mass
   parameter、drift-ratio keyを混在させず、全stage/pathで宣言相対速度以下であることを要求する。
 - 各physics categoryは非空の`model`を持つmapping。source分布modelはsolver設定へ置かない。
 - sourceは少なくとも1件必要で、source名は一意。
@@ -853,8 +826,7 @@ prepare時にrunの`[start_s,end_s]`全体を覆わなければなりません�
 stage timeでの線形補間を置き換えるものではなく、係数の傾きが変わるknotを積分区間の端に置く規則です。
 静的場だけのcaseは追加境界を持たず、既存のmacro countとsample経路を維持します。
 required vector fieldのcanonical metadataはXYで`["x","y"] / cartesian_xy`、RZで
-`["r","z"] / axisymmetric_rz`です。scalarは両座標で`["value"] / scalar`です。P06-RZはこの既存field datasetを
-使い、schema versionやRZ専用datasetを追加しません。
+`["r","z"] / axisymmetric_rz`です。scalarは両座標で`["value"] / scalar`です。RZも同じfield dataset構造を使い、RZ専用の別形式を持ちません。
 
 realized tableは空を許可せず、`particle_id`を全tableを通して一意な非負signed-int64整数とします。
 `position_m`を持つ内部tableと、`facet_id + facet_parameter`を持つsurface tableは相互排他的です。

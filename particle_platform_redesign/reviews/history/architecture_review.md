@@ -1,7 +1,9 @@
-# 粒子輸送基盤 アーキテクチャ／数値計算レビュー
+# 初期アーキテクチャ・数値レビュー（履歴）
+
+本書は2026年9〜10月の段階別レビューと当時の設計案を保持する履歴です。本文の「現行」「次工程」、API数、形式、cadence、未実装判定は各節のsource時点に限定します。採用済みの責務は[現行architecture](../../architecture_proposal.md)、未完の作業は[implementation plan](../../implementation_plan.md)、0.5の実行状況は[foundation記録](../../solver/evidence/foundation_2026_11_23/README.md)を参照してください。以下を現在の実装指示として使用しません。
 
 本書はreview記録である。採用済みmodule責務、依存方向、runtime境界の権威は
-[`architecture_proposal.md`](architecture_proposal.md) とし、両者が食い違う場合はproposalを修正してから
+[`architecture_proposal.md`](../../architecture_proposal.md) とし、両者が食い違う場合はproposalを修正してから
 実装する。
 
 ## P18-C aggregate charge closeoutレビュー（2026-10-01）
@@ -19,7 +21,7 @@ state、subcycle、fallback、result/checkpoint schemaは追加していない�
 外部V&Vは保存済み12 packageをCOMSOL再実行なしで層別評価した。export済み`phi1`を使う同式再生はPASS、coreの
 screening式と標準`epsilon0`を含む厳密provider一致は定数規約差によりFAILとなった。閾値緩和やcore定数fitを行わず、
 式parityとprovider完全一致を別statusとして維持する判断は妥当である。数値のauthorityは
-[`solver/evidence/p18c/README.md`](solver/evidence/p18c/README.md)であり、この証拠はintegrated chargeやtrajectory一致を
+[`solver/evidence/p18c/README.md`](../../solver/evidence/p18c/README.md)であり、この証拠はintegrated chargeやtrajectory一致を
 意味しない。
 
 P18-C closeout当時のrevisionはengine v30、proposal v7、compiled tile v12、catalog v11、runtime v10、runtime layout v6、memory plan v12で、
@@ -311,7 +313,7 @@ future wave、worker別scratch、thread maskを削除し、再利用workspace、
 writerまで統合した。linear/quadratic exactと一般曲線eventはflat SoA wavefront、boundary/Philoxはcompiled batch、
 fieldからenclosureはrow numerical status、surface releaseはbatch、frame/probeはdirect columnar replayである。
 memory plan v10はこれらをnamed componentへ分離し、pack時だけのgatherを12.5% safety marginへ含める。正確な
-byte式と不採用判断は[`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)が所有する。
+byte式と不採用判断は[`solver/docs/parallel_execution_plan.md`](../../solver/docs/parallel_execution_plan.md)が所有する。
 
 物理modelは、宣言した狭いrevision内では式、符号、単位、適用域が整合している。Epstein linear、air向け
 Stokes--Cunningham、Coulomb、重力・浮力、point-particleの理想壁則を全面的に作り直す根拠はない。一方、
@@ -428,7 +430,7 @@ microkernelは約3.75xにscaleしたが、end-to-endはproposal/enclosureのPyth
 engine v27 / compiled tile v6 / runtime layout v5は`resources.threads`、thread mask、parallel-only test/harnessを
 削除し、compiled single-thread engineを唯一のproduction経路とした。bounded slab、workspace、event wavefront、
 BVH、compiled boundary/RNG、direct replayは直列でも有用なので維持する。case sweepのprocess並列はsolver外に置く。
-測定値、削除対象、再検討条件は[`solver/docs/parallel_execution_plan.md`](solver/docs/parallel_execution_plan.md)を
+測定値、削除対象、再検討条件は[`solver/docs/parallel_execution_plan.md`](../../solver/docs/parallel_execution_plan.md)を
 権威とする。
 
 ## P14完了レビュー（engine v20 / indexed containment / memory plan v6）

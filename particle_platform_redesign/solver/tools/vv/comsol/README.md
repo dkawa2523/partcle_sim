@@ -264,6 +264,8 @@ criterion. A field-knot-dominated window with identical partitions cannot pass
 because extra steps elsewhere increase global counts. Reports retain bounded
 partition summaries and hashes, not a full particle step ledger.
 
+### Fixed-root execution prerequisite
+
 Missing/unknown clock policy (including CSV-only metadata) leaves macro
 qualification `NOT_TESTED` while raw differences remain available. A supported
 macro refinement alone does not establish the particle integration intervals.

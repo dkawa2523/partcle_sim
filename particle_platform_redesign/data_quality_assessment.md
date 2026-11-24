@@ -1,4 +1,4 @@
-# `model_dataset` データ品質評価
+# 参照datasetの監査結果と利用条件
 
 ## 1. 結論
 
@@ -11,7 +11,7 @@
 | 粒子時系列・初期状態・最終状態 | 条件付きで基準に使用可 | 12 ケースすべてでキー、粒子数、保存時刻、状態フラグ、主要な派生量が内部整合。Brownian 項を含むため、異なる乱数実装との粒子単位完全一致を合格条件にしてはならない |
 | ジオメトリー・接続・境界 ID | 条件付きで基準に使用可 | 全 12 ケースで同一ハッシュ、接続範囲正常、境界 ID の 0/1 始まり対応も整合。ただし四角形の周回順はCSV列順ではなく`node1,node2,node4,node3`である |
 | 背景場の原始量（速度、温度、密度、電場等） | 条件付きで使用可 | 値そのものは利用できるが、領域支持、重複座標、格子座標ゆらぎを正規化してから使う。NaN や `inside_model_domain` から形状を復元してはならない |
-| 背景場の粒子依存派生量 | **入力として使用禁止** | 30/100 nm パッケージでも `Kn`、Epstein 応答時間、Brownian 拡散係数が実質 10 nm 条件。原始量と粒子属性から実行時に再計算する必要がある |
+| 背景場の粒子依存派生量 | **入力として使用禁止** | 30/100 nm パッケージでも `Kn`、Epstein 応答時間、Brownian 拡散係数が実質 10 nm 条件。原始量と粒子属性から選択modelに応じて生成・計算し直す必要がある |
 | 境界モデルの網羅的検証 | 不可 | Stick/Disappear の一部実績はあるが、反射は未設定、Freeze 到達は 0、表面放出は存在しない。各境界 ID の正例も揃っていない |
 | 確率モデルの統計検証 | 不可 | seed は記録されているが、各条件 1 realization のみ。分布、信頼区間、乱数更新規約の検証に必要な反復がない |
 | 3D・時間依存場・大規模性能評価 | 不可 | 2D 軸対称・定常場・287 粒子のデータであり、対象機能を直接検証しない |
@@ -161,7 +161,7 @@ gas_mean_free_path / particle_Knudsen_number ~= 1.0e-8 m
 - **測定事実**: 独立入力用背景場の粒子依存 3 列は粒径別になっていない。
 - **測定事実**: 保存済み軌道表内の粒径、質量、局所 Knudsen 数は粒径別である。
 - **推論**: 背景場 export 時に、保存済み粒子 Study のパラメータではなく、10 nm に復帰した可変 global parameter が評価された可能性が高い。付属 Java に `d0` を 10 nm へ戻す処理があることとも整合するが、CSV 監査だけでは COMSOL 内部の正確な評価順序までは断定できない。
-- **使用規則**: 背景場からは気体・プラズマ・電場等の**粒子によらない原始量だけ**を読み、Knudsen 数、応答時間、拡散係数、その他の粒子依存量は粒子属性と原始量から実行時に再計算する。
+- **使用規則**: 背景場からは気体・プラズマ・電場等の**粒子によらない原始量だけ**を読み、Knudsen 数、応答時間、拡散係数、その他の粒子依存量は選択modelに応じてproducerまたはruntimeで粒子属性と原始量から計算する。
 
 これらの派生列を 30/100 nm 入力としてそのまま使用すると、抗力、確率力、時間スケールを誤らせる。列名やケースディレクトリ名が正しくても、値が正しいとは限らない典型例である。
 
@@ -171,7 +171,7 @@ gas_mean_free_path / particle_Knudsen_number ~= 1.0e-8 m
 
 この微差を物理差とみなせる証拠はない。異なる export の浮動小数丸め差である可能性が高いが、それも推論である。重要なのは、ion-drag の variant は力モデルの差であり、背景場を 2 重に保存する必要はないことである。
 
-新形式では、背景場を `field_set_id` で 1 回だけ保存し、粒径・力モデル・初期条件を別の run manifest から参照すべきである。ファイルハッシュの差だけで「異なる物理場」と判定せず、正規化後の数値比較と由来を併用する。
+再exportする場合は、背景場を一つの再利用可能なbundleに置き、粒径・力モデル・初期条件を別のcaseから参照する。`field_set_id`を現行canonical形式の必須keyとして追加する提案ではない。ファイルハッシュの差だけで「異なる物理場」と判定せず、正規化後の数値比較と由来を併用する。
 
 ### 5.3 元メッシュ点版は「1 行 = 1 node」ではない
 
@@ -232,8 +232,7 @@ source MPH hash
 local orderingを誤ればdomain判定、形状関数、Jacobian、境界横断が破壊される。これは外部実装に
 とってHigh severity、High confidenceの契約欠落である。
 
-新しいexportには`element_type`、`local_node_ordinal`、COMSOL側のordering名を含める。現在の
-bundle converterは`[1,2,4,3]`を明示し、変換時に全quadの自己交差、向き、Jacobianを検査する。
+新しいexportには`element_type`、`local_node_ordinal`、COMSOL側のordering名を含める。このdatasetを変換する時は、周回順`[1,2,4,3]`とQ1 reference順を区別して宣言し、全quadの自己交差、向き、Jacobianを検査する。現行の[CSV importer](solver/src/chamber_particles_tools/csv_import/README.md)はQ1 reference順を明示してP1へ三角形分割する。
 自動的に座標角度順へ並べ替える処理は、元の形状関数DOF対応を失うため採用しない。
 
 ### 5.8 軸対称運動に使われない方位 Brownian 力
@@ -332,13 +331,13 @@ COMSOL と同じ乱数生成器・粒子/component への割当・step 更新順
 - 287 粒子の処理時間から 10^4–10^6 粒子や COMSOL 比の高速性を外挿する。
 - どちらかの ion-drag variant を実験検証なしに「物理的真値」とする。
 
-## 8. export 修理要件
+## 8. このdatasetを再exportする場合の条件
 
 ### 8.1 原始量と派生量を分離する
 
-canonical field package は、粒子属性に依存しない原始量だけを保存する。例はガス速度、温度、圧力、密度、粘度、平均自由行程、電位、電場、電子/イオン密度、電子/イオン温度、イオン速度である。
+このdatasetの未束縛な粒径派生列を修理するには、まず粒子属性に依存しない原始量を取り出す。例はガス速度、温度、圧力、密度、粘度、平均自由行程、電位、電場、電子/イオン密度、電子/イオン温度、イオン速度である。
 
-次は field package に固定値として保存せず、run ごとに粒子属性から計算する。
+次の派生量は粒子属性・選択modelに束縛して生成する。未束縛のexport列を別粒径へ流用しない。
 
 - Knudsen 数
 - Epstein/Stokes 応答時間と補正係数
@@ -347,7 +346,7 @@ canonical field package は、粒子属性に依存しない原始量だけを�
 - 表面電位増分など粒径・電荷依存量
 - ion-drag の断面積、Coulomb logarithm、screening cutoff
 
-診断目的で派生量を export する場合は `derived=true`、依存パラメータ、式、評価時の数値を列 metadata に持たせる。同じ値を solver 入力として二重に権威化しない。
+現行基盤では明示prescribed係数場も入力できる。その場合はproducerが式・依存parameter・粒子物性・原始場と係数の対応を保持し、宣言済み生成recordはpublisherが照合する。詳細は[物理model](solver/docs/physics_models.md#explicit-coefficient-reference-revisions)と[入力形式](solver/docs/case_format_v3.md)が所有する。ここで示す再export条件を新しいcanonical keyや暗黙の係数再生成仕様にしない。
 
 ### 8.2 mesh field を node ID 付きで export する
 
@@ -400,11 +399,11 @@ post_vr, post_vz, outcome, random_u, state_before, state_after
 
 これにより、保存時刻とは独立に first-hit と wall law を検証できる。
 
-## 9. 追加すべきベンチマーク
+## 9. このdatasetが覆わない検証
 
-現データはシステムレベルの複合ケースとして残し、足りない挙動を小さい独立ケースで補う。
+次表はこのdatasetからは認定できない性質と、その評価に必要なcaseを対応付ける。全てが現行基盤で未実装という意味ではない。現在の実装・独立検証は[対応と確認範囲](solver/docs/support_and_errors.md)、採用済み未実装の拡張は[実装計画](implementation_plan.md)で区別する。
 
-| 目的 | 必要な追加ケース | 主な合格指標 |
+| 目的 | 別途必要な検証case | 確認する性質 |
 |---|---|---|
 | 表面放出 | 平面・曲面・軸対称面からの既知分布放出 | source facet、所有 cell、法線、面積/`2pi r` 重み、初期再衝突 0 |
 | 境界 first hit | 1 本の平面、角、薄い障害物、同一 step 複数候補 | event 時刻・位置・boundary ID |
@@ -420,24 +419,20 @@ post_vr, post_vz, outcome, random_u, state_before, state_after
 
 複合 COMSOL ケースで差が出た後に原因を推測するのではなく、この microcase 群で補間、力、積分、イベント、乱数を個別に固定する。
 
-## 10. 再現手順
+## 10. 保存観測の確認と再利用
 
-以下の値は監査時点のreview済みsnapshotである。旧root環境は`old_code/`へ退避済みであり、
-それを再利用しない。P00より前の`analysis/`は監査方法を保存するsourceであって実行入口ではない。
-P00で新solverのlocked uv環境を作る際、必要な監査dependencyと再生成commandを一箇所に定義してから、
-同じlockで再生成する。plain `python`やarchive済み`.venv`からの再生成は禁止する。
+本書の数値は監査時点のsnapshotであり、この文書改訂でdatasetを再解析した値ではない。
+監査方法は第2節のGit固定source、対象と観測値は保存済みJSON/CSVへたどれる。
+旧root環境と一度限りの監査scriptは現行の実行入口ではなく、P00の再実施やarchive環境の起動を要求しない。
 
-同じ入力に対し、少なくとも次を確認する。
+保存された観測を読む際は、`dataset_audit.json`の12 case、各34,727行・287粒子・121時刻・duplicate key 0、
+共通時刻とgeometryのhash、mesh fieldの33,449行/正規化後7,732座標、regular gridの90,601行/301×301、
+`field_redundancy_audit.json`の粒径比較`different_columns: []`を、それぞれの測定項目として扱う。
+これらの値は別datasetや将来の修理済みexportの合格値ではない。
 
-1. `dataset_audit.json` の `case_count` が 12。
-2. 各ケースが 34,727 行、287 粒子、121 時刻、duplicate key 0。
-3. `cross_case.unique_time_schedule_hashes` が 1 種類。
-4. 各ジオメトリーファイルの `unique_hash_count` が 1。
-5. mesh field が 33,449 行、正規化後 7,732 座標。
-6. regular grid が 90,601 行、正規化後 301×301。
-7. `field_redundancy_audit.json` の規則格子 size 比較が `different_columns: []`。
-
-監査出力は入力データが変われば更新される snapshot である。将来の修正版 export では、既存 snapshot を上書きして問題を隠すのではなく、dataset version を上げて新旧の監査結果を併存させる。
+入力を修理・再exportした時は、元の観測を上書きせず新しい入力identityと変更範囲を残す。
+必要な再確認はその変更と用途から決め、[inspection](../.agents/skills/inspect-comsol-model/SKILL.md)、
+現行の入力producer、[V&V方法論](vv_methodology.md)を使う。保存結果の実用評価を、不要な新規native計算で止めない。
 
 ## 11. 受入条件
 

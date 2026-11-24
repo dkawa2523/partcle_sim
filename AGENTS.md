@@ -1,40 +1,38 @@
 # Clean-room workspace guidance
 
-This repository is being rebuilt from zero. Before changing anything, use the
-following ownership rules.
+This workspace maintains the independent Chamber Particles solver. Its current
+scope and change rules are owned by `particle_platform_redesign/`; the former
+implementation remains a read-only reference, not an implementation base.
 
-## Active areas
+## Workspace boundaries
 
-- `particle_platform_redesign/` owns the new specification, architecture,
-  implementation plan, and current solver. Read
-  `particle_platform_redesign/AGENTS.md` in full before working there.
+- Read [particle_platform_redesign/AGENTS.md](particle_platform_redesign/AGENTS.md)
+  before changing that project. Read the separate `report_app/AGENTS.md` before
+  changing the visible report.
+- New production code belongs only in the independent uv project at
+  `particle_platform_redesign/solver/`. Its numerical core and installed clients
+  have the dependency boundaries defined in the project architecture.
 - `model_dataset/` is reference input and external V&V material. It is not a
   solver dependency or a golden definition of the physics.
-- `old_code/` is a read-only archive of the former implementation, tools,
-  tests, environment, and root files. Do not activate its environment, import
-  its package, or modify it to implement the new solver.
+- `old_code/` is a read-only archive. Do not activate its environment, import its
+  package, copy its implementation, or modify it to implement the current solver.
+- Do not restore an archived root project, lockfile, package, test tree or tool
+  configuration. Use the solver's locked uv project.
 
-## Clean-room rules
+Old code may be inspected for failure cases, candidate equations and input
+provenance. Re-derive and independently verify anything adopted. Native
+observations, independent scientific references, external inputs and execution
+environments are distinct from disposable software-generated outputs.
 
-- New production code belongs only in the independent uv project at
-  `particle_platform_redesign/solver/`.
-- `src/chamber_particles` owns the numerical core. Installed normal input,
-  analysis, export, visualization clients and the sole CLI belong to
-  `src/chamber_particles_tools`; core dependencies never point back to clients.
-- Do not restore an archived root `pyproject.toml`, `uv.lock`, package, test
-  tree, or tool configuration.
-- The old implementation may be inspected only for failure cases, candidate
-  equations, and input provenance. Re-derive and independently verify anything
-  adopted by the new solver.
-- COMSOL integration and comparisons stay in adapters and external V&V tools;
-  the solver core must not depend on COMSOL or `model_dataset/`.
-- Keep one production engine and one owner for each fact. Replaced code,
-  settings, tests, and documentation are removed in the same change.
-- Do not add general plugin frameworks, dependency-injection containers,
-  duplicated validators, broad contract suites, or diagnostic subsystems.
+Keep one production engine and one owner for each fact. COMSOL integration and
+comparisons remain external to the core. Replace obsolete callers, settings,
+tests and documentation in the same change; do not retain compatibility readers
+or aliases. Do not add general plugin/DI frameworks, duplicated validators,
+broad contract suites or diagnostic subsystems.
 
-The detailed numerical invariants, module ownership, quality gates, and change
-workflow are authoritative in `particle_platform_redesign/AGENTS.md`.
+The [project document guide](particle_platform_redesign/README.md) routes users
+and maintainers. Module ownership lives in the architecture; the project AGENTS
+contains stable invariants, and the quality document owns the change/check workflow.
 
 ## Project skills
 

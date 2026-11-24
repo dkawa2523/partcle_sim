@@ -1,33 +1,19 @@
-# Installed editable examples
+# 編集可能な配布例題
 
-Examples are shipped in the distribution and generated through the same public
-case publisher as user inputs. No checkout-only case writer is maintained here.
-
-```console
-python -m chamber_particles init work/xy --example xy-ballistic
-python -m chamber_particles init work/rz --example rz-charged
-python -m chamber_particles init work/time --example xy-time-field
-python -m chamber_particles init work/noise --example brownian-wall
-python -m chamber_particles init work/electric --example reduced-electrostatic
-```
-
-Each directory contains canonical `case.yaml`/`case.h5`, an editable realized
-`particles.csv`, and `recipe.yaml`. Change the CSV or explicit settings, then
-publish a new case with `python -m chamber_particles create recipe.yaml -o NEW_CASE`.
-Examples are small analytic demonstrations, not device-specific defaults or a
-physical prediction certification. The reduced electric example also includes
-its thermal bundle and builder configuration.
-
-`rz-charged` also includes `field-input/` CSVs, `field-mapping.yaml`,
-`field-recipe.yaml` and `FIELD_INPUT.md`. Their mesh and electric field derive
-from that example's analytic inputs. From its generated directory, import the
-editable fields and publish the source/settings against the imported bundle:
+例題はwheel内の`chamber_particles_tools.examples`が定義し、通常入力と同じpublisherで作ります。
+このdirectoryにcheckout専用のcase writerや別の設定一式は置きません。
+例題の選び方、実行、CSV場への差替えと結果再利用は[利用ガイド](../README.md#例題を実行する)を参照してください。
 
 ```console
-python -m chamber_particles inputs import-csv field-mapping.yaml background
-python -m chamber_particles create field-recipe.yaml -o ../charged-rebuilt
+uv run --locked python -m chamber_particles init work/xy --example xy-ballistic
+uv run --locked python -m chamber_particles check work/xy/case.yaml
 ```
 
-The mapping explicitly declares units, basis, domain, side and support. Use it
-as an editable starting point; example geometry and settings are not defaults
-for another device. Existing output directories are never overwritten.
+生成先には`case.yaml`、`case.h5`、実現sourceの`particles.csv`、再作成用`recipe.yaml`が入ります。
+`rz-charged`にはfield CSVとmapping、`reduced-electrostatic`にはthermal bundleとbuilder設定も含まれます。
+CSV・単位・物性・モデル・時計を編集した後は、元の完成物を上書きせず別directoryへpublishします。
+入力方法の詳細は[source producer](../src/chamber_particles_tools/source_builder/README.md)と
+[CSV importer](../src/chamber_particles_tools/csv_import/README.md)が所有します。
+
+これらは小型の解析的な利用例です。例題の粒径、source、step、壁則を別装置のdefaultにせず、
+利用例の実行成功を実装置の予測妥当性へ読み替えません。

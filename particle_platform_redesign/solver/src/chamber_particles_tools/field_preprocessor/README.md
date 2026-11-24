@@ -6,7 +6,7 @@ change physics, integrate particles or repair geometry.
 
 ```console
 uv run --locked python -m chamber_particles inputs cache cache.yaml cached
-uv run --locked python -m chamber_particles inputs cache cache.yaml cached --source-time-diagnostic
+uv run --locked python -m chamber_particles inputs cache cache.yaml cached-time-diagnostic --source-time-diagnostic
 ```
 
 The same CLI ships in the wheel. Python uses

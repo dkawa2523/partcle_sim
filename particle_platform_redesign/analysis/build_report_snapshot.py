@@ -31,17 +31,22 @@ QUERY_IDS = (
 )
 AUTHORITY_PATHS = (
     "AGENTS.md",
+    "README.md",
     "product_specification.md",
     "architecture_proposal.md",
     "implementation_plan.md",
     "vv_methodology.md",
     "data_quality_assessment.md",
+    "quality_tooling_plan.md",
+    "technical_research.md",
     "solver/pyproject.toml",
     "solver/README.md",
     "solver/docs/case_format_v3.md",
     "solver/docs/result_format_v5.md",
     "solver/docs/physics_models.md",
     "solver/docs/numerics.md",
+    "solver/docs/decisions.md",
+    "solver/docs/support_and_errors.md",
     "solver/docs/parallel_execution_plan.md",
     "solver/tests/performance/README.md",
     "solver/tools/vv/comsol/README.md",
@@ -53,6 +58,8 @@ AUTHORITY_PATHS = (
     "solver/src/chamber_particles_tools/bundle_publication.py",
     "solver/src/chamber_particles_tools/selection.py",
     "solver/src/chamber_particles_tools/field_generation.py",
+    "report_app/README.md",
+    "report_app/src/content/report/ReportContent.jsx",
 )
 COMPONENT_IDS = {
     "case_audit": ["dataset-role"],
@@ -104,6 +111,39 @@ def _record(path: Path) -> dict[str, str]:
     return {"path": name, "sha256": _digest(path)}
 
 
+def _current_binding_errors(records: Any, root: Path) -> list[str]:
+    if not isinstance(records, list):
+        return ["report: current authorities must be a list"]
+    names = [item.get("path") for item in records if isinstance(item, dict)]
+    if len(names) != len(records) or any(not isinstance(name, str) for name in names):
+        return ["report: current authorities require path/sha256 records"]
+    if len(set(names)) != len(names) or set(names) != set(AUTHORITY_PATHS):
+        return ["report: current authority roster differs; regenerate the snapshot"]
+    return [
+        f"report: current authority missing or hash drift: {item['path']}"
+        for item in records
+        if not (root / item["path"]).is_file() or item.get("sha256") != _digest(root / item["path"])
+    ]
+
+
+def validate_current_authorities(snapshot: dict[str, Any], root: Path) -> list[str]:
+    """Own exact current design bindings; historical execution sources stay historical."""
+    reproducibility = snapshot.get("reproducibility")
+    if not isinstance(reproducibility, dict):
+        return ["report: reproducibility and current authority bindings are required"]
+    errors = _current_binding_errors(reproducibility.get("authorities"), root)
+    producer = reproducibility.get("producer")
+    expected = root / "analysis/build_report_snapshot.py"
+    if (
+        not isinstance(producer, dict)
+        or producer.get("path") != "analysis/build_report_snapshot.py"
+        or not expected.is_file()
+        or producer.get("sha256") != _digest(expected)
+    ):
+        errors.append("report: current snapshot producer missing or hash drift")
+    return errors
+
+
 def _query(key: str, rows: list[dict[str, Any]], label: str, files: list[str]) -> dict[str, Any]:
     return {
         "label": label,
@@ -125,12 +165,7 @@ def _query(key: str, rows: list[dict[str, Any]], label: str, files: list[str]) -
                 }
             ],
         },
-        "methods": [
-            {
-                "language": "shell",
-                "code": "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete",
-            }
-        ],
+        "methods": [],
     }
 
 
@@ -426,8 +461,12 @@ def reviewed_query_errors(name: str, query: Any) -> list[str]:
         or not source["files"]
     ):
         return [f"report query {name}: source.files must be a nonempty list"]
-    if not isinstance(source.get("evidenceFlow", []), list):
-        return [f"report query {name}: source.evidenceFlow must be a list"]
+    for key, entries in (
+        ("source.evidenceFlow", source.get("evidenceFlow", [])),
+        ("methods", query.get("methods", [])),
+    ):
+        if not isinstance(entries, list) or any(not isinstance(item, dict) for item in entries):
+            return [f"report query {name}: {key} must be a list of objects"]
     errors = _reviewed_row_errors(name, query["rows"])
     errors.extend(
         f"report query {name}: source.files entries must be references"
@@ -583,6 +622,82 @@ def publish_snapshot(snapshot: dict[str, Any], destination: Path) -> dict[str, s
     return {"path": str(destination), "sha256": "sha256:" + hashlib.sha256(raw).hexdigest()}
 
 
+def _solver_argument(path: Path) -> str:
+    try:
+        return Path(os.path.relpath(path.resolve(), ROOT / "solver")).as_posix()
+    except ValueError:  # A different Windows drive cannot be made relative.
+        return str(path.resolve())
+
+
+def _reproduction(
+    existing: Path,
+    output: Path,
+    projections: tuple[tuple[str, Path | None], ...],
+    build_status: str,
+) -> dict[str, Any]:
+    arguments = [
+        "uv",
+        "run",
+        "--locked",
+        "python",
+        "../analysis/build_report_snapshot.py",
+        "--existing",
+        _solver_argument(existing),
+        "--output",
+        _solver_argument(output),
+    ]
+    for name, path in projections:
+        if path is not None:
+            arguments.extend((f"--{name}", _solver_argument(path)))
+    arguments.extend(("--build-status", build_status))
+    return {
+        "working_directory": "particle_platform_redesign/solver",
+        "scope": "declared_projections" if any(path for _, path in projections) else "design_only",
+        "arguments": arguments,
+        "input_policy": "Reuse the recorded projection bytes and existing presentation; regeneration does not rerun their scientific executions",
+    }
+
+
+def _bind_query_reproduction(query: dict[str, Any], reproduction: dict[str, Any]) -> None:
+    """Replace producer-owned instructions while preserving external analysis methods."""
+    python_call = f"subprocess.run({reproduction['arguments']!r}, check=True)"
+    query["methods"] = [
+        method
+        for method in query.get("methods", [])
+        if method.get("owner") != "build_report_snapshot"
+        and method.get("code")
+        != "uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --build-status complete"
+    ]
+    query["methods"].append(
+        {
+            "owner": "build_report_snapshot",
+            "language": "python",
+            "code": "# Run from particle_platform_redesign/solver\nimport subprocess\n"
+            + python_call,
+        }
+    )
+    query["source"]["evidenceFlow"] = [
+        item
+        for item in query["source"].get("evidenceFlow", [])
+        if item.get("title")
+        not in {
+            "Reproduce design snapshot",
+            "Reconstruct this report snapshot",
+            "Bound authority snapshot and catalog",
+        }
+    ]
+    query["source"]["evidenceFlow"].append(
+        {
+            "title": "Reconstruct this report snapshot",
+            "detail": "Instruction for rebuilding the document, not a new scientific execution. "
+            f"Working directory: {reproduction['working_directory']}. "
+            f"Scope: {reproduction['scope']}. {reproduction['input_policy']}.\n"
+            + "import subprocess; "
+            + python_call,
+        }
+    )
+
+
 def build_snapshot(
     existing: Path,
     *,
@@ -590,6 +705,7 @@ def build_snapshot(
     quality: Path | None = None,
     performance: Path | None = None,
     build_status: str = "updating",
+    output: Path | None = None,
 ) -> dict[str, Any]:
     """Preserve app identity/presentation while refreshing ten reviewed datasets."""
     if build_status not in {"updating", "paused", "complete"}:
@@ -627,8 +743,15 @@ def build_snapshot(
         asOf=None,
         evidenceScope="Current source-bound design snapshot; optional execution receipts only when explicitly supplied",
     )
+    reproduction = _reproduction(
+        existing,
+        output or APP / "src/data.json",
+        (("assessment", assessment), ("quality", quality), ("performance", performance)),
+        build_status,
+    )
     authorities = [_record(ROOT / name) for name in AUTHORITY_PATHS]
     for query in queries.values():
+        _bind_query_reproduction(query, reproduction)
         query["source"].setdefault("evidenceFlow", []).append(
             {
                 "title": "Bound authority snapshot and catalog",
@@ -650,8 +773,12 @@ def build_snapshot(
         "catalog_sha256": catalog_hash,
         "optional_inputs": inputs,
         "reviewed_evidence": reviewed_evidence,
+        "reproduction": reproduction,
         "optional_evidence_policy": "Missing is unavailable, never zero; snapshot generation does not run scientific calculations, and imported receipts retain their declared execution scope",
     }
+    errors = validate_current_authorities(snapshot, ROOT)
+    if errors:
+        raise ValueError("; ".join(errors))
     return snapshot
 
 
@@ -672,6 +799,7 @@ def main() -> None:
         quality=args.quality,
         performance=args.performance,
         build_status=args.build_status,
+        output=args.output,
     )
     binding = publish_snapshot(snapshot, args.output)
     print(

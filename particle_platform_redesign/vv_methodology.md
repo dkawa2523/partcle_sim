@@ -105,15 +105,12 @@ Freezeは数値terminal outcomeであり、実機adhesionの証拠ではない�
 `compare-pair`は実在する二つの保存結果で記述的に比較でき、架空の第三resolutionを要求しない。
 資格付き比較はgenuine coarse/medium/fine、別々のself-sensitivity budgetとcross budgetを使う。
 細かい二解の差だけで絶対誤差を保証しない。
-親macro解像度はknown `macro_grid_revision`、actual releaseと対象時間窓をbindし、
-`time_grid.MacroGrid`が復元する実分割で確認する。全区間のstep件数増加やnominal dt比だけでは確認しない。
-field knot等で非一様になる分割では、nominal dt比をobserved orderの根拠にしない。
-macro分割だけではevent/safety再積分後の粒子区間を認定しない。現行比較器はreview済みengine/path policyと、
-既存の全run refinement/depth・axis・residual split・wall/periodic event・failure件数が全0という十分条件を
-別の`fixed_root_execution`前提へ用いる。全runの正の件数を対象cohort/windowへ帰属させず、前提を未確認にする。
-同じ受理区間へ飽和した複数macro設定の微小差を独立resolutionと読まない。自己差の資格と次数解釈には両前提が
-必要であり、不足時もraw差・empirical target verdict・実用比較は保持する。一般のaccepted pathや確率strong収束の
-認定、絶対誤差保証を追加するものではない。
+自己差を数値解像度の根拠にするには、選んだ粒子・release・時間窓で実際の積分区間が細かくなっている必要がある。
+全runのstep件数増加やnominal dt比だけでは、field knotやevent再積分後の区間を説明できない。
+現在のpre-event比較器で受理するmacro分割と`fixed_root_execution`の十分条件は
+[比較器の契約](solver/tools/vv/comsol/README.md#fixed-root-execution-prerequisite)を参照する。
+前提が不足してもraw差と用途指標の評価は残し、資格と次数解釈を未確認とする。
+この限定資格は、一般のaccepted path・確率strong収束の認定や絶対誤差保証ではない。
 
 ### 5.2 確率輸送と停止
 
@@ -170,9 +167,12 @@ reference不確かさやmodel-form差も独立に残る。
 benchmarkの実行code、固定input、独立native/解析参照、評価方法、生成結果を分ける。
 old result形式をrelabellingして読まず、必要な科学データは当時の環境から明示exportするか現行で再実行する。
 古い実装のhashを固定するtestを現行の数値検証とはしない。
-現行public APIを実際に動かし、独立参照と比較した新しい結果だけを現行の説明へ使う。
+新しい実行は現行public APIを通し、実際に使った入力・source・独立参照へ結び付ける。
+保存済みの結果も、そのidentity、実行条件、観測量、適用範囲が確認できれば再利用できる。
+文書や表示の更新を新しい科学実行として数えず、旧containerのschemaや実行sourceを書き換えて現行化しない。
 
-現行の確認記録は[撤去・再実行記録](solver/evidence/retirement_2026_11_23/vv/README.md)、
-以前の実用比較と因果の証拠は
-[保存比較の科学記録](solver/evidence/platform_restructure_2026_11_23/science/README.md)を参照する。
-過去の実験記録はそのsourceと範囲の証拠であり、現行sourceの自動的な再認定ではない。
+基盤の確認状況は[基盤再構成記録](solver/evidence/foundation_2026_11_23/README.md)、
+保存COMSOLとの用途別の結論は[A/P集団比較](solver/evidence/foundation_2026_11_23/ap_population_readout.md)にある。
+[初期撤去時のV&V](solver/evidence/retirement_2026_11_23/vv/README.md)と
+[以前の比較・因果記録](solver/evidence/platform_restructure_2026_11_23/science/README.md)は当時のsourceに対する証拠である。
+それぞれの実行範囲を保ち、現行sourceの自動的な再認定へ読み替えない。

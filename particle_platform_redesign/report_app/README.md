@@ -1,74 +1,118 @@
-# 保存結果を説明するレポート
+# 現行仕様と保存証拠を読むレポート
 
-現行0.5.0の利用フロー・責務と、明示的に取り込んだ科学・品質・性能の証拠を説明するconsumerです。
-solver実行や比較判定は行いません。app ID、タイトル、block IDs、presentation、共通runtimeを維持します。
+0.5.0 alphaの利用経路、責務、科学・数値の意味と、取り込んだ実行証拠を説明するconsumerです。
+計算や比較判定の入口は[solver README](../solver/README.md)です。
+本文は、機能選択 → 自前入力 → check/run → 結果の再利用 → 実装の責務 → 妥当性の順に構成します。
 
-## データを更新する
+## 現在の説明と実行証拠
 
-独立solver projectから実行します。
+本文と設計表は現在のauthority・catalogを参照します。品質・性能・COMSOL比較の数値は、
+各receiptのsource、母集団、window、実行条件に限定されます。
+文書更新は過去実行のsourceをHEADへ置き換えず、科学計算の再実行を意味しません。
+`generatedAt`はsnapshot作成時刻で、共通の科学的cutoffを持たない`report.asOf`はnullです。
 
-```console
-uv run --locked python ../analysis/build_report_snapshot.py --output ../report_app/src/data.json --assessment evidence/foundation_2026_11_23/assessment_projection.json --quality evidence/foundation_2026_11_23/quality_projection.json --performance evidence/foundation_2026_11_23/performance_projection.json --build-status complete
-uv run --locked python -m pytest ../report_app/tests/test_reviewed_snapshot.py -q
-```
+10 query IDs、app ID・タイトル・block IDs・presentation・filtersを保持します。
+編集領域と公式build契約は[AGENTS.md](AGENTS.md)を参照してください。
+共通runtime、chrome、source inspector、theme、manifest、lockは本文整理の対象にしません。
 
-reviewed projectionsを読み、現行authority・catalog・producerと入力のSHA-256を保存します。
-projectionのparseとhashは同じ一度のread bytesを使います。row object、表示に必要な列、
-source.filesのlist、unavailable/nullをproducerが検査し、document checkerも同じ検査ownerを使います。
-完成snapshotをserializeしてから同directoryの一時fileをfsyncし、atomic replaceで公開します。
-検査・書込み・replace前の失敗では以前のdata.jsonを保持します。
-既存identity、presentation、filters、10 query IDsを保持し、rows/sourceを更新します。
-任意の実行logから判定を推測しません。未提供の証拠はunavailable/nullであり、ゼロや過去のPASSを補いません。
+## 内容とsnapshotを更新する
 
-各projectionはqueries配下へ、対象queryのrowsと実ファイル・母集団・単位・条件を明示したsourceを持ちます。
-`source.files`の文字列は引用として保持します。現在のlocal fileとbyte bindingを要求する場合は、
-`{location, availability: "bound_local", sha256, execution_source, scope}`を明示します。
-relative locationは`particle_platform_redesign/`基準です。bound_localは存在とSHAを確認し、不一致を拒否します。
-外部引用は`external_reference`、現在利用できない履歴引用は`historical_unavailable`とscopeを明示できます。
-欠損を自動的に別区分へ変更しません。runtimeのsource.filesには対応する文字列又はlabel/hrefを渡し、
-availability/hash/execution_source/scopeは`reproducibility.reviewed_evidence`と既存Evidence flowへ同じ内容を残します。
-現行designのauthority hash、過去実行source、今回のbuild identityは別の事実です。
-assessmentはcase_audit/trajectory_divergence、qualityはquality_findings、performanceはimplementation_work_packagesを更新します。
-A/P比較は入力receiptのsource、seed集合、実現数/各case、windowへ限定します。
-今回の実行と以前のsourceに束縛した参照は、各projectionのexecution source/scopeで区別します。
-同じseedでの再実行や再利用native参照を新しい独立標本とは数えず、実行済みの範囲から
-現行全体の数値認定を推測しません。進行中のsnapshotでは未完了の測定を明示します。
-過去のretirement projectionはその当時のsourceに対する履歴であり、変更後の品質・性能のPASSを補いません。
-generatedAtはsnapshot作成時刻、共通の科学的cutoffがないreport.asOfはnullです。
+本文は`src/content/report/ReportContent.jsx`、reviewed datasetは`src/data.json`です。
+編集開始時は`buildStatus: updating`とし、authority文書・本文・producerを確定してからsnapshotを生成します。
+本文だけの修正でも、current authority hashの更新が必要です。
 
-recipe 2は完成bundleのsource table全量を明示し、通常bundle producerはbundle.h5/report.jsonをdirectory単位で公開します。
-ResultView/ResultCohort、manifest_document/source_identity、macro window・stability boundの説明も現行ownerへ対応させます。
-frozen charge/ion-force比較は明示CSVと現行式を使い、ion-forceではrevisionとmatched/analogousを選びます。
-性能のC03 relaxation計測はP10の`--scenarios relaxation --relaxation-particles`で選びます。
-
-reportのauthoring完了とfilesystem cleanupの完了を分けます。削除が自動承認reviewで拒否されたscopeは
-未実行のまま、正確なblock理由・残存範囲・再開条件をreviewed品質入力へ保存します。
-追跡対象の削除から物理fileやbytesの削除済みを推測しません。
-
-## ビルドと閲覧
-
-編集領域と公式buildは[AGENTS.md](AGENTS.md)を参照してください。
-src/contentとsrc/data.jsonを更新し、234の共通runtimeファイル、manifest、lock、chrome、source inspector、autosave、publicationを維持します。
+次は`particle_platform_redesign/solver/`から、既存の科学・性能projectionと、
+削除完了だけを反映した品質projectionを取り込む手順です。品質の元の計測値は保持しています。
 
 ```console
-NODE DATA_PLUGIN/output_formats/html/scripts/data-app.mjs prepare --project-dir report_app
-NODE DATA_PLUGIN/output_formats/html/scripts/data-app.mjs build --project-dir report_app --separate-data
+uv run --locked python ../analysis/build_report_snapshot.py --existing ../report_app/src/data.json --output ../report_app/src/data.json --assessment evidence/foundation_2026_11_23/assessment_projection.json --quality evidence/documentation_2026_11_24/quality_projection.json --performance evidence/foundation_2026_11_23/performance_projection.json --build-status complete
+uv run --locked python -m pytest tests/verification/test_documentation.py ../report_app/tests/test_reviewed_snapshot.py -q
+uv run --locked python scripts/check_documentation.py
 ```
 
-NODEとDATA_PLUGINはinstalled runtimeの絶対pathを使います。
-このWindows環境ではinstalled prebuiltのpath検査にOS依存の問題があるため、
-同じsourceをWSL/Linux Nodeから公式scriptへ渡す経路で実行します。
-rendererの変更、guardの緩和、source build、node_modulesのinstallは必要ありません。
-
-dist全体をloopback HTTPでserveします。snapshot、HTML、runtimeのidentityはdist/data-app-build.jsonにあります。
-公式export-offlineで、検査済みsplit buildを同じappの.data-app-offline/exports/foundation-report.htmlへ書き出せます。
-この単一HTMLはsidecar HTTP serverなしで全reviewed datasetを読めます。
+assessmentは`case_audit`/`trajectory_divergence`、qualityは`quality_findings`、performanceは
+`implementation_work_packages`を更新します。省略した種類の実行証拠を再現したことにはなりません。
+設計だけを生成する場合は別の出力先を明示します。
 
 ```console
-NODE DATA_PLUGIN/output_formats/html/scripts/data-app.mjs export-offline --project-dir report_app --output report_app/.data-app-offline/exports/foundation-report.html
+uv run --locked python ../analysis/build_report_snapshot.py --existing ../report_app/src/data.json --output .artifacts/report_design_only/data.json --build-status updating
 ```
+
+省略した比較・品質証拠はunavailable/nullとなり、過去のPASSやゼロで補いません。
+performanceを省略した表は設計上の利用フローであり、実測性能ではありません。
+`reproducibility.reproduction`と各queryのMethodsには、実際のoptional projection・出力先・statusを
+含む引数列を保存します。Python例はsolver directoryから実行し、空白を含むpathも一つの引数として渡します。
+外部の測定手順は保持し、producer自身の手順は置き換えます。
+
+### 参照とhashの所有者
+
+producer `analysis/build_report_snapshot.py`がcurrent authorityの正確なroster・path・SHA-256を所有し、
+document checkerも同じ`validate_current_authorities`を呼びます。文書変更後の古いsnapshotは拒否されます。
+過去の`execution_source`を現行sourceへ一致させる検査は行いません。
+
+projectionは`queries`配下にrowsとsourceを持ちます。parseとhashには同じ一度のread bytesを使い、
+表示に必要なrow列、source.files、unavailable/nullを検査します。
+`source.files`の文字列は引用です。local fileのbyte bindingが必要なら、
+`{location, availability: "bound_local", sha256, execution_source, scope}`を渡します。
+relative locationは`particle_platform_redesign/`基準で、存在・hash不一致を拒否します。
+`external_reference`と`historical_unavailable`は各scopeを保持し、欠損から自動推定しません。
+
+runtimeには文字列またはlabel/hrefを渡し、構造化したavailability/hash/execution_source/scopeは
+`reproducibility.reviewed_evidence`とEvidence flowに残します。履歴の条件や数値を変更せず、
+文書の現在形と実行時の測定値を区別します。削除・保持も各整理記録の時点と対象に限定されます。
+
+snapshot全体をserializeした後、同directoryの一時fileをfsyncしてatomic replaceします。
+書込み・replace前の失敗では以前のdata.jsonを保持します。
+
+## 公式buildと表示確認
+
+ここからはrepositoryの`particle_platform_redesign/`を作業directoryにします。
+次のPowerShell例では3変数をinstalled runtimeとprojectの**絶対path**へ置き換えます。
+本文中の`NODE DATA_PLUGIN/...`をそのまま実行する必要はありません。
+
+```powershell
+Set-Location C:\path\to\partcle_sim-sim_rev4\particle_platform_redesign
+$reportNode = 'C:\absolute\path\to\node.exe'
+$reportPlugin = 'C:\absolute\path\to\data-analytics\1.2.2-e.1'
+$reportApp = (Resolve-Path .\report_app).Path
+& $reportNode "$reportPlugin\output_formats\html\scripts\data-app.mjs" prepare --project-dir $reportApp
+& $reportNode "$reportPlugin\output_formats\html\scripts\data-app.mjs" build --project-dir $reportApp --separate-data
+```
+
+このworkspaceのWindows実行では、installed prebuiltのasset path検査が拒否する事象を確認しています。
+その条件では同じsourceをWSL/Linux Nodeから同じ公式scriptへ渡す経路を利用しました。
+別環境では実際のprepare結果で判断します。runtimeやguardの変更、source build、依存追加は不要です。
+
+WSLを使う場合もPowerShellから実行でき、cwdに依存しない絶対Linux pathを3変数へ指定します。
+NodeはWSL/Linux用のinstalled binaryを使い、Windows Nodeのpathを渡しません。
+このworkspaceで検証したversionは24.22.3です。次のpathは配置例であり、Nodeの一時directoryを要求しません。
+
+```powershell
+$reportLinuxNode = '/absolute/linux/path/to/node'
+$reportLinuxPlugin = '/mnt/c/Users/USER/.codex/plugins/cache/openai-curated-remote/data-analytics/1.2.2-e.1'
+$reportLinuxApp = '/mnt/c/path/to/partcle_sim-sim_rev4/particle_platform_redesign/report_app'
+wsl --exec $reportLinuxNode "$reportLinuxPlugin/output_formats/html/scripts/data-app.mjs" prepare --project-dir $reportLinuxApp
+wsl --exec $reportLinuxNode "$reportLinuxPlugin/output_formats/html/scripts/data-app.mjs" build --project-dir $reportLinuxApp --separate-data
+```
+
+dist全体をloopback HTTPでserveし、desktop/mobileの読順・表・Source・Evidence flow・Copyを確認します。
+全10 query、snapshot、HTML、runtimeのbindingは`dist/data-app-build.json`と生成物で確認します。
+以前のdistを、新しいsourceに対する表示確認の証拠にしません。
+
+公式export-offlineで、検査した同じアプリをsidecar HTTP server不要の単一HTMLへ書き出せます。
+
+同じPowerShell sessionのWindows変数、またはWSL変数を使います。
+
+```powershell
+& $reportNode "$reportPlugin\output_formats\html\scripts\data-app.mjs" export-offline --project-dir $reportApp --output "$reportApp\.data-app-offline\exports\foundation-report.html"
+```
+
+```powershell
+wsl --exec $reportLinuxNode "$reportLinuxPlugin/output_formats/html/scripts/data-app.mjs" export-offline --project-dir $reportLinuxApp --output "$reportLinuxApp/.data-app-offline/exports/foundation-report.html"
+```
+
 dist/offline HTMLはGitへ同梱せず、sourceとreviewed inputsから再生成します。
-
-今回の実行範囲と結果は[実装・実行記録](../solver/evidence/foundation_2026_11_23/README.md)に記載します。
-authoringのbuildStatus: completeは未実施のbuild、表示確認、公開を成功にする値ではありません。
-公開先・共有設定は変更していません。
+`buildStatus: complete`はauthoring状態であり、未実行のbuild・表示確認・公開を成功に変える値ではありません。
+文書更新の実行範囲は[今回の作業記録](../solver/evidence/documentation_2026_11_24/README.md)、
+以前の実装・科学計算は[foundation記録](../solver/evidence/foundation_2026_11_23/README.md)で確認し、
+以前のbuildや測定receiptは当時の証拠として保持します。公開・共有設定の変更は別の操作です。

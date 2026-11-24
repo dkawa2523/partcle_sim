@@ -1224,7 +1224,7 @@ F02で代表P1 meshのlinear solve、fixed charge/electricのfield-production in
 builder v3は、実際のtriangle外周の全非軸facetへ明示potential条件を要求し、未指定の外面を自然zero-fluxへ
 読み替えない。軸facetはDirichlet合成から除外し、各連結成分のDirichlet anchorを低位数値入口でも検査する。
 正常な複数のanchored成分は許す。入力構文format 2、closure、FEM離散式を維持し、非軸Neumann条件や全材料問題へ
-拡張しない。低位interfaceの自然条件と公開YAMLの範囲は[builder README](../tools/electrostatic_builder/README.md)を参照する。
+拡張しない。低位interfaceの自然条件と公開YAMLの説明の所有先は[builder README](../src/chamber_particles_tools/electrostatic_builder/README.md)である。
 
 ## F02：provider adapter / representative integration decision
 

@@ -42,8 +42,10 @@ access only for missing native observations or authorized new reference runs.
 Record package/source revision and dirty state, lock identity, case schema, and
 the selected model/numerical revisions. Read the chosen model sections of
 `solver/docs/physics_models.md`, schema in `solver/docs/case_format_v3.md`, and
-relevant `solver/docs/numerics.md`. Resolve contradictory historical text against
+relevant `solver/docs/numerics.md`. Check the adopted specification against
 current selectors, preparation gates, and run readbacks before claiming support.
+If they disagree, record the affected owner and unmet requirement; do not turn
+an implementation limitation into a specification change.
 
 Reuse a fresh extraction record from
 [inspect-comsol-model](../inspect-comsol-model/SKILL.md). Invoke it when source

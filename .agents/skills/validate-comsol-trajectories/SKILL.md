@@ -202,19 +202,17 @@ Its self-resolution gate consumes completed public result manifests with a
 known `macro_grid_revision`, using the same pure clock owner as execution.
 Global counts do not prove a window refinement. Nonuniform actual macro grids
 retain raw changes without an order inferred from nominal dt ratios.
-A separate `fixed_root_execution` prerequisite binds a reviewed deterministic
-engine/path policy and all-zero run-wide refinement/depth, axis, residual,
-wall/boundary/topology and failure counters. This sufficient condition can
-link macro and particle intervals; positive global work cannot be attributed
-to the selected cohort/window. Both prerequisites govern self-resolution and
-order interpretation. Otherwise retain raw changes and empirical target
-verdicts with qualification `NOT_TESTED`, including for RK4 dense paths whose
-outer transport may reintegrate. This adds no accepted-path ledger or
-stochastic strong-convergence claim. CSV-only native execution/partition
-authenticity remains unqualified by this tool. Read the actual report limits,
-or use a source-bound native evaluation suited to the requested claim; do not
-label a native CSV as a public result to bypass the gate. Empirical self
-sensitivity still supplies neither an absolute error bound nor physical truth.
+The separate `fixed_root_execution` prerequisite and its exact accepted
+policies/counters are owned by the
+[pre-event tool contract](../../../particle_platform_redesign/solver/tools/vv/comsol/README.md#fixed-root-execution-prerequisite).
+Both macro and fixed-root prerequisites govern that tool's self-resolution
+and order interpretation. Otherwise retain raw changes and empirical target
+verdicts with qualification `NOT_TESTED`. This adds no general accepted-path
+ledger or stochastic strong-convergence claim. CSV-only native execution/
+partition authenticity remains unqualified; do not label native CSV as a
+public result to bypass the gate. Use an evaluation suited to the requested
+claim when the tool's assumptions do not apply. Empirical self sensitivity
+still supplies neither an absolute error bound nor physical truth.
 
 Evaluate the primary observable, initial meaning, relevant fields/RHS,
 exercised events and numerical/statistical evidence at the depth required by
